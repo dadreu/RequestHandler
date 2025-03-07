@@ -3,7 +3,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const currentMonthElement = document.getElementById('current-month');
     const prevMonthButton = document.getElementById('prev-month');
     const nextMonthButton = document.getElementById('next-month');
-    const timeSlotsContainer = document.getElementById('time-slots');
+    const morningSlots = document.getElementById('morning-slots');
+    const afternoonSlots = document.getElementById('afternoon-slots');
+    const eveningSlots = document.getElementById('evening-slots');
 
     let currentDate = new Date(2025, 2, 1); // Март 2025
     let selectedDay = null; // Выбранный день
@@ -11,7 +13,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Функция для генерации времени с 9:00 до 18:00 с интервалом 15 минут
     function generateTimeSlots() {
-        timeSlotsContainer.innerHTML = '';
+        morningSlots.innerHTML = '';
+        afternoonSlots.innerHTML = '';
+        eveningSlots.innerHTML = '';
+
         for (let hour = 9; hour <= 18; hour++) {
             for (let minute = 0; minute < 60; minute += 15) {
                 if (hour === 18 && minute > 0) break; // Останавливаемся на 18:00
@@ -24,7 +29,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     selectedTime = timeSlot;
                     timeSlot.classList.add('selected');
                 });
-                timeSlotsContainer.appendChild(timeSlot);
+
+                // Группировка по утру, дню и вечеру
+                if (hour < 12) {
+                    morningSlots.appendChild(timeSlot);
+                } else if (hour < 16) {
+                    afternoonSlots.appendChild(timeSlot);
+                } else {
+                    eveningSlots.appendChild(timeSlot);
+                }
             }
         }
     }

@@ -1,3 +1,4 @@
+/* Общие стили для всех страниц */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -5,51 +6,66 @@ body {
     background-color: #f4f4f4;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;
 }
 
-.container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    margin: 20px auto;
-}
-
-.header {
+/* Верхний блок с белым фоном */
+.top-bar {
     background-color: #fff;
     padding: 15px 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
     position: sticky;
     top: 0;
     z-index: 10;
 }
 
-.header h2 {
+.top-bar h1 {
     font-size: 20px;
     margin: 0;
+    flex: 1;
+    text-align: center;
     color: #333;
 }
 
+.back-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #007bff;
+    padding: 0;
+    margin-right: 10px;
+}
+
+.back-button:hover {
+    color: #0056b3;
+}
+
+/* Основной контент на сером фоне */
 .content {
     flex: 1;
     padding: 20px;
     background-color: #f4f4f4;
+    margin: 0 20px; /* Боковые отступы */
 }
 
+/* Стили для страницы index.html */
+
+/* Блок "Мои записи" */
 .my-records {
     background-color: #fff;
-    padding: 15px;
+    padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
 }
 
-.my-records h3 {
-    font-size: 16px;
-    margin-bottom: 10px;
-    color: #555;
+.my-records h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
 }
 
 .record {
@@ -79,131 +95,33 @@ body {
     color: #000;
 }
 
+/* Кнопка "Записаться" */
 .sign-up-button {
     background-color: #007bff;
     color: #fff;
     border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 15px 20px;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 16px;
     width: 100%;
     margin-top: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .sign-up-button:hover {
     background-color: #0056b3;
 }
 
-/* Стили для страницы выбора даты */
-/* Верхний блок с белым фоном */
-.top-bar {
-    background-color: #fff;
-    padding: 15px 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
+/* Стили для страницы date-selection.html */
 
-.top-bar h1 {
-    font-size: 20px;
-    margin: 0;
-    flex: 1;
-    text-align: center;
-}
-
-.back-button {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #007bff;
-    padding: 0;
-    margin-right: 10px;
-}
-
-.back-button:hover {
-    color: #0056b3;
-}
-
-/* Основной контент на сером фоне */
-.top-bar {
-    background-color: #fff;
-    padding: 15px 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.top-bar h1 {
-    font-size: 20px;
-    margin: 0;
-    flex: 1;
-    text-align: center;
-}
-
-.back-button {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #007bff;
-    padding: 0;
-    margin-right: 10px;
-}
-
-.back-button:hover {
-    color: #0056b3;
-}
-
-/* Основной контент на сером фоне */
-.top-bar {
-    background-color: #fff;
-    padding: 15px 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.top-bar h1 {
-    font-size: 20px;
-    margin: 0;
-    flex: 1;
-    text-align: center;
-}
-
-.back-button {
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #007bff;
-    padding: 0;
-    margin-right: 10px;
-}
-
-.back-button:hover {
-    color: #0056b3;
-}
-
-/* Основной контент на сером фоне */
-.content {
-    flex: 1;
-    padding: 20px;
-    background-color: #f4f4f4;
-}
-
+/* Блок календаря */
 .date-selection {
     margin-bottom: 20px;
+    padding: 20px; /* Отступы внутри блока */
+    background-color: #fff; /* Белый фон */
+    border-radius: 10px; /* Закругленные углы */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Тень */
 }
 
 .month-navigation {
@@ -278,17 +196,25 @@ body {
     border-color: #007bff;
 }
 
+/* Блок выбора времени */
 .time-selection {
     margin-bottom: 20px;
+    padding: 20px; /* Отступы внутри блока */
+    background-color: #fff; /* Белый фон */
+    border-radius: 10px; /* Закругленные углы */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Тень */
 }
 
-.time-slots-container {
-    max-height: 200px; /* Фиксированная высота для скролла */
-    overflow-y: auto; /* Включение вертикального скролла */
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #fff;
-    padding: 10px;
+.time-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.time-group h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
 }
 
 .time-slots {
@@ -304,7 +230,7 @@ body {
     cursor: pointer;
     font-size: 14px;
     text-align: center;
-    width: calc(33.333% - 10px); /* Фиксированный размер */
+    width: calc(33.333% - 10px);
     box-sizing: border-box;
     border: 1px solid #ddd;
 }
