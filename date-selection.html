@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Выбор времени</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Верхний блок с белым фоном -->
+    <div class="top-bar">
+        <button class="back-button" onclick="window.location.href='index.html'">‹</button>
+        <h1>Выбор времени</h1>
+    </div>
+
+    <!-- Основной контент на сером фоне -->
+    <div class="content">
+        <!-- Выбор дня -->
+        <div class="date-selection">
+            <h2>Выберите день</h2>
+            <div class="month-navigation">
+                <button class="nav-button" id="prev-month">&lt;</button>
+                <span id="current-month">Март 2025</span>
+                <button class="nav-button" id="next-month">&gt;</button>
+            </div>
+            <div class="calendar" id="calendar">
+                <div class="calendar-header">
+                    <div>ПН</div>
+                    <div>ВТ</div>
+                    <div>СР</div>
+                    <div>ЧТ</div>
+                    <div>ПТ</div>
+                    <div>СБ</div>
+                    <div>ВС</div>
+                </div>
+                <div class="calendar-body" id="calendar-body">
+                    <!-- Календарь будет заполнен через JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Выбор времени -->
+        <div class="time-selection">
+            <h2>Выберите время</h2>
+            <div class="time-slots-container">
+                <div class="time-slots" id="time-slots">
+                    <!-- Время будет заполнено через JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
