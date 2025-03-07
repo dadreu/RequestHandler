@@ -244,3 +244,58 @@ body {
     color: #fff;
     border-color: #007bff;
 }
+
+/* Медиа-запросы для мобильной версии */
+@media (max-width: 600px) {
+    /* Уменьшаем отступы и размеры для мобильных устройств */
+    .content {
+        padding: 10px;
+        margin: 0 10px;
+    }
+
+    .top-bar {
+        padding: 10px 15px;
+    }
+
+    .top-bar h1 {
+        font-size: 18px;
+    }
+
+    .my-records {
+        padding: 15px;
+    }
+
+    .my-records h2 {
+        font-size: 16px;
+    }
+
+    .record {
+        font-size: 14px;
+    }
+
+    .sign-up-button {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    /* Адаптация календаря для мобильных устройств */
+    .calendar-header div {
+        font-size: 12px; /* Уменьшаем размер текста дней недели */
+    }
+
+    .calendar-day {
+        padding: 8px; /* Уменьшаем отступы внутри ячеек */
+        font-size: 12px; /* Уменьшаем размер текста */
+    }
+
+    /* Адаптация выбора времени для мобильных устройств */
+    .time-slot {
+        width: calc(50% - 10px); /* Две колонки на мобильных устройствах */
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .time-group h3 {
+        font-size: 14px;
+    }
+}
