@@ -7,20 +7,22 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    min-width: 280px; /* Минимальная ширина для всего тела */
 }
 
 /* Верхний блок с белым фоном */
 .top-bar {
     background-color: #fff;
-    padding: 10px 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 15px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1), 0 3px 10px rgba(0, 0, 0, 0.05);
     display: flex;
+    justify-content: center;
     align-items: center;
     position: sticky;
     top: 0;
     z-index: 10;
+    border-bottom: 1px solid #ddd;
 }
-
 .top-bar h1 {
     font-size: 18px;
     margin: 0;
@@ -43,25 +45,25 @@ body {
     color: #0056b3;
 }
 
-/* Основной контент на сером фоне */
+/* Основной контент */
 .content {
     flex: 1;
-    padding: 10px;
+    padding: 15px;
     background-color: #f4f4f4;
-    margin: 0 10px; /* Боковые отступы */
+    margin: 0 auto; /* Центрирование контента */
+    width: 75%; /* Ширина контента пропорциональна экрану */
+    max-width: 1600px; /* Ограничиваем максимальную ширину */
 }
 
 /* Стили для страницы index.html */
-
-/* Блок "Мои записи" */
 .my-records {
     background-color: #fff;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 35px;
+    border: 1px solid #e0e0e0; /* Легкий контур для отделения */
 }
-
 .my-records h2 {
     font-size: 16px;
     margin-bottom: 10px;
@@ -96,33 +98,46 @@ body {
     color: #000;
 }
 
+/* Убедитесь, что каждая запись имеет отступ */
+.record {
+    margin-bottom: 15px; /* Отступ между записями */
+    padding: 12px; /* Увеличиваем отступ внутри блока записи */
+    border-radius: 10px; /* Скругленные углы */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Добавляем тень */
+    background-color: #fff;
+}
+
+.record:hover {
+    background-color: #f9f9f9; /* Изменение фона при наведении */
+}
+
 /* Кнопка "Записаться" */
 .sign-up-button {
     background-color: #007bff;
     color: #fff;
     border: none;
-    padding: 12px 15px;
-    border-radius: 10px;
+    padding: 18px 25px;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 18px;
     width: 100%;
-    margin-top: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
 }
-
 .sign-up-button:hover {
     background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* Стили для страницы date-selection.html */
-
-/* Блок календаря */
 .date-selection {
     margin-bottom: 20px;
     padding: 15px;
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    min-width: 240px; /* Минимальная ширина для всего тела */
 }
 
 .month-navigation {
@@ -148,6 +163,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    min-width: 240px; /* Минимальная ширина для всего тела */
 }
 
 .calendar-header {
@@ -205,6 +221,7 @@ body {
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    min-width: 240px; /* Минимальная ширина для всего тела */
 }
 
 .time-groups {
@@ -220,9 +237,10 @@ body {
 }
 
 .time-slots {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Пропорциональные колонки с минимальной шириной */
     gap: 8px;
+    min-width: 240px; /* Минимальная ширина для всего тела */
 }
 
 .time-slot {
@@ -232,7 +250,6 @@ body {
     cursor: pointer;
     font-size: 12px;
     text-align: center;
-    width: calc(50% - 8px); /* Две колонки на узких экранах */
     box-sizing: border-box;
     border: 1px solid #ddd;
 }
@@ -247,59 +264,89 @@ body {
     border-color: #007bff;
 }
 
-/* Медиа-запросы для очень узких экранов (до 350px) */
-@media (max-width: 350px) {
-    .content {
-        padding: 5px;
-        margin: 0 5px;
-    }
+/* Форма записи */
+.form-section {
+    margin-bottom: 20px;
+}
 
-    .top-bar {
-        padding: 8px 10px;
-    }
+.form-section h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #333;
+}
 
-    .top-bar h1 {
-        font-size: 16px;
-    }
+.form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
 
-    .my-records {
-        padding: 10px;
-    }
+.confirm-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
-    .my-records h2 {
-        font-size: 14px;
-    }
+.confirm-button:hover {
+    background-color: #0056b3;
+}
 
-    .record {
-        font-size: 12px;
-        padding: 6px 0;
-    }
+/* Медиа-запросы для узких экранов (до 350px) */
+@media (max-width: 399px) {
 
-    .sign-up-button {
-        padding: 10px 12px;
-        font-size: 12px;
-    }
+    /* Обеспечиваем, чтобы все дни в календаре заполняли блок */
+    .calendar-body {
+        grid-template-columns: repeat(7, 1fr);
 
-    /* Календарь для очень узких экранов */
-    .calendar-header div {
-        font-size: 10px;
     }
-
-    .calendar-day {
-        padding: 4px;
-        font-size: 10px;
-        border-radius: 6px;
+    .content{
+        width: 90%;
     }
-
-    /* Выбор времени для очень узких экранов */
-    .time-slot {
-        width: calc(50% - 4px); /* Две колонки */
-        font-size: 10px;
-        padding: 6px 8px;
-        border-radius: 12px;
+    .time-slots {
+        grid-template-columns: repeat(3, 1fr); /* 3 колонки при ширине от 400px */
     }
+}
+@media (min-width: 400px) {
+    .time-slots {
+        grid-template-columns: repeat(3, 1fr); /* 3 колонки при ширине от 400px */
+    }
+}
 
-    .time-group h3 {
-        font-size: 12px;
+@media (min-width: 600px) {
+    .time-slots {
+        grid-template-columns: repeat(4, 1fr); /* 4 колонки при ширине от 600px */
+    }
+}
+
+@media (min-width: 880px) {
+    .time-slots {
+        grid-template-columns: repeat(5, 1fr); /* 5 колонок при ширине от 880px */
+    }
+}
+
+@media (min-width: 1000px) {
+    .time-slots {
+        grid-template-columns: repeat(6, 1fr); /* 6 колонок при ширине от 1000px */
+    }
+}
+
+@media (min-width: 1200px) {
+    .time-slots {
+        grid-template-columns: repeat(7, 1fr); /* 7 колонок при ширине от 1200px */
+    }
+}
+@media (min-width: 1600px) {
+    .time-slots {
+        grid-template-columns: repeat(8, 1fr); /* 8 колонок при ширине от 1600px */
     }
 }

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Запись</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Верхний блок с белым фоном -->
+    <div class="top-bar">
+        <button class="back-button" onclick="window.location.href='date-selection.html'">‹</button>
+        <h1>Запись</h1>
+    </div>
+
+    <!-- Основной контент на сером фоне -->
+    <div class="content">
+        <!-- Выбор мастера -->
+        <div class="form-section">
+            <h2>Выберите мастера</h2>
+            <select class="form-input" id="master-select">
+                <option value="master1">Мастер 1</option>
+                <option value="master2">Мастер 2</option>
+                <option value="master3">Мастер 3</option>
+            </select>
+        </div>
+
+        <!-- Выбор услуги -->
+        <div class="form-section">
+            <h2>Выберите услугу</h2>
+            <select class="form-input" id="service-select">
+                <option value="service1">Услуга 1</option>
+                <option value="service2">Услуга 2</option>
+                <option value="service3">Услуга 3</option>
+            </select>
+        </div>
+
+        <!-- Ввод ФИО -->
+        <div class="form-section">
+            <h2>Ваше ФИО</h2>
+            <input type="text" class="form-input" id="fio-input" placeholder="Введите ваше ФИО" pattern="^[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*)?)?$" required>
+        </div>
+
+        <!-- Ввод номера телефона -->
+        <div class="form-section">
+            <h2>Номер телефона</h2>
+            <input type="tel" class="form-input" id="phone-input" placeholder="Введите номер телефона" pattern="^((\+7|7|8)[\s\-]?)?(\(?\d{3}\)?[\s\-]?)?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$" required>
+        </div>
+
+        <!-- Кнопка подтверждения -->
+        <button class="confirm-button" id="confirm-button">Подтвердить запись</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const fioInput = document.getElementById('fio-input');
+            const phoneInput = document.getElementById('phone-input');
+            const confirmButton = document.getElementById('confirm-button');
+
+            // Валидация данных формы
+            function validateForm() {
+                let isValid = true;
+
+                const fioPattern = /^[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*)?)?$/;
+                if (!fioInput.value.match(fioPattern)) {
+                    alert("ФИО должно содержать только буквы, пробелы и дефисы, начинаться с заглавной буквы.");
+                    isValid = false; // Останавливаем выполнение
+                }
+
+                const phonePattern = /^((\+7|7|8)[\s\-]?)?(\(?\d{3}\)?[\s\-]?)?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/;
+                if (!phoneInput.value.match(phonePattern)) {
+                    alert("Номер телефона должен быть в формате: +79999999999 или 89999999999.");
+                    isValid = false; // Останавливаем выполнение
+                }
+
+                if (isValid) {
+                    alert("Запись подтверждена!");
+                }
+
+                return isValid;
+            }
+
+            // Привязка события к кнопке
+            confirmButton.addEventListener('click', function() {
+                if (!validateForm()) {
+                    // Если валидация не прошла, не продолжаем
+                    return;
+                }
+                window.location.href = 'appointment.html'; // Переход на страницу записи
+            });
+        });
+    </script>
+</body>
+</html>

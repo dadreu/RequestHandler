@@ -3,9 +3,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const currentMonthElement = document.getElementById('current-month');
     const prevMonthButton = document.getElementById('prev-month');
     const nextMonthButton = document.getElementById('next-month');
-    const morningSlots = document.getElementById('morning-slots');
-    const afternoonSlots = document.getElementById('afternoon-slots');
-    const eveningSlots = document.getElementById('evening-slots');
+    const timeSlotsContainer = document.getElementById('time-slots');
+    const confirmButtonContainer = document.getElementById('confirm-button-container');
+    const nameInput = document.querySelector('input[type="text"]');
+    const phoneInput = document.querySelector('input[type="tel"]');
+
+
+    
+    // Проверка, что все необходимые элементы существуют
+    if (!calendarBody || !currentMonthElement || !prevMonthButton || !nextMonthButton || !timeSlotsContainer || !confirmButtonContainer) {
+        console.error('Один из элементов не найден на странице.');
+        return;
+    }
 
     let currentDate = new Date(2025, 2, 1); // Март 2025
     let selectedDay = null; // Выбранный день
@@ -13,10 +22,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Функция для генерации времени с 9:00 до 18:00 с интервалом 15 минут
     function generateTimeSlots() {
-        morningSlots.innerHTML = '';
-        afternoonSlots.innerHTML = '';
-        eveningSlots.innerHTML = '';
+        if (!timeSlotsContainer) {
+            console.error('Элемент time-slots не найден.');
+            return;
+        }
 
+        timeSlotsContainer.innerHTML = '';
         for (let hour = 9; hour <= 18; hour++) {
             for (let minute = 0; minute < 60; minute += 15) {
                 if (hour === 18 && minute > 0) break; // Останавливаемся на 18:00
@@ -28,22 +39,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (selectedTime) selectedTime.classList.remove('selected');
                     selectedTime = timeSlot;
                     timeSlot.classList.add('selected');
+                    showConfirmButton();
                 });
-
-                // Группировка по утру, дню и вечеру
-                if (hour < 12) {
-                    morningSlots.appendChild(timeSlot);
-                } else if (hour < 16) {
-                    afternoonSlots.appendChild(timeSlot);
-                } else {
-                    eveningSlots.appendChild(timeSlot);
-                }
+                timeSlotsContainer.appendChild(timeSlot);
             }
         }
     }
 
     // Функция для отрисовки календаря
     function renderCalendar() {
+        if (!calendarBody) {
+            console.error('Элемент calendar-body не найден.');
+            return;
+        }
+
         calendarBody.innerHTML = '';
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
@@ -77,11 +86,28 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (selectedDay) selectedDay.classList.remove('selected');
                         selectedDay = day;
                         day.classList.add('selected');
+                        showConfirmButton();
                     });
                     date++;
                 }
                 calendarBody.appendChild(day);
             }
+        }
+    }
+
+    // Функция для отображения кнопки "Записаться"
+    function showConfirmButton() {
+        if (!confirmButtonContainer) {
+            console.error('Элемент confirm-button-container не найден.');
+            return;
+        }
+
+        if (selectedDay && selectedTime) {
+            confirmButtonContainer.innerHTML = `
+                <button class="confirm-button" onclick="window.location.href='appointment.html'">Записаться</button>
+            `;
+        } else {
+            confirmButtonContainer.innerHTML = '';
         }
     }
 
