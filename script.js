@@ -5,12 +5,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const nextMonthButton = document.getElementById('next-month');
     const timeSlotsContainer = document.getElementById('time-slots');
     const confirmButtonContainer = document.getElementById('confirm-button-container');
-    const nameInput = document.querySelector('input[type="text"]');
-    const phoneInput = document.querySelector('input[type="tel"]');
 
-
-    
-    // Проверка, что все необходимые элементы существуют
+    // Проверка наличия необходимых элементов
     if (!calendarBody || !currentMonthElement || !prevMonthButton || !nextMonthButton || !timeSlotsContainer || !confirmButtonContainer) {
         console.error('Один из элементов не найден на странице.');
         return;
@@ -20,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let selectedDay = null; // Выбранный день
     let selectedTime = null; // Выбранное время
 
-    // Функция для генерации времени с 9:00 до 18:00 с интервалом 15 минут
+    // Функция для генерации слотов времени с 9:00 до 18:00 с интервалом 15 минут
     function generateTimeSlots() {
         if (!timeSlotsContainer) {
             console.error('Элемент time-slots не найден.');
@@ -39,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (selectedTime) selectedTime.classList.remove('selected');
                     selectedTime = timeSlot;
                     timeSlot.classList.add('selected');
-                    showConfirmButton();
+                    updateConfirmButtonState();
                 });
                 timeSlotsContainer.appendChild(timeSlot);
             }
@@ -77,16 +73,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     day.classList.add('calendar-day');
                     day.textContent = date;
-                    if (date === 10 || date === 11 || date === 12 || date === 13 || date === 14 ||
-                        date === 17 || date === 18 || date === 19 || date === 20 || date === 21 ||
-                        date === 24 || date === 25 || date === 26 || date === 27 || date === 28) {
+                    if ([10, 11, 12, 13, 14, 17, 18, 19, 20, 21, 24, 25, 26, 27, 28].includes(date)) {
                         day.innerHTML = `<strong>${date}</strong>`;
                     }
                     day.addEventListener('click', () => {
                         if (selectedDay) selectedDay.classList.remove('selected');
                         selectedDay = day;
                         day.classList.add('selected');
-                        showConfirmButton();
+                        updateConfirmButtonState();
                     });
                     date++;
                 }
@@ -95,8 +89,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Функция для отображения кнопки "Записаться"
-    function showConfirmButton() {
+    // Функция для обновления состояния кнопки "Записаться"
+    function updateConfirmButtonState() {
         if (!confirmButtonContainer) {
             console.error('Элемент confirm-button-container не найден.');
             return;
@@ -107,7 +101,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 <button class="confirm-button" onclick="window.location.href='appointment.html'">Записаться</button>
             `;
         } else {
-            confirmButtonContainer.innerHTML = '';
+            confirmButtonContainer.innerHTML = `
+                <button class="confirm-button" disabled>Записаться</button>
+            `;
         }
     }
 

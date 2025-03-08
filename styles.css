@@ -296,9 +296,21 @@ body {
     margin-top: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+.confirm-button:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
+
 
 .confirm-button:hover {
     background-color: #0056b3;
+    color: #fff;
+}
+.confirm-button:disabled:hover {
+    background-color: #ccc;
+    color: #666;
 }
 
 /* Медиа-запросы для узких экранов (до 350px) */
@@ -317,35 +329,53 @@ body {
     }
 }
 @media (min-width: 400px) {
+    .content{
+        width: 80%;
+    }
     .time-slots {
         grid-template-columns: repeat(3, 1fr); /* 3 колонки при ширине от 400px */
     }
 }
 
 @media (min-width: 600px) {
+    .content{
+        width: 75%;
+    }
     .time-slots {
         grid-template-columns: repeat(4, 1fr); /* 4 колонки при ширине от 600px */
     }
 }
 
 @media (min-width: 880px) {
+    .content{
+        width: 70%;
+    }
     .time-slots {
         grid-template-columns: repeat(5, 1fr); /* 5 колонок при ширине от 880px */
     }
 }
 
 @media (min-width: 1000px) {
+    .content{
+        width: 60%;
+    }
     .time-slots {
         grid-template-columns: repeat(6, 1fr); /* 6 колонок при ширине от 1000px */
     }
 }
 
 @media (min-width: 1200px) {
+    .content{
+        width: 55%;
+    }
     .time-slots {
         grid-template-columns: repeat(7, 1fr); /* 7 колонок при ширине от 1200px */
     }
 }
 @media (min-width: 1600px) {
+    .content{
+        width: 50%;
+    }
     .time-slots {
         grid-template-columns: repeat(8, 1fr); /* 8 колонок при ширине от 1600px */
     }
