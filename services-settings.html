@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка услуг</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Верхний белый хедер с кнопкой возврата -->
+    <header class="top-bar">
+        <button class="back-button" onclick="window.location.href='masterReq.html'">Назад</button>
+        <h1>Настройка услуг</h1>
+        <div></div> <!-- Пространство для выравнивания -->
+    </header>
+
+    <!-- Основной контент с серым фоном -->
+    <div class="content" style="background-color: #f1f1f1;">
+        <!-- Подпись над блоком услуг -->
+        <p class="select-services">Выберите услуги</p>
+
+        <!-- Список услуг с тумблерами -->
+        <div class="service-group">
+            <div class="service-item">
+                <span class="service-name">Услуга 1</span>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="service-item">
+                <span class="service-name">Услуга 2</span>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="service-item">
+                <span class="service-name">Услуга 3</span>
+                <label class="switch">
+                    <input type="checkbox" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Кнопки для сохранения и добавления услуги -->
+        <div class="buttons-container">
+            <!-- Кнопка сохранения, переходящая на masterReq.html -->
+            <button class="save-button" onclick="window.location.href='masterReq.html'">Сохранить</button>
+            <!-- Ссылка на страницу добавления услуги -->
+            <a href="add-service.html"><button class="add-service-button">Добавить услугу</button></a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

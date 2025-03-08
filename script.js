@@ -138,3 +138,11 @@ document.addEventListener('DOMContentLoaded', function () {
         let previousPage = sessionStorage.getItem("previousPage") || "clientReq.html"; // По умолчанию возвращаем на clientReq
         window.location.href = previousPage;
     }
+    function saveServices() {
+        alert("Настройки услуг сохранены.");
+    }
+    
+    // Функция для добавления новой услуги
+    function addService() {
+        alert("Добавление новой услуги.");
+    }
