@@ -551,19 +551,14 @@ body {
     background-color: #fff;
     border-radius: 10px;
     padding: 15px;
-    width: 90%; /* Адаптивная ширина */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 15px; /* Отступы между элементами внутри дня */
     flex-wrap: wrap; /* Позволяет элементам переноситься на новую строку при уменьшении ширины */
-    transition: transform 0.3s ease;
 }
 
-.work-schedule .day:hover {
-    transform: translateY(-5px);
-}
+
 
 .work-schedule label {
     font-size: 16px;
@@ -571,7 +566,7 @@ body {
     color: #333;
     display: flex;
     align-items: center;
-    white-space: nowrap; /* Чтобы название дня не переносилось на новую строку */
+    white-space: nowrap;
 }
 
 .work-schedule input {
@@ -588,16 +583,75 @@ body {
     background-color: #007bff;
     color: white;
     border: none;
-    padding: 10px 20px;
+    padding: 15px 20px;
     margin-top: 20px;
     font-size: 16px;
     width: 100%;
     border-radius: 5px;
     cursor: pointer;
+
 }
 
 .save-btn:hover {
     background-color: #0056b3;
+}
+/* Элементы time внутри контейнера */
+.time-column {
+    display: flex;
+    flex-direction: column; /* Элементы time будут располагаться друг под другом */
+    gap: 5px; /* Отступ между time */
+}
+
+.work-schedule .time select {
+    border-radius: 6px; /* Ещё меньше закругление */
+    padding: 3px 8px; /* Минимальный отступ */
+    font-size: 12px; /* Уменьшаем текст */
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    outline: none;
+    min-width: 65px; /* Компактная ширина */
+    text-align: center;
+    appearance: none; /* Убираем стандартное оформление браузера */
+}
+
+/* Улучшение внешнего вида стрелки выпадающего списка */
+.work-schedule .time {
+    position: relative;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.work-schedule .time::after {
+    content: "▼"; /* Кастомная стрелка */
+    font-size: 10px;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #555;
+}
+
+.notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4caf50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    animation: fadeInOut 3s ease-in-out;
+}
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
 }
 
 /* Медиа-запросы для узких экранов (до 350px) */
@@ -614,15 +668,9 @@ body {
     .time-slots {
         grid-template-columns: repeat(3, 1fr); /* 3 колонки при ширине от 400px */
     }
-    .work-schedule .day {
-        flex-direction: column;
-        align-items: flex-start;
-    }
 
-    .work-schedule label,
-    .work-schedule input {
-        width: 95%;
-    }
+
+
 }
 @media (min-width: 400px) {
     .content{
@@ -633,7 +681,21 @@ body {
     }
 
 }
+@media (max-width: 500px) {
 
+    .day label {
+        margin-bottom: 5px; /* Отступ для label */
+    }
+
+    .time-column {
+        align-items: flex-start;
+    }
+
+    .save-btn {
+        width: 100%;
+        font-size: 18px;
+    }
+}
 @media (min-width: 600px) {
     .content{
         width: 75%;

@@ -13,49 +13,157 @@
     </div>
 
     <div class="content">
-        <p class="change-time">Измените время</p>
+        <p class="change-time">Настройте время работы</p>
+
         <div class="work-schedule">
             <div class="day">
                 <label>Пн</label>
-                <input type="time" id="monday-start" step="900"/>
-                <input type="time" id="monday-end" step="900"/>
+                <div class="time-column">
+                    <div class="time">
+                        <select id="monday-start" class="hour"></select> :
+                        <select id="monday-start-minutes" class="minute"></select>
+                    </div>
+                    <div class="time">
+                        <select id="monday-end" class="hour"></select> :
+                        <select id="monday-end-minutes" class="minute"></select>
+                    </div>
+                </div>
             </div>
             <div class="day">
                 <label>Вт</label>
-                <input type="time" id="tuesday-start" step="900"/>
-                <input type="time" id="tuesday-end" step="900"/>
+                <div class="time-column">
+                    <div class="time">
+                        <select id="tuesday-start" class="hour"></select> :
+                        <select id="tuesday-start-minutes" class="minute"></select>
+                    </div>
+                    <div class="time">
+                        <select id="tuesday-end" class="hour"></select> :
+                        <select id="tuesday-end-minutes" class="minute"></select>
+                    </div>
+                </div>
             </div>
             <div class="day">
                 <label>Ср</label>
-                <input type="time" id="wednesday-start" step="900"/>
-                <input type="time" id="wednesday-end" step="900"/>
+                <div class="time-column">
+                    <div class="time">
+                        <select id="wednesday-start" class="hour"></select> :
+                        <select id="wednesday-start-minutes" class="minute"></select>
+                    </div>
+                    <div class="time">
+                        <select id="wednesday-end" class="hour"></select> :
+                        <select id="wednesday-end-minutes" class="minute"></select>
+                    </div>
+                </div>
             </div>
             <div class="day">
                 <label>Чт</label>
-                <input type="time" id="thursday-start" step="900"/>
-                <input type="time" id="thursday-end" step="900"/>
+                <div class="time-column">
+                    <div class="time">
+                        <select id="thursday-start" class="hour"></select> :
+                        <select id="thursday-start-minutes" class="minute"></select>
+                    </div>
+                    <div class="time">
+                        <select id="thursday-end" class="hour"></select> :
+                        <select id="thursday-end-minutes" class="minute"></select>
+                    </div>
+                </div>
             </div>
             <div class="day">
                 <label>Пт</label>
-                <input type="time" id="friday-start" step="900"/>
-                <input type="time" id="friday-end" step="900"/>
+                <div class="time-column">
+                    <div class="time">
+                        <select id="friday-start" class="hour"></select> :
+                        <select id="friday-start-minutes" class="minute"></select>
+                    </div>
+                    <div class="time">
+                        <select id="friday-end" class="hour"></select> :
+                        <select id="friday-end-minutes" class="minute"></select>
+                    </div>
+                </div>
             </div>
             <div class="day">
                 <label>Сб</label>
-                <input type="time" id="saturday-start" step="900"/>
-                <input type="time" id="saturday-end" step="900"/>
+                <div class="time-column">
+                    <div class="time">
+                        <select id="saturday-start" class="hour"></select> :
+                        <select id="saturday-start-minutes" class="minute"></select>
+                    </div>
+                    <div class="time">
+                        <select id="saturday-end" class="hour"></select> :
+                        <select id="saturday-end-minutes" class="minute"></select>
+                    </div>
+                </div>
             </div>
             <div class="day">
                 <label>Вс</label>
-                <input type="time" id="sunday-start" step="900"/>
-                <input type="time" id="sunday-end" step="900"/>
+                <div class="time-column">
+                    <div class="time">
+                        <select id="sunday-start" class="hour"></select> :
+                        <select id="sunday-start-minutes" class="minute"></select>
+                    </div>
+                    <div class="time">
+                        <select id="sunday-end" class="hour"></select> :
+                        <select id="sunday-end-minutes" class="minute"></select>
+                    </div>
+                </div>
             </div>
         </div>
 
-
-        <button class="save-btn">Сохранить</button>
+        <button class="save-btn" onclick="showSaveNotification()">Сохранить</button>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+
+        // Функция для заполнения выпадающих списков
+        function populateTimeSelectors() {
+            const hours = document.querySelectorAll('.hour');
+            const minutes = document.querySelectorAll('.minute');
+
+            // Заполняем часы (9:00 - 20:00)
+            for (let h = 9; h <= 20; h++) {
+                hours.forEach(hourSelect => {
+                    let option = document.createElement('option');
+                    option.value = h;
+                    option.textContent = h < 10 ? '0' + h : h;
+                    hourSelect.appendChild(option);
+                });
+            }
+
+            // Заполняем минуты (00, 15, 30, 45)
+            [0, 15, 30, 45].forEach(m => {
+                minutes.forEach(minSelect => {
+                    let option = document.createElement('option');
+                    option.value = m;
+                    option.textContent = m === 0 ? '00' : m;
+                    minSelect.appendChild(option);
+                });
+            });
+
+            // Устанавливаем время окончания по умолчанию на 18:00
+            document.querySelectorAll('[id$="end"]').forEach((endHour) => {
+                endHour.value = 18;
+            });
+            document.querySelectorAll('[id$="end-minutes"]').forEach((endMinutes) => {
+                endMinutes.value = 0;
+            });
+        }
+
+        // Функция для отображения уведомления при сохранении
+        function showSaveNotification() {
+            const notification = document.createElement('div');
+            notification.classList.add('notification');
+            notification.textContent = "Настройки успешно сохранены!";
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', populateTimeSelectors);
+    </script>
 </body>
 </html>

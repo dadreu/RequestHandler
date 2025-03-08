@@ -138,21 +138,3 @@ document.addEventListener('DOMContentLoaded', function () {
         let previousPage = sessionStorage.getItem("previousPage") || "clientReq.html"; // По умолчанию возвращаем на clientReq
         window.location.href = previousPage;
     }
-    // Интеграция для страницы "Режим работы"
-    const inputs = document.querySelectorAll(".day input");
-    const saveBtn = document.querySelector(".save-btn");
-
-    // Загрузка сохранённых данных
-    if (localStorage.getItem("workSchedule")) {
-        const savedSchedule = JSON.parse(localStorage.getItem("workSchedule"));
-        inputs.forEach((input, index) => {
-            input.value = savedSchedule[index] || input.value;
-        });
-    }
-
-    // Сохранение данных
-    saveBtn.addEventListener("click", function () {
-        const schedule = Array.from(inputs).map(input => input.value);
-        localStorage.setItem("workSchedule", JSON.stringify(schedule));
-        alert("Режим работы сохранён!");
-    });
