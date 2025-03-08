@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Верхний белый хедер с кнопкой возврата -->
+    <header class="top-bar">
+        <button class="back-button" onclick="window.location.href='index.html'">← Назад</button>
+        <h1>Управление</h1>
+        <div></div> <!-- Это пространство для выравнивания -->
+    </header>
+
+    <!-- Основной контент -->
+    <div class="content">
+        <!-- Блок записи по дням -->
+        <div class="day-group">
+            <h2>Понедельник</h2>
+            <div class="appointment">
+                <p><strong>10:00</strong> - Иван Иванов - Ремонт</p>
+            </div>
+            <div class="appointment">
+                <p><strong>12:00</strong> - Сергей Сергеев - Чистка</p>
+            </div>
+        </div>
+
+        <div class="day-group">
+            <h2>Вторник</h2>
+            <div class="appointment">
+                <p><strong>14:00</strong> - Алексей Алексеев - Замена масла</p>
+            </div>
+        </div>
+
+        <!-- Кнопки для дальнейших действий -->
+        <div class="buttons">
+            <button onclick="window.location.href='appointment.html'">Записать</button>
+            <button onclick="window.location.href='working-hours.html'">Режим работы</button>
+            <button onclick="window.location.href='service-settings.html'">Настройка услуг</button>
+        </div>
+    </div>
+</body>
+</html>
