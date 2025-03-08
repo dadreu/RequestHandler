@@ -146,3 +146,25 @@ document.addEventListener('DOMContentLoaded', function () {
     function addService() {
         alert("Добавление новой услуги.");
     }
+    // Функция для обнуления значения поля ввода
+function resetField(fieldId) {
+    document.getElementById(fieldId).value = '';
+}
+
+// Функция для сохранения услуги
+function saveService() {
+    // Получаем значения полей
+    const name = document.getElementById('service-name').value;
+    const duration = document.getElementById('service-duration').value;
+    const price = document.getElementById('service-price').value;
+
+    // Проверка на пустые поля
+    if (name === '' || duration === '' || price === '') {
+        alert("Пожалуйста, заполните все поля.");
+        return;
+    }
+
+    // Здесь можно добавить код для отправки данных на сервер или локальное сохранение
+    alert("Услуга сохранена.");
+}
+
