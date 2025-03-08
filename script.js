@@ -107,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+
     // Переключение месяцев
     prevMonthButton.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
@@ -117,8 +118,23 @@ document.addEventListener('DOMContentLoaded', function () {
         currentDate.setMonth(currentDate.getMonth() + 1);
         renderCalendar();
     });
+    
 
     // Инициализация
     generateTimeSlots();
     renderCalendar();
 });
+
+
+
+    // Функция для перехода на date-selection.html и сохранения источника перехода
+    function goToDateSelection(sourcePage) {
+        sessionStorage.setItem("previousPage", sourcePage);
+        window.location.href = "date-selection.html";
+    }
+
+    // Функция для возврата на предыдущую страницу
+    function goBack() {
+        let previousPage = sessionStorage.getItem("previousPage") || "clientReq.html"; // По умолчанию возвращаем на clientReq
+        window.location.href = previousPage;
+    }

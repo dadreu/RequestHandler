@@ -432,19 +432,19 @@ body {
     font-size: 18px;
 }
 
-//* Общие стили для записей */
+/* Общие стили для записей */
 .record {
     display: flex;
+    justify-content: space-between; /* Выравнивание по краям */
     align-items: center;
-    padding: 12px;
-    margin-bottom: 15px;
+    padding: 12px 7px; /* Отступы */
     border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     background-color: #fff;
-    transition: background-color 0.3s ease;
-    justify-content: flex-start; /* Выравнивание элементов по левому краю */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box; /* Учитывать padding в ширине */
 }
-
 .record:hover {
     background-color: #f9f9f9;
 }
@@ -482,6 +482,26 @@ body {
     margin-bottom: 15px;
     color: #333;
 }
+
+.record-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 18px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 100%;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.record-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+}
+
 /* Кнопки снизу страницы */
 
 
