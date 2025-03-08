@@ -534,7 +534,71 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
 }
+/*Изменение времени*/
+.change-time {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+}
 
+.work-schedule {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Отступ между днями */
+}
+
+.work-schedule .day {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    width: 90%; /* Адаптивная ширина */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px; /* Отступы между элементами внутри дня */
+    flex-wrap: wrap; /* Позволяет элементам переноситься на новую строку при уменьшении ширины */
+    transition: transform 0.3s ease;
+}
+
+.work-schedule .day:hover {
+    transform: translateY(-5px);
+}
+
+.work-schedule label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    display: flex;
+    align-items: center;
+    white-space: nowrap; /* Чтобы название дня не переносилось на новую строку */
+}
+
+.work-schedule input {
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    flex: 1; /* Поля ввода подстраиваются под доступное пространство */
+    min-width: 80px; /* Минимальная ширина, чтобы не становились слишком маленькими */
+}
+
+.save-btn {
+    display: block;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 20px;
+    font-size: 16px;
+    width: 100%;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.save-btn:hover {
+    background-color: #0056b3;
+}
 
 /* Медиа-запросы для узких экранов (до 350px) */
 @media (max-width: 399px) {
@@ -550,6 +614,15 @@ body {
     .time-slots {
         grid-template-columns: repeat(3, 1fr); /* 3 колонки при ширине от 400px */
     }
+    .work-schedule .day {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .work-schedule label,
+    .work-schedule input {
+        width: 95%;
+    }
 }
 @media (min-width: 400px) {
     .content{
@@ -558,6 +631,7 @@ body {
     .time-slots {
         grid-template-columns: repeat(3, 1fr); /* 3 колонки при ширине от 400px */
     }
+
 }
 
 @media (min-width: 600px) {

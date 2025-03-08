@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Режим работы</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="top-bar">
+        <button class="back-button" onclick="goBack()">Назад</button>
+        <h1>Режим работы</h1>
+    </div>
+
+    <div class="content">
+        <p class="change-time">Измените время</p>
+        <div class="work-schedule">
+            <div class="day">
+                <label>Пн</label>
+                <input type="time" id="monday-start" step="900"/>
+                <input type="time" id="monday-end" step="900"/>
+            </div>
+            <div class="day">
+                <label>Вт</label>
+                <input type="time" id="tuesday-start" step="900"/>
+                <input type="time" id="tuesday-end" step="900"/>
+            </div>
+            <div class="day">
+                <label>Ср</label>
+                <input type="time" id="wednesday-start" step="900"/>
+                <input type="time" id="wednesday-end" step="900"/>
+            </div>
+            <div class="day">
+                <label>Чт</label>
+                <input type="time" id="thursday-start" step="900"/>
+                <input type="time" id="thursday-end" step="900"/>
+            </div>
+            <div class="day">
+                <label>Пт</label>
+                <input type="time" id="friday-start" step="900"/>
+                <input type="time" id="friday-end" step="900"/>
+            </div>
+            <div class="day">
+                <label>Сб</label>
+                <input type="time" id="saturday-start" step="900"/>
+                <input type="time" id="saturday-end" step="900"/>
+            </div>
+            <div class="day">
+                <label>Вс</label>
+                <input type="time" id="sunday-start" step="900"/>
+                <input type="time" id="sunday-end" step="900"/>
+            </div>
+        </div>
+
+
+        <button class="save-btn">Сохранить</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
