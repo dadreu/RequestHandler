@@ -16,29 +16,40 @@
 
     <!-- Основной контент -->
     <div class="content">
-        <!-- Блок записи по дням -->
-        <div class="day-group">
-            <h2>Понедельник</h2>
-            <div class="appointment">
-                <p><strong>10:00</strong> - Иван Иванов - Ремонт</p>
+        <!-- Записи к мастеру -->
+        <div class="record-group">
+            <h2>Записи на приём</h2>
+            <div class="record-day">
+                <h3>Понедельник</h3>
+                <div class="record">
+                    <span class="record-time">10:00</span>
+                    <span class="record-client">Иванов Иван</span>
+                    <span class="record-service">Услуга 1</span>
+                    <span class="record-price">1000 ₽</span> <!-- Цена услуги -->
+                </div>
+                <div class="record">
+                    <span class="record-time">12:00</span>
+                    <span class="record-client">Петров Пётр</span>
+                    <span class="record-service">Услуга 2</span>
+                    <span class="record-price">1500 ₽</span> <!-- Цена услуги -->
+                </div>
             </div>
-            <div class="appointment">
-                <p><strong>12:00</strong> - Сергей Сергеев - Чистка</p>
+            <div class="record-day">
+                <h3>Вторник</h3>
+                <div class="record">
+                    <span class="record-time">14:00</span>
+                    <span class="record-client">Сидоров Сергей</span>
+                    <span class="record-service">Услуга 3</span>
+                    <span class="record-price">2000 ₽</span> <!-- Цена услуги -->
+                </div>
             </div>
         </div>
-
-        <div class="day-group">
-            <h2>Вторник</h2>
-            <div class="appointment">
-                <p><strong>14:00</strong> - Алексей Алексеев - Замена масла</p>
-            </div>
-        </div>
-
-        <!-- Кнопки для дальнейших действий -->
-        <div class="buttons">
-            <button onclick="window.location.href='appointment.html'">Записать</button>
-            <button onclick="window.location.href='working-hours.html'">Режим работы</button>
-            <button onclick="window.location.href='service-settings.html'">Настройка услуг</button>
+    
+        <!-- Кнопки -->
+        <div class="buttons-container">
+            <button id="bookButton">Записать</button>
+            <button id="workingHoursButton">Режим работы</button>
+            <button id="servicesSettingsButton">Настройка услуг</button>
         </div>
     </div>
 </body>
