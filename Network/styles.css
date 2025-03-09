@@ -1,0 +1,880 @@
+/* Общие стили для всех страниц */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-width: 280px; /* Минимальная ширина для всего тела */
+}
+
+/* Верхний блок с белым фоном */
+.top-bar {
+    background-color: #fff;
+    padding: 15px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1), 0 3px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #ddd;
+}
+.top-bar h1 {
+    font-size: 18px;
+    margin: 0;
+    flex: 1;
+    text-align: center;
+    color: #333;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #007bff;
+    padding: 0;
+    margin-right: 10px;
+}
+
+.back-button:hover {
+    color: #0056b3;
+}
+
+/* Основной контент */
+.content {
+    flex: 1;
+    padding: 15px;
+    background-color: #f4f4f4;
+    margin: 0 auto; /* Центрирование контента */
+    width: 75%; /* Ширина контента пропорциональна экрану */
+    max-width: 1600px; /* Ограничиваем максимальную ширину */
+}
+
+/* Стили для страницы index.html */
+.my-records {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-bottom: 35px;
+    border: 1px solid #e0e0e0; /* Легкий контур для отделения */
+}
+.my-records h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.record {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.record:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.record-name {
+    font-weight: bold;
+    color: #000;
+}
+
+.record-date {
+    color: #777;
+}
+
+.record-amount {
+    color: #000;
+}
+
+/* Убедитесь, что каждая запись имеет отступ */
+.record {
+    margin-bottom: 15px; /* Отступ между записями */
+    padding: 12px; /* Увеличиваем отступ внутри блока записи */
+    border-radius: 10px; /* Скругленные углы */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Добавляем тень */
+    background-color: #fff;
+}
+
+.record:hover {
+    background-color: #f9f9f9; /* Изменение фона при наведении */
+}
+
+/* Кнопка "Записаться" */
+.sign-up-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 18px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 100%;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+.sign-up-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Стили для страницы date-selection.html */
+.date-selection {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    min-width: 240px; /* Минимальная ширина для всего тела */
+}
+
+.month-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.nav-button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: #007bff;
+}
+
+.nav-button:hover {
+    color: #0056b3;
+}
+
+.calendar {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 240px; /* Минимальная ширина для всего тела */
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: #333;
+    font-size: 12px;
+}
+
+.calendar-header div {
+    flex: 1;
+    text-align: center;
+}
+
+.calendar-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+}
+
+.calendar-day {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.calendar-day.empty {
+    background-color: transparent;
+    cursor: default;
+    border: none;
+}
+
+.calendar-day:hover {
+    background-color: #f0f0f0;
+}
+
+.calendar-day.selected {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+/* Блок выбора времени */
+.time-selection {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    min-width: 240px; /* Минимальная ширина для всего тела */
+}
+
+.time-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.time-group h3 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.time-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Пропорциональные колонки с минимальной шириной */
+    gap: 8px;
+    min-width: 240px; /* Минимальная ширина для всего тела */
+}
+
+.time-slot {
+    background-color: #fff;
+    padding: 8px 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 12px;
+    text-align: center;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+}
+
+.time-slot:hover {
+    background-color: #f0f0f0;
+}
+
+.time-slot.selected {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+/* Форма записи */
+.form-section {
+    margin-bottom: 20px;
+}
+
+.form-section h2 {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.confirm-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.confirm-button:disabled {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.confirm-button:hover {
+    background-color: #0056b3;
+    color: #fff;
+}
+.confirm-button:disabled:hover {
+    background-color: #ccc;
+    color: #666;
+}
+
+.error-message {
+    color: red;
+    margin-top: 15px;
+}
+
+/* Уникальные стили для страницы index.html */
+
+/* Стили для формы входа */
+.login-form {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.05);
+    margin-top: 50px;
+    max-width: 400px;
+    margin: 50px auto;
+}
+
+.login-form h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+}
+
+.form-input-group {
+    margin-bottom: 20px;
+}
+
+.form-input-group label {
+    display: block;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.form-input-group input {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+}
+
+.form-input-group input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.form-input-group button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.form-input-group button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Сообщение об ошибке */
+.error-message {
+    color: red;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Хедер для страницы masterReq.html */
+.header {
+    background: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+.header h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+/* Кнопка возврата в хедере */
+.back-button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #007bff;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 10px;
+}
+.back-button:hover {
+    text-decoration: underline;
+}
+
+
+
+/* Блоки записей, сгруппированные по дням */
+.day-group {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+.day-group h2 {
+    margin: 0 0 10px;
+    font-size: 18px;
+}
+
+/* Общие стили для записей */
+.record {
+    display: flex;
+    justify-content: space-between; /* Выравнивание по краям */
+    align-items: center;
+    padding: 12px 7px; /* Отступы */
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box; /* Учитывать padding в ширине */
+}
+.record:hover {
+    background-color: #f9f9f9;
+}
+
+/* Стили для времени записи, клиента, услуги и цены */
+.record-time,
+.record-client,
+.record-service {
+    font-size: 14px;
+    color: #333;
+    margin-right: 10px; /* Отступ между элементами */
+}
+
+.record-price {
+    font-size: 14px;
+    color: #007bff;
+    font-weight: bold;
+    margin-left: 10px; /* Отступ слева для цены */
+}
+
+/* Стили для группы записей по дням */
+.record-day {
+    margin-bottom: 20px;
+}
+
+.record-day h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+/* Заголовок записи на приём */
+.record-group h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.record-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 18px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 100%;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.record-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Кнопки снизу страницы */
+
+
+.buttons-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Отступ между кнопками */
+    margin-top: 30px; /* Отступ сверху */
+    width: 100%;
+ /* Ограничение ширины */
+    margin: 0 auto; /* Центрирование */
+}
+
+/* Стили для кнопок */
+.buttons-container button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.buttons-container button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
+}
+/*Изменение времени*/
+.change-time {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.work-schedule {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Отступ между днями */
+}
+
+.work-schedule .day {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap; /* Позволяет элементам переноситься на новую строку при уменьшении ширины */
+}
+
+
+
+.work-schedule label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.work-schedule input {
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    flex: 1; /* Поля ввода подстраиваются под доступное пространство */
+    min-width: 80px; /* Минимальная ширина, чтобы не становились слишком маленькими */
+}
+
+.save-btn {
+    display: block;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    margin-top: 20px;
+    font-size: 16px;
+    width: 100%;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+
+.save-btn:hover {
+    background-color: #0056b3;
+}
+/* Элементы time внутри контейнера */
+.time-column {
+    display: flex;
+    flex-direction: column; /* Элементы time будут располагаться друг под другом */
+    gap: 5px; /* Отступ между time */
+}
+
+.work-schedule .time select {
+    border-radius: 6px; /* Ещё меньше закругление */
+    padding: 3px 8px; /* Минимальный отступ */
+    font-size: 12px; /* Уменьшаем текст */
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    outline: none;
+    min-width: 65px; /* Компактная ширина */
+    text-align: center;
+    appearance: none; /* Убираем стандартное оформление браузера */
+}
+
+/* Улучшение внешнего вида стрелки выпадающего списка */
+.work-schedule .time {
+    position: relative;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.work-schedule .time::after {
+    content: "▼"; /* Кастомная стрелка */
+    font-size: 10px;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #555;
+}
+
+.select-services {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.service-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.service-item {
+    background-color: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.service-name {
+    font-size: 16px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    border-radius: 50%;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Стили для кнопок */
+.buttons-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.save-button, .add-service-button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.save-button:hover, .add-service-button:hover {
+    background-color: #45a049;
+}
+.input-data {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-item {
+    background-color: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.input-item label {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.input-item input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.reset-btn {
+    background-color: #ff4d4d;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+    align-self: flex-end;
+}
+
+.reset-btn:hover {
+    background-color: #e60000;
+}
+.notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4caf50;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    animation: fadeInOut 3s ease-in-out;
+}
+@keyframes fadeInOut {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* Медиа-запросы для узких экранов (до 350px) */
+@media (max-width: 399px) {
+
+    /* Обеспечиваем, чтобы все дни в календаре заполняли блок */
+    .calendar-body {
+        grid-template-columns: repeat(7, 1fr);
+
+    }
+    .content{
+        width: 90%;
+    }
+    .time-slots {
+        grid-template-columns: repeat(3, 1fr); /* 3 колонки при ширине от 400px */
+    }
+
+
+
+}
+@media (min-width: 400px) {
+    .content{
+        width: 80%;
+    }
+    .time-slots {
+        grid-template-columns: repeat(3, 1fr); /* 3 колонки при ширине от 400px */
+    }
+
+}
+@media (max-width: 500px) {
+
+    .day label {
+        margin-bottom: 5px; /* Отступ для label */
+    }
+
+    .time-column {
+        align-items: flex-start;
+    }
+
+    .save-btn {
+        width: 100%;
+        font-size: 18px;
+    }
+}
+@media (min-width: 600px) {
+    .content{
+        width: 75%;
+    }
+    .time-slots {
+        grid-template-columns: repeat(4, 1fr); /* 4 колонки при ширине от 600px */
+    }
+}
+
+@media (min-width: 880px) {
+    .content{
+        width: 70%;
+    }
+    .time-slots {
+        grid-template-columns: repeat(5, 1fr); /* 5 колонок при ширине от 880px */
+    }
+}
+
+@media (min-width: 1000px) {
+    .content{
+        width: 60%;
+    }
+    .time-slots {
+        grid-template-columns: repeat(6, 1fr); /* 6 колонок при ширине от 1000px */
+    }
+}
+
+@media (min-width: 1200px) {
+    .content{
+        width: 55%;
+    }
+    .time-slots {
+        grid-template-columns: repeat(7, 1fr); /* 7 колонок при ширине от 1200px */
+    }
+}
+@media (min-width: 1600px) {
+    .content{
+        width: 50%;
+    }
+    .time-slots {
+        grid-template-columns: repeat(8, 1fr); /* 8 колонок при ширине от 1600px */
+    }
+}
