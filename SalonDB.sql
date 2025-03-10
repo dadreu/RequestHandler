@@ -2,8 +2,8 @@
 -- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
--- Хост: 192.168.50.42:3307
--- Время создания: Мар 10 2025 г., 01:16
+-- Хост: 127.0.0.1:3307
+-- Время создания: Мар 10 2025 г., 23:16
 -- Версия сервера: 8.0.30
 -- Версия PHP: 8.1.9
 
@@ -20,8 +20,6 @@ SET time_zone = "+00:00";
 --
 -- База данных: `SalonDB`
 --
-CREATE DATABASE IF NOT EXISTS `SalonDB` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-USE `SalonDB`;
 
 -- --------------------------------------------------------
 
@@ -31,8 +29,9 @@ USE `SalonDB`;
 
 CREATE TABLE `Appointments` (
   `id` int NOT NULL,
-  `service_id` int NOT NULL,
+  `master_id` int NOT NULL,
   `client_id` int NOT NULL,
+  `service_id` int NOT NULL,
   `date_time` datetime NOT NULL,
   `price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -41,9 +40,9 @@ CREATE TABLE `Appointments` (
 -- Дамп данных таблицы `Appointments`
 --
 
-INSERT INTO `Appointments` (`id`, `service_id`, `client_id`, `date_time`, `price`) VALUES
-(1, 1, 1, '2025-03-15 10:30:00', '1000.00'),
-(2, 3, 2, '2025-03-16 12:00:00', '1200.00');
+INSERT INTO `Appointments` (`id`, `master_id`, `client_id`, `service_id`, `date_time`, `price`) VALUES
+(1, 1, 1, 1, '2025-03-15 10:30:00', '1000.00'),
+(2, 2, 2, 3, '2025-03-16 12:00:00', '1200.00');
 
 -- --------------------------------------------------------
 
@@ -64,28 +63,6 @@ CREATE TABLE `Clients` (
 INSERT INTO `Clients` (`id`, `full_name`, `phone`) VALUES
 (1, 'Сидоров Алексей', '+79991234567'),
 (2, 'Марина Кузнецова', '+79881234567');
-
--- --------------------------------------------------------
-
---
--- Структура таблицы `MasterAppointments`
---
-
-CREATE TABLE `MasterAppointments` (
-  `master_id` int NOT NULL,
-  `time` datetime NOT NULL,
-  `client_name` varchar(100) NOT NULL,
-  `service_id` int NOT NULL,
-  `price` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Дамп данных таблицы `MasterAppointments`
---
-
-INSERT INTO `MasterAppointments` (`master_id`, `time`, `client_name`, `service_id`, `price`) VALUES
-(1, '2025-03-15 10:30:00', 'Сидоров Алексей', 1, '1000.00'),
-(2, '2025-03-16 12:00:00', 'Марина Кузнецова', 3, '1200.00');
 
 -- --------------------------------------------------------
 
@@ -117,8 +94,8 @@ CREATE TABLE `Masters` (
 --
 
 INSERT INTO `Masters` (`id`, `full_name`, `monday_start`, `monday_end`, `tuesday_start`, `tuesday_end`, `wednesday_start`, `wednesday_end`, `thursday_start`, `thursday_end`, `friday_start`, `friday_end`, `saturday_start`, `saturday_end`, `sunday_start`, `sunday_end`) VALUES
-(1, 'Иванов Иван Иванович', '09:00:00', '18:00:00', '09:00:00', '18:00:00', '09:00:00', '18:00:00', '09:00:00', '18:00:00', '09:00:00', '18:00:00', NULL, NULL, NULL, NULL),
-(2, 'Петров Петр Петрович', '10:00:00', '19:00:00', '10:00:00', '19:00:00', '10:00:00', '19:00:00', '10:00:00', '19:00:00', '10:00:00', '19:00:00', NULL, NULL, NULL, NULL);
+(1, 'Иванов Иван Иванович', '09:00:00', '18:00:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(2, 'Петров Петр Петрович', '10:00:00', '19:00:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -155,16 +132,20 @@ CREATE TABLE `Users` (
   `id` int NOT NULL,
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('master','client') NOT NULL
+  `role` enum('master','client') NOT NULL,
+  `master_id` int DEFAULT NULL,
+  `client_id` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Дамп данных таблицы `Users`
 --
 
-INSERT INTO `Users` (`id`, `username`, `password`, `role`) VALUES
-(1, 'master', '1234', 'master'),
-(2, 'client', '1234', 'client');
+INSERT INTO `Users` (`id`, `username`, `password`, `role`, `master_id`, `client_id`) VALUES
+(1, 'master_ivanov', '1234', 'master', 1, NULL),
+(2, 'master_petrov', '5678', 'master', 2, NULL),
+(3, 'client_sidorov', 'abcd', 'client', NULL, 1),
+(4, 'client_kuznetsova', 'efgh', 'client', NULL, 2);
 
 --
 -- Индексы сохранённых таблиц
@@ -175,8 +156,9 @@ INSERT INTO `Users` (`id`, `username`, `password`, `role`) VALUES
 --
 ALTER TABLE `Appointments`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `service_id` (`service_id`),
-  ADD KEY `client_id` (`client_id`);
+  ADD KEY `master_id` (`master_id`),
+  ADD KEY `client_id` (`client_id`),
+  ADD KEY `service_id` (`service_id`);
 
 --
 -- Индексы таблицы `Clients`
@@ -184,13 +166,6 @@ ALTER TABLE `Appointments`
 ALTER TABLE `Clients`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `phone` (`phone`);
-
---
--- Индексы таблицы `MasterAppointments`
---
-ALTER TABLE `MasterAppointments`
-  ADD PRIMARY KEY (`master_id`,`time`),
-  ADD KEY `service_id` (`service_id`);
 
 --
 -- Индексы таблицы `Masters`
@@ -209,7 +184,9 @@ ALTER TABLE `Services`
 --
 ALTER TABLE `Users`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`);
+  ADD UNIQUE KEY `username` (`username`),
+  ADD KEY `master_id` (`master_id`),
+  ADD KEY `client_id` (`client_id`);
 
 --
 -- AUTO_INCREMENT для сохранённых таблиц
@@ -243,7 +220,7 @@ ALTER TABLE `Services`
 -- AUTO_INCREMENT для таблицы `Users`
 --
 ALTER TABLE `Users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Ограничения внешнего ключа сохраненных таблиц
@@ -253,15 +230,16 @@ ALTER TABLE `Users`
 -- Ограничения внешнего ключа таблицы `Appointments`
 --
 ALTER TABLE `Appointments`
-  ADD CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `Services` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `Clients` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`master_id`) REFERENCES `Masters` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `appointments_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `Clients` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `appointments_ibfk_3` FOREIGN KEY (`service_id`) REFERENCES `Services` (`id`) ON DELETE CASCADE;
 
 --
--- Ограничения внешнего ключа таблицы `MasterAppointments`
+-- Ограничения внешнего ключа таблицы `Users`
 --
-ALTER TABLE `MasterAppointments`
-  ADD CONSTRAINT `masterappointments_ibfk_1` FOREIGN KEY (`master_id`) REFERENCES `Masters` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `masterappointments_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `Services` (`id`) ON DELETE CASCADE;
+ALTER TABLE `Users`
+  ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`master_id`) REFERENCES `Masters` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `users_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `Clients` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
