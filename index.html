@@ -7,19 +7,16 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Верхний белый хедер с кнопкой возврата -->
     <header class="top-bar">
         <h1>Вход</h1>
         <div></div>
     </header>
 
-    <!-- Основной контент -->
     <div class="content">
         <div class="login-form">
             <h2>Авторизация</h2>
-            
-            <!-- Форма для ввода данных пользователя -->
-            <form id="loginForm" action="javascript:void(0);">
+
+            <form id="loginForm">
                 <div class="form-input-group">
                     <label for="username">Логин</label>
                     <input type="text" id="username" name="username" required>
@@ -31,43 +28,50 @@
                 </div>
 
                 <div class="form-input-group">
-                    <button type="submit" onclick="login()">Войти</button>
+                    <button type="submit">Войти</button>
                 </div>
 
-                <!-- Сообщение об ошибке -->
-                <div id="error-message" class="error-message" style="display: none;">
-                    Неверный логин или пароль
-                </div>
+                <div id="error-message" class="error-message" style="display: none;"></div>
             </form>
         </div>
     </div>
 
     <script>
-        // Входные данные для мастера
-        const masterCredentials = {
-            username: 'master',
-            password: '1234'
-        };
+document.getElementById('loginForm').addEventListener('submit', function(event) {
+    event.preventDefault();
 
-        // Входные данные для клиента
-        const clientCredentials = {
-            username: 'client',
-            password: '1234'
-        };
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorMessage = document.getElementById('error-message');
 
-        function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('error-message');
-
-            if (username === masterCredentials.username && password === masterCredentials.password) {
-                window.location.href = 'masterReq.html'; // Перенаправление на страницу мастера
-            } else if (username === clientCredentials.username && password === clientCredentials.password) {
-                window.location.href = 'clientReq.html'; // Перенаправление на страницу клиента
-            } else {
-                errorMessage.style.display = 'block'; // Показываем ошибку при неверных данных
+    fetch('http://localhost/login.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `username=${username}&password=${password}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Ответ от сервера:', data);
+        if (data.success) {
+            if (data.role === 'master') {
+                window.location.href = 'masterReq.html';
+            } else if (data.role === 'client') {
+                window.location.href = 'clientReq.html';
             }
+        } else {
+            errorMessage.style.display = 'block';
+            errorMessage.textContent = 'Неверный логин или пароль';
         }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        errorMessage.style.display = 'block';
+        errorMessage.textContent = 'Ошибка подключения. Попробуйте снова.';
+    });
+});
+
     </script>
 </body>
 </html>

@@ -168,3 +168,55 @@ function saveService() {
     alert("Услуга сохранена.");
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    const masterId = localStorage.getItem("master_id"); // Получаем ID мастера
+
+    if (masterId) {
+        fetch(`get_master_appointments.php?master_id=${masterId}`)
+            .then(response => response.json())
+            .then(data => {
+                const recordGroup = document.querySelector(".record-group");
+
+                if (data.success) {
+                    let days = {}; // Объект для группировки записей по дням недели
+
+                    // Обработка записей и группировка по дням недели
+                    data.appointments.forEach(appointment => {
+                        let date = new Date(appointment.time);
+                        let day = date.toLocaleDateString("ru-RU", { weekday: "long" });
+
+                        if (!days[day]) {
+                            days[day] = [];
+                        }
+
+                        days[day].push(`
+                            <div class="record">
+                                <span class="record-time">${date.toLocaleTimeString("ru-RU", { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span class="record-client">${appointment.client_name}</span>
+                                <span class="record-service">${appointment.service_name}</span>
+                                <span class="record-price">${appointment.price} ₽</span>
+                            </div>
+                        `);
+                    });
+
+                    // Выводим записи по дням недели
+                    for (let day in days) {
+                        recordGroup.innerHTML += `
+                            <div class="record-day">
+                                <h3>${day}</h3>
+                                ${days[day].join("")}
+                            </div>
+                        `;
+                    }
+                } else {
+                    recordGroup.innerHTML = `<h2>${data.message || 'Произошла ошибка'}</h2>`;
+                }
+            })
+            .catch(error => console.error("Ошибка загрузки данных:", error));
+    } else {
+        alert("Ошибка: ID мастера не найден!");
+    }
+});
+
+
+
