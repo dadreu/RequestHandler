@@ -18,8 +18,11 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
     if ($user && $user['password'] === $password) {
         $response['success'] = true;
         $response['role'] = $user['role']; // Передаем роль
+
         if ($user['role'] === 'master') {
-            $response['master_id'] = $user['id']; // Передаем master_id
+            $response['master_id'] = $user['master_id']; // Передаем master_id
+        } elseif ($user['role'] === 'client') {
+            $response['client_id'] = $user['client_id']; // Передаем client_id
         }
     }
 }

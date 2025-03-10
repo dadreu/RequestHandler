@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Записи</title>
+    <title>Список записей</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -16,23 +16,63 @@
     <!-- Основной контент на сером фоне -->
     <div class="content">
         <!-- Блок "Мои записи" -->
-        <div class="my-records">
+        <div id="my-records" class="my-records">
             <h2>Мои записи</h2>
-            <div class="record">
-                <span class="record-name">Запись 1</span>
-                <span class="record-date">25 Июня 2024</span>
-                <span class="record-amount">900</span>
-            </div>
-            <div class="record">
-                <span class="record-name">Запись 2</span>
-                <span class="record-date">26 Июня 2024</span>
-                <span class="record-amount">200</span>
-            </div>
+            <!-- Записи будут добавляться сюда -->
         </div>
 
         <!-- Кнопка "Записаться" -->
         <button class="record-button" onclick="goToDateSelection('clientReq.html')">Записаться</button>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        // Получаем ID клиента из параметров URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const clientId = urlParams.get('client_id');
+        
+        // Функция загрузки записей
+        function loadClientRecords() {
+            if (!clientId) {
+                alert("Не найден client_id");
+                return;
+            }
+
+            fetch(`http://localhost/get_client_appointments.php?client_id=${clientId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const recordsContainer = document.getElementById('my-records');
+                    if (data.success) {
+                        data.appointments.forEach(appointment => {
+                            const recordDiv = document.createElement('div');
+                            recordDiv.classList.add('record');
+                            recordDiv.innerHTML = `
+                                <span class="record-name">${appointment.service_name}</span>
+                                <span class="record-date">${appointment.date_time}</span>
+                                <span class="record-amount">${appointment.price} ₽</span>
+                            `;
+                            recordsContainer.appendChild(recordDiv);
+                        });
+                    } else {
+                        recordsContainer.innerHTML = `<p>${data.message || "У вас нет записей."}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при загрузке записей:', error);
+                    document.getElementById('my-records').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
+                });
+        }
+
+        // Функция для перехода на страницу записи с передачей client_id
+        function goToDateSelection(url) {
+            if (!clientId) {
+                alert("Client ID не найден");
+                return;
+            }
+            window.location.href = `${url}?client_id=${clientId}`;
+        }
+
+        // Загружаем записи при загрузке страницы
+        window.onload = loadClientRecords;
+    </script>
 </body>
 </html>
