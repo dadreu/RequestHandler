@@ -17,7 +17,10 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
     // Проверка пароля
     if ($user && $user['password'] === $password) {
         $response['success'] = true;
-        $response['role'] = $user['role']; // Передаём роль в ответе
+        $response['role'] = $user['role']; // Передаем роль
+        if ($user['role'] === 'master') {
+            $response['master_id'] = $user['id']; // Передаем master_id
+        }
     }
 }
 

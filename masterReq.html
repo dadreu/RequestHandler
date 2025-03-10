@@ -3,55 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление</title>
+    <title>Записи мастера</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Верхний белый хедер с кнопкой возврата -->
     <header class="top-bar">
         <button class="back-button" onclick="window.location.href='index.html'">Назад</button>
-        <h1>Управление</h1>
-        <div></div> <!-- Это пространство для выравнивания -->
+        <h1>Записи мастера</h1>
     </header>
 
-    <!-- Основной контент -->
     <div class="content">
-        <!-- Записи к мастеру -->
-        <div class="record-group">
-            <h2>Записи на приём</h2>
-            <div class="record-day">
-                <h3>Понедельник</h3>
-                <div class="record">
-                    <span class="record-time">10:00</span>
-                    <span class="record-client">Иванов Иван</span>
-                    <span class="record-service">Услуга 1</span>
-                    <span class="record-price">1000 ₽</span> <!-- Цена услуги -->
-                </div>
-                <div class="record">
-                    <span class="record-time">12:00</span>
-                    <span class="record-client">Петров Пётр</span>
-                    <span class="record-service">Услуга 2</span>
-                    <span class="record-price">1500 ₽</span> <!-- Цена услуги -->
-                </div>
-            </div>
-            <div class="record-day">
-                <h3>Вторник</h3>
-                <div class="record">
-                    <span class="record-time">14:00</span>
-                    <span class="record-client">Сидоров Сергей</span>
-                    <span class="record-service">Услуга 3</span>
-                    <span class="record-price">2000 ₽</span> <!-- Цена услуги -->
-                </div>
-            </div>
+        <div id="appointments-container" class="appointments-container">
+            <!-- Здесь будут отображаться записи -->
         </div>
-    
-        <!-- Кнопки -->
-        <div class="buttons-container">
-            <button class="record-button" onclick="goToDateSelection('masterReq.html')">Записать</button>
-            <button onclick="location.href='work-mode.html'" id="workingHoursButton">Режим работы</button>
-            <button id="servicesSettingsButton" onclick="window.location.href='services-settings.html'">Настройка услуг</button>
-        </div>
+                <!-- Кнопки -->
+                <div class="buttons-container">
+                    <button class="record-button" onclick="goToDateSelection('masterReq.html')">Записать</button>
+                    <button onclick="location.href='work-mode.html'" id="workingHoursButton">Режим работы</button>
+                    <button id="servicesSettingsButton" onclick="window.location.href='services-settings.html'">Настройка услуг</button>
+                </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        // Получаем ID мастера из параметров URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const masterId = urlParams.get('master_id');
+
+        function loadAppointments() {
+            fetch(`http://localhost/get_master_appointments.php?master_id=${masterId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    const container = document.getElementById('appointments-container');
+                    if (data.success) {
+                        data.appointments.forEach(appointment => {
+                            const appointmentDiv = document.createElement('div');
+                            appointmentDiv.classList.add('record');
+
+                            appointmentDiv.innerHTML = `
+                                <span class="record-time">${appointment.date_time}</span>
+                                <span class="record-client">${appointment.client_name}</span>
+                                <span class="record-service">${appointment.service_name}</span>
+                                <span class="record-price">${appointment.price} ₽</span>
+                            `;
+                            container.appendChild(appointmentDiv);
+                        });
+                    } else {
+                        container.innerHTML = `<p>${data.message || "Записи отсутствуют."}</p>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при загрузке записей:', error);
+                    document.getElementById('appointments-container').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
+                });
+        }
+
+        window.onload = loadAppointments;
+    </script>
 </body>
 </html>
