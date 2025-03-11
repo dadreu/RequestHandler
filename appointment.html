@@ -17,6 +17,12 @@
     <div class="content">
         <!-- Выбор мастера -->
         <div class="form-section">
+            <h2>Выбранное время</h2>
+            <p id="selected-date"></p>
+            <p id="selected-time"></p>
+        </div>
+        
+        <div class="form-section">
             <h2>Выберите мастера</h2>
             <select class="form-input" id="master-select">
                 <option value="master1">Мастер 1</option>
@@ -53,10 +59,26 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const masterId = urlParams.get('master_id');
+            const selectedDate = urlParams.get('date');
+            const selectedTime = urlParams.get('time');
+
             const fioInput = document.getElementById('fio-input');
             const phoneInput = document.getElementById('phone-input');
             const confirmButton = document.getElementById('confirm-button');
 
+            if (masterId) {
+            console.log(`ID мастера: ${masterId}`);
+            }
+            if (selectedDate && selectedTime) {
+                console.log(`Выбранная дата: ${selectedDate}, Время: ${selectedTime}`);
+
+                // Выводим дату и время на страницу
+                document.getElementById('selected-date').textContent = `Дата: ${selectedDate}`;
+                document.getElementById('selected-time').textContent = `Время: ${selectedTime}`;
+            }
+            
             // Валидация данных формы
             function validateForm() {
                 let isValid = true;
