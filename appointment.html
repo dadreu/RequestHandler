@@ -25,9 +25,7 @@
         <div class="form-section">
             <h2>Выберите мастера</h2>
             <select class="form-input" id="master-select">
-                <option value="master1">Мастер 1</option>
-                <option value="master2">Мастер 2</option>
-                <option value="master3">Мастер 3</option>
+                <!-- Мастера будут подгружены сюда -->
             </select>
         </div>
 
@@ -35,9 +33,7 @@
         <div class="form-section">
             <h2>Выберите услугу</h2>
             <select class="form-input" id="service-select">
-                <option value="service1">Услуга 1</option>
-                <option value="service2">Услуга 2</option>
-                <option value="service3">Услуга 3</option>
+                <!-- Услуги будут подгружены сюда -->
             </select>
         </div>
 
@@ -68,6 +64,8 @@
             const fioInput = document.getElementById('fio-input');
             const phoneInput = document.getElementById('phone-input');
             const confirmButton = document.getElementById('confirm-button');
+            const masterSelect = document.getElementById('master-select');
+            const serviceSelect = document.getElementById('service-select');
 
             if (masterId) {
                 console.log(`ID мастера: ${masterId}`);
@@ -79,6 +77,30 @@
                 document.getElementById('selected-date').textContent = `Дата: ${selectedDate}`;
                 document.getElementById('selected-time').textContent = `Время: ${selectedTime}`;
             }
+
+            // Получение данных о мастерах и услугах
+            fetch('get_data.php')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);  // Выводим данные в консоль для проверки
+
+                    // Заполняем список мастеров
+                    data.masters.forEach(master => {
+                        const option = document.createElement('option');
+                        option.value = master.id;
+                        option.textContent = master.full_name;  // Используем full_name для мастеров
+                        masterSelect.appendChild(option);
+                    });
+
+                    // Заполняем список услуг
+                    data.services.forEach(service => {
+                        const option = document.createElement('option');
+                        option.value = service.id;
+                        option.textContent = service.name;
+                        serviceSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Ошибка при загрузке данных:', error));
 
             // Валидация данных формы
             function validateForm() {
@@ -94,10 +116,6 @@
                 if (!phoneInput.value.match(phonePattern)) {
                     alert("Номер телефона должен быть в формате: +79999999999 или 89999999999.");
                     isValid = false; // Останавливаем выполнение
-                }
-
-                if (isValid) {
-                    alert("Запись подтверждена!");
                 }
 
                 return isValid;
@@ -119,7 +137,53 @@
                     // Если валидация не прошла, не продолжаем
                     return;
                 }
-                window.location.href = 'appointment.html'; // Переход на страницу записи
+
+                // Получаем данные из формы
+                const masterId = masterSelect.value;
+                const serviceId = serviceSelect.value;
+                const fio = fioInput.value;
+                const phone = phoneInput.value;
+                const date = selectedDate;
+                const time = selectedTime;
+
+                // Отправляем данные на сервер через fetch
+                fetch('create_appointment.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    master_id: masterId,
+                    service_id: serviceId,
+                    fio: fio,
+                    phone: phone,
+                    date: date,
+                    time: time
+                })
+            })
+            .then(response => response.text())  // Вместо response.json()
+            .then(data => {
+                console.log(data); // Выведет текстовый ответ сервера
+                try {
+                    const jsonData = JSON.parse(data); // Пробуем преобразовать в JSON
+                    if (jsonData.success) {
+                        alert('Запись успешно создана!');
+                        const creatorMasterId = urlParams.get('master_id'); // ID того, кто создаёт запись
+                        window.location.href = `masterReq.html?master_id=${creatorMasterId}`;
+
+                    } else {
+                        alert('Ошибка при создании записи: ' + jsonData.message);
+                    }
+                } catch (e) {
+                    console.error('Ошибка при парсинге JSON:', e);
+                    alert('Ошибка в формате данных от сервера.');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке данных:', error);
+                alert('Произошла ошибка при создании записи.');
+            });
+
             });
         });
     </script>
