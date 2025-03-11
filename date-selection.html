@@ -56,15 +56,25 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const masterId = urlParams.get('master_id');
+        const role = urlParams.get('role');  // Получаем роль пользователя (master или client)
         const previousPage = urlParams.get('previousPage');
 
         function goBack() {
-            if (previousPage) {
-                window.location.href = `${previousPage}?master_id=${masterId}`;
-            } else {
-                window.history.back(); // На случай, если previousPage не передан
-            }
+        const role = new URLSearchParams(window.location.search).get('role'); // Получаем роль пользователя
+        const masterId = new URLSearchParams(window.location.search).get('master_id'); // Получаем ID мастера
+
+        if (role === 'master') {
+            // Для мастера - редирект на masterReq.html с передачей master_id
+            window.location.href = `masterReq.html?master_id=${masterId}`;
+        } else if (role === 'client') {
+            // Для клиента - редирект на clientReq.html с передачей master_id
+            window.location.href = `clientReq.html?client_id=${masterId}`;
+        } else {
+            // В случае ошибки, можно вернуть назад на предыдущее место
+            window.history.back();
         }
+}
+
 
         document.addEventListener('click', function(event) {
             if (event.target && event.target.classList.contains('confirm-button')) {

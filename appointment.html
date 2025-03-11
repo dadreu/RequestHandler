@@ -9,7 +9,7 @@
 <body>
     <!-- Верхний блок с белым фоном -->
     <div class="top-bar">
-        <button class="back-button" onclick="window.location.href='date-selection.html'">Назад</button>
+        <button class="back-button">Назад</button>
         <h1>Запись</h1>
     </div>
 
@@ -63,13 +63,14 @@
             const masterId = urlParams.get('master_id');
             const selectedDate = urlParams.get('date');
             const selectedTime = urlParams.get('time');
+            const previousPage = urlParams.get('previousPage') || '/masterReq.html';
 
             const fioInput = document.getElementById('fio-input');
             const phoneInput = document.getElementById('phone-input');
             const confirmButton = document.getElementById('confirm-button');
 
             if (masterId) {
-            console.log(`ID мастера: ${masterId}`);
+                console.log(`ID мастера: ${masterId}`);
             }
             if (selectedDate && selectedTime) {
                 console.log(`Выбранная дата: ${selectedDate}, Время: ${selectedTime}`);
@@ -78,7 +79,7 @@
                 document.getElementById('selected-date').textContent = `Дата: ${selectedDate}`;
                 document.getElementById('selected-time').textContent = `Время: ${selectedTime}`;
             }
-            
+
             // Валидация данных формы
             function validateForm() {
                 let isValid = true;
@@ -102,7 +103,17 @@
                 return isValid;
             }
 
-            // Привязка события к кнопке
+            // Обработчик кнопки "Назад"
+            document.querySelector('.back-button').addEventListener('click', function () {
+                const returnUrl = new URL(previousPage, window.location.origin);
+                // Добавляем параметры, если они существуют
+                if (masterId) returnUrl.searchParams.set('master_id', masterId);
+                if (selectedDate) returnUrl.searchParams.set('date', selectedDate);
+                if (selectedTime) returnUrl.searchParams.set('time', selectedTime);
+                window.location.href = returnUrl.toString(); // Переход на правильную страницу с параметрами
+            });
+
+            // Привязка события к кнопке "Подтвердить"
             confirmButton.addEventListener('click', function() {
                 if (!validateForm()) {
                     // Если валидация не прошла, не продолжаем

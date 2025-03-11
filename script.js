@@ -95,10 +95,14 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Элемент confirm-button-container не найден.');
             return;
         }
-
+    
         if (selectedDay && selectedTime) {
+            const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), selectedDay.textContent);
+            const formattedDate = selectedDate.toISOString().split('T')[0]; // Преобразуем дату в формат YYYY-MM-DD
+            const formattedTime = selectedTime.textContent; // Читаем выбранное время
+    
             confirmButtonContainer.innerHTML = `
-                <button class="confirm-button" onclick="window.location.href='appointment.html'">Записаться</button>
+                <button class="confirm-button" onclick="confirmAppointment('${formattedDate}', '${formattedTime}')">Записаться</button>
             `;
         } else {
             confirmButtonContainer.innerHTML = `
