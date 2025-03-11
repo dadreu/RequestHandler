@@ -55,10 +55,22 @@
                 .catch(error => {
                     console.error('Ошибка при загрузке записей:', error);
                     document.getElementById('appointments-container').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
-                });
-        }
+            });
 
+
+        }
         window.onload = loadAppointments;
+                        // Функция для перехода на date-selection.html и сохранения источника перехода
+                        function goToDateSelection() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const masterId = urlParams.get('master_id'); // Получаем ID мастера из URL текущей страницы
+            if (masterId) {
+            const previousPage = window.location.pathname; // Получаем путь текущей страницы
+            window.location.href = `date-selection.html?master_id=${masterId}&previousPage=${encodeURIComponent(previousPage)}`;
+        } else {
+            console.error("ID мастера не найден.");
+        }
+        }
     </script>
 </body>
 </html>

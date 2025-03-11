@@ -52,7 +52,19 @@
             <button class="confirm-button" id="confirm-button" disabled>Записаться</button>
         </div>
     </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+    const masterId = urlParams.get('master_id');
+    const previousPage = urlParams.get('previousPage');
 
+    function goBack() {
+        if (previousPage) {
+            window.location.href = `${previousPage}?master_id=${masterId}`;
+        } else {
+            window.history.back(); // На случай, если previousPage не передан
+        }
+    }
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
