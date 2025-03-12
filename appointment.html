@@ -168,9 +168,13 @@
                     const jsonData = JSON.parse(data); // Пробуем преобразовать в JSON
                     if (jsonData.success) {
                         alert('Запись успешно создана!');
+<<<<<<< HEAD
                         const creatorMasterId = urlParams.get('master_id'); // ID того, кто создаёт запись
                         window.location.href = `masterReq.html?master_id=${creatorMasterId}`;
 
+=======
+                        window.location.href = `masterReq.html?master_id=${masterId}`;
+>>>>>>> 6fbd783688195d715b38fde99f4d03d08cbf29a8
                     } else {
                         alert('Ошибка при создании записи: ' + jsonData.message);
                     }
