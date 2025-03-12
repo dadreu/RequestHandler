@@ -15,114 +15,61 @@
     <div class="content">
         <p class="change-time">Настройте время работы</p>
 
-        <div class="work-schedule">
-            <div class="day">
-                <label>Пн</label>
-                <div class="time-column">
-                    <div class="time">
-                        <select id="monday-start" class="hour"></select> :
-                        <select id="monday-start-minutes" class="minute"></select>
-                    </div>
-                    <div class="time">
-                        <select id="monday-end" class="hour"></select> :
-                        <select id="monday-end-minutes" class="minute"></select>
-                    </div>
-                </div>
-            </div>
-            <div class="day">
-                <label>Вт</label>
-                <div class="time-column">
-                    <div class="time">
-                        <select id="tuesday-start" class="hour"></select> :
-                        <select id="tuesday-start-minutes" class="minute"></select>
-                    </div>
-                    <div class="time">
-                        <select id="tuesday-end" class="hour"></select> :
-                        <select id="tuesday-end-minutes" class="minute"></select>
-                    </div>
-                </div>
-            </div>
-            <div class="day">
-                <label>Ср</label>
-                <div class="time-column">
-                    <div class="time">
-                        <select id="wednesday-start" class="hour"></select> :
-                        <select id="wednesday-start-minutes" class="minute"></select>
-                    </div>
-                    <div class="time">
-                        <select id="wednesday-end" class="hour"></select> :
-                        <select id="wednesday-end-minutes" class="minute"></select>
-                    </div>
-                </div>
-            </div>
-            <div class="day">
-                <label>Чт</label>
-                <div class="time-column">
-                    <div class="time">
-                        <select id="thursday-start" class="hour"></select> :
-                        <select id="thursday-start-minutes" class="minute"></select>
-                    </div>
-                    <div class="time">
-                        <select id="thursday-end" class="hour"></select> :
-                        <select id="thursday-end-minutes" class="minute"></select>
-                    </div>
-                </div>
-            </div>
-            <div class="day">
-                <label>Пт</label>
-                <div class="time-column">
-                    <div class="time">
-                        <select id="friday-start" class="hour"></select> :
-                        <select id="friday-start-minutes" class="minute"></select>
-                    </div>
-                    <div class="time">
-                        <select id="friday-end" class="hour"></select> :
-                        <select id="friday-end-minutes" class="minute"></select>
-                    </div>
-                </div>
-            </div>
-            <div class="day">
-                <label>Сб</label>
-                <div class="time-column">
-                    <div class="time">
-                        <select id="saturday-start" class="hour"></select> :
-                        <select id="saturday-start-minutes" class="minute"></select>
-                    </div>
-                    <div class="time">
-                        <select id="saturday-end" class="hour"></select> :
-                        <select id="saturday-end-minutes" class="minute"></select>
-                    </div>
-                </div>
-            </div>
-            <div class="day">
-                <label>Вс</label>
-                <div class="time-column">
-                    <div class="time">
-                        <select id="sunday-start" class="hour"></select> :
-                        <select id="sunday-start-minutes" class="minute"></select>
-                    </div>
-                    <div class="time">
-                        <select id="sunday-end" class="hour"></select> :
-                        <select id="sunday-end-minutes" class="minute"></select>
-                    </div>
-                </div>
-            </div>
+        <div class="work-schedule" id="schedule">
+            <!-- Дни недели добавятся через JS -->
         </div>
 
-        <button class="save-btn" onclick="showSaveNotification()">Сохранить</button>
+        <button class="save-btn" onclick="saveSchedule()">Сохранить</button>
     </div>
-    <script src="script.js"></script>
+
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const masterId = urlParams.get("master_id");
+
+            populateSchedule();
+
+            if (masterId) {
+                loadSchedule(masterId);
+            } else {
+                setDefaultSchedule();
+            }
+        });
+
         function goBack() {
             window.history.back();
         }
 
-        // Функция для заполнения выпадающих списков
+        function populateSchedule() {
+            const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+            const scheduleContainer = document.getElementById("schedule");
+
+            days.forEach((day, index) => {
+                const dayId = `day-${index}`;
+                scheduleContainer.innerHTML += `
+                    <div class="day">
+                        <label>${day}</label>
+                        <div class="time-column">
+                            <div class="time">
+                                <select id="${dayId}-start" class="hour"></select> :
+                                <select id="${dayId}-start-minutes" class="minute"></select>
+                            </div>
+                            <div class="time">
+                                <select id="${dayId}-end" class="hour"></select> :
+                                <select id="${dayId}-end-minutes" class="minute"></select>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            populateTimeSelectors();
+        }
+
         function populateTimeSelectors() {
             const hours = document.querySelectorAll('.hour');
             const minutes = document.querySelectorAll('.minute');
 
-            // Заполняем часы (9:00 - 20:00)
             for (let h = 9; h <= 20; h++) {
                 hours.forEach(hourSelect => {
                     let option = document.createElement('option');
@@ -132,7 +79,6 @@
                 });
             }
 
-            // Заполняем минуты (00, 15, 30, 45)
             [0, 15, 30, 45].forEach(m => {
                 minutes.forEach(minSelect => {
                     let option = document.createElement('option');
@@ -141,29 +87,69 @@
                     minSelect.appendChild(option);
                 });
             });
-
-            // Устанавливаем время окончания по умолчанию на 18:00
-            document.querySelectorAll('[id$="end"]').forEach((endHour) => {
-                endHour.value = 18;
-            });
-            document.querySelectorAll('[id$="end-minutes"]').forEach((endMinutes) => {
-                endMinutes.value = 0;
-            });
         }
 
-        // Функция для отображения уведомления при сохранении
-        function showSaveNotification() {
-            const notification = document.createElement('div');
-            notification.classList.add('notification');
-            notification.textContent = "Настройки успешно сохранены!";
-            document.body.appendChild(notification);
-
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
+        function setDefaultSchedule() {
+            document.querySelectorAll('[id$="-start"]').forEach(start => start.value = 9);
+            document.querySelectorAll('[id$="-start-minutes"]').forEach(startMin => startMin.value = 0);
+            document.querySelectorAll('[id$="-end"]').forEach(end => end.value = 18);
+            document.querySelectorAll('[id$="-end-minutes"]').forEach(endMin => endMin.value = 0);
         }
 
-        document.addEventListener('DOMContentLoaded', populateTimeSelectors);
+        function loadSchedule(masterId) {
+            fetch(`load_schedule.php?master_id=${masterId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        data.schedule.forEach(item => {
+                            const dayIndex = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].indexOf(item.day_of_week);
+                            if (dayIndex !== -1) {
+                                document.getElementById(`day-${dayIndex}-start`).value = parseInt(item.start_time.split(':')[0]);
+                                document.getElementById(`day-${dayIndex}-start-minutes`).value = parseInt(item.start_time.split(':')[1]);
+                                document.getElementById(`day-${dayIndex}-end`).value = parseInt(item.end_time.split(':')[0]);
+                                document.getElementById(`day-${dayIndex}-end-minutes`).value = parseInt(item.end_time.split(':')[1]);
+                            }
+                        });
+                    }
+                })
+                .catch(error => console.error('Ошибка загрузки данных:', error));
+        }
+
+        function saveSchedule() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const masterId = urlParams.get("master_id");
+
+            if (!masterId) {
+                alert("Не указан ID мастера.");
+                return;
+            }
+
+            let scheduleData = [];
+            const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+
+            days.forEach((day, index) => {
+                scheduleData.push({
+                    day_of_week: day,
+                    start_time: `${document.getElementById(`day-${index}-start`).value}:${document.getElementById(`day-${index}-start-minutes`).value}`,
+                    end_time: `${document.getElementById(`day-${index}-end`).value}:${document.getElementById(`day-${index}-end-minutes`).value}`
+                });
+            });
+
+            fetch("save_schedule.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ master_id: masterId, schedule: scheduleData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Расписание сохранено!");
+                } else {
+                    alert("Ошибка сохранения расписания.");
+                }
+            })
+            .catch(error => console.error("Ошибка сохранения:", error));
+        }
     </script>
 </body>
 </html>

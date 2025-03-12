@@ -16,12 +16,12 @@
         <div id="appointments-container" class="appointments-container">
             <!-- Здесь будут отображаться записи -->
         </div>
-                <!-- Кнопки -->
-                <div class="buttons-container">
-                    <button class="record-button" onclick="goToDateSelection('masterReq.html')">Записать</button>
-                    <button onclick="location.href='work-mode.html'" id="workingHoursButton">Режим работы</button>
-                    <button id="servicesSettingsButton" onclick="window.location.href='services-settings.html'">Настройка услуг</button>
-                </div>
+        <!-- Кнопки -->
+        <div class="buttons-container">
+            <button class="record-button" onclick="goToDateSelection()">Записать</button>
+            <button onclick="goToWorkMode()">Режим работы</button>
+            <button id="servicesSettingsButton" onclick="window.location.href='services-settings.html'">Настройка услуг</button>
+        </div>
     </div>
 
     <script>
@@ -55,22 +55,36 @@
                 .catch(error => {
                     console.error('Ошибка при загрузке записей:', error);
                     document.getElementById('appointments-container').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
-            });
-
-
+                });
         }
+
         window.onload = loadAppointments;
-                        // Функция для перехода на date-selection.html и сохранения источника перехода
-                        function goToDateSelection() {
-            const urlParams = new URLSearchParams(window.location.search);
+
+        // Функция для перехода на date-selection.html и сохранения источника перехода
+        function goToDateSelection() {
             const masterId = urlParams.get('master_id'); // Получаем ID мастера из URL текущей страницы
             if (masterId) {
-            const previousPage = window.location.pathname; // Получаем путь текущей страницы
-            window.location.href = `date-selection.html?master_id=${masterId}&previousPage=${encodeURIComponent(previousPage)}`;
-        } else {
-            console.error("ID мастера не найден.");
+                const previousPage = window.location.pathname; // Получаем путь текущей страницы
+                window.location.href = `date-selection.html?master_id=${masterId}&previousPage=${encodeURIComponent(previousPage)}`;
+            } else {
+                console.error("ID мастера не найден.");
+            }
         }
-        }
-    </script>
+
+        function goToWorkMode() {
+    console.log("goToWorkMode вызван");
+    const urlParams = new URLSearchParams(window.location.search);
+    const masterId = urlParams.get('master_id'); 
+    
+    console.log("masterId перед переходом:", masterId); // Логирование
+
+    if (masterId) {
+        window.location.href = `work-mode.html?master_id=${masterId}`;
+    } else {
+        console.error("ID мастера не найден.");
+    }
+}
+
+</script>
 </body>
 </html>

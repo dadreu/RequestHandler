@@ -1,6 +1,5 @@
 <?php
 include 'config.php';
-
 header('Content-Type: application/json');
 
 if (!empty($_GET['master_id'])) {
@@ -13,7 +12,7 @@ if (!empty($_GET['master_id'])) {
 
         echo json_encode(['success' => true, 'schedule' => $schedule]);
     } catch (PDOException $e) {
-        die(json_encode(["error" => "Ошибка запроса: " . $e->getMessage()]));
+        echo json_encode(["error" => "Ошибка запроса: " . $e->getMessage()]);
     }
 } else {
     echo json_encode(['error' => "Не указан master_id"]);

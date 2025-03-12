@@ -34,42 +34,41 @@
 
   <script>
     document.getElementById('loginForm').addEventListener('submit', function(event) {
-  event.preventDefault();
-  
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
-  const errorMessage = document.getElementById('error-message');
-  
-  fetch('http://localhost/login.php', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log('Ответ от сервера:', data);
-    if (data.success) {
-      if (data.role === 'master') {
-        // Перенаправляем мастера с параметром master_id
-        window.location.href = `masterReq.html?master_id=${data.master_id}`;
-      } else if (data.role === 'client') {
-        // Перенаправляем клиента с параметром client_id
-        window.location.href = `clientReq.html?client_id=${data.client_id}`;
-      }
-    } else {
-      errorMessage.style.display = 'block';
-      errorMessage.textContent = 'Неверный логин или пароль';
-    }
-  })
-  .catch(error => {
-    console.error('Ошибка:', error);
-    errorMessage.style.display = 'block';
-    errorMessage.textContent = 'Ошибка подключения. Попробуйте снова.';
-  });
-});
-
+      event.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('error-message');
+      
+      fetch('http://localhost/login.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Ответ от сервера:', data);
+        if (data.success) {
+          if (data.role === 'master') {
+            // Перенаправляем мастера с параметром master_id
+            window.location.href = `masterReq.html?master_id=${data.master_id}`;
+          } else if (data.role === 'client') {
+            // Перенаправляем клиента с параметром client_id
+            window.location.href = `clientReq.html?client_id=${data.client_id}`;
+          }
+        } else {
+          errorMessage.style.display = 'block';
+          errorMessage.textContent = 'Неверный логин или пароль';
+        }
+      })
+      .catch(error => {
+        console.error('Ошибка:', error);
+        errorMessage.style.display = 'block';
+        errorMessage.textContent = 'Ошибка подключения. Попробуйте снова.';
+      });
+    });
   </script>
 </body>
 </html>
