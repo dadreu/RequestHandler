@@ -27,13 +27,13 @@
             const urlParams = new URLSearchParams(window.location.search);
             const masterId = urlParams.get("master_id");
 
-            populateSchedule();
-
             if (masterId) {
                 loadSchedule(masterId);
             } else {
-                setDefaultSchedule();
+                alert("Не указан master_id.");
             }
+
+            populateSchedule();
         });
 
         function goBack() {
@@ -87,13 +87,6 @@
                     minSelect.appendChild(option);
                 });
             });
-        }
-
-        function setDefaultSchedule() {
-            document.querySelectorAll('[id$="-start"]').forEach(start => start.value = 9);
-            document.querySelectorAll('[id$="-start-minutes"]').forEach(startMin => startMin.value = 0);
-            document.querySelectorAll('[id$="-end"]').forEach(end => end.value = 18);
-            document.querySelectorAll('[id$="-end-minutes"]').forEach(endMin => endMin.value = 0);
         }
 
         function loadSchedule(masterId) {
