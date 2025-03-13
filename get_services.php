@@ -5,16 +5,14 @@ header('Content-Type: application/json; charset=UTF-8');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$response = ["masters" => [], "services" => []];
+$response = ["services" => []];
 
 try {
-    // Загружаем список мастеров
-    $stmt_masters = $pdo->query("SELECT id, full_name FROM Masters");
-    $response["masters"] = $stmt_masters->fetchAll(PDO::FETCH_ASSOC);
-
-    // Если передан master_id, загружаем услуги для мастера
+    // Проверяем, передан ли параметр master_id
     if (isset($_GET['master_id'])) {
         $masterId = intval($_GET['master_id']);
+
+        // Загружаем услуги для выбранного мастера
         $stmt_services = $pdo->prepare("
             SELECT s.id, s.name 
             FROM Services s
@@ -23,14 +21,12 @@ try {
             AND ms.is_available = 1
             LIMIT 50
         ");
-        
         $stmt_services->execute([$masterId]); // передаем параметр как массив
         $response["services"] = $stmt_services->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        // Если master_id не передан, возвращаем ошибку
+        $response["error"] = "master_id is required";
     }
-
-    // Выводим отладочную информацию
-    // Для отладки можно раскомментировать, чтобы увидеть, что передается в запросах
-    // echo "<pre>" . print_r($response, true) . "</pre>";
 
     // Возвращаем ответ в формате JSON
     echo json_encode($response);

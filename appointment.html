@@ -15,13 +15,14 @@
 
     <!-- Основной контент на сером фоне -->
     <div class="content">
-        <!-- Выбор мастера -->
+        <!-- Выбранное время -->
         <div class="form-section">
             <h2>Выбранное время</h2>
             <p id="selected-date"></p>
             <p id="selected-time"></p>
         </div>
         
+        <!-- Выбор мастера -->
         <div class="form-section">
             <h2>Выберите мастера</h2>
             <select class="form-input" id="master-select">
@@ -60,79 +61,130 @@
             const selectedDate = urlParams.get('date');
             const selectedTime = urlParams.get('time');
             const previousPage = urlParams.get('previousPage') || '/masterReq.html';
-
+    
             const fioInput = document.getElementById('fio-input');
             const phoneInput = document.getElementById('phone-input');
             const confirmButton = document.getElementById('confirm-button');
             const masterSelect = document.getElementById('master-select');
             const serviceSelect = document.getElementById('service-select');
-
-            if (masterId) {
-                console.log(`ID мастера: ${masterId}`);
-            }
+    
             if (selectedDate && selectedTime) {
-                console.log(`Выбранная дата: ${selectedDate}, Время: ${selectedTime}`);
-
-                // Выводим дату и время на страницу
                 document.getElementById('selected-date').textContent = `Дата: ${selectedDate}`;
                 document.getElementById('selected-time').textContent = `Время: ${selectedTime}`;
             }
-
-            // Получение данных о мастерах и услугах
-            fetch('get_data.php')
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);  // Выводим данные в консоль для проверки
-
-                    // Заполняем список мастеров
-                    data.masters.forEach(master => {
-                        const option = document.createElement('option');
-                        option.value = master.id;
-                        option.textContent = master.full_name;  // Используем full_name для мастеров
-                        masterSelect.appendChild(option);
+    
+            // Функция загрузки мастеров
+            function loadMasters(selectedMasterId = '') {
+                fetch('get_masters.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error("Ошибка сервера:", data.error);
+                            alert("Ошибка сервера: " + data.error);
+                            return;
+                        }
+    
+                        masterSelect.innerHTML = ''; // Очищаем список мастеров
+    
+                        if (data.masters.length > 0) {
+                            data.masters.forEach(master => {
+                                const option = document.createElement('option');
+                                option.value = master.id;
+                                option.textContent = master.full_name;
+                                masterSelect.appendChild(option);
+                            });
+    
+                            // Устанавливаем выбранного мастера, если передан ID
+                            if (selectedMasterId) {
+                                masterSelect.value = selectedMasterId;
+                            }
+                            
+                            // Загружаем услуги для текущего мастера
+                            loadServices(masterSelect.value);
+                        } else {
+                            console.warn("Список мастеров пуст!");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Ошибка при загрузке мастеров:", error);
+                        alert("Ошибка при загрузке данных с сервера.");
                     });
-
-                    // Заполняем список услуг
-                    data.services.forEach(service => {
-                        const option = document.createElement('option');
-                        option.value = service.id;
-                        option.textContent = service.name;
-                        serviceSelect.appendChild(option);
+            }
+    
+            // Функция загрузки услуг для выбранного мастера
+            function loadServices(masterId) {
+                if (!masterId) {
+                    serviceSelect.innerHTML = '<option disabled selected>Выберите мастера</option>';
+                    return;
+                }
+    
+                fetch(`get_services.php?master_id=${masterId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error("Ошибка сервера:", data.error);
+                            alert("Ошибка сервера: " + data.error);
+                            return;
+                        }
+    
+                        serviceSelect.innerHTML = ''; // Очищаем список услуг
+    
+                        if (data.services.length > 0) {
+                            data.services.forEach(service => {
+                                const option = document.createElement('option');
+                                option.value = service.id;
+                                option.textContent = service.name;
+                                serviceSelect.appendChild(option);
+                            });
+                        } else {
+                            serviceSelect.innerHTML = '<option disabled selected>Нет доступных услуг</option>';
+                            console.warn("Нет доступных услуг для выбранного мастера!");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Ошибка при загрузке услуг:", error);
+                        alert("Ошибка при загрузке данных.");
                     });
-                })
-                .catch(error => console.error('Ошибка при загрузке данных:', error));
-
+            }
+    
+            // Загружаем мастеров (и услуги, если есть masterId)
+            loadMasters(masterId);
+    
+            // Обработчик изменения мастера (загружает только услуги)
+            masterSelect.addEventListener('change', function () {
+                loadServices(masterSelect.value);
+            });
+    
             // Валидация данных формы
             function validateForm() {
                 let isValid = true;
-
+    
                 const fioPattern = /^[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*)?)?$/;
                 if (!fioInput.value.match(fioPattern)) {
                     alert("ФИО должно содержать только буквы, пробелы и дефисы, начинаться с заглавной буквы.");
-                    isValid = false; // Останавливаем выполнение
+                    isValid = false;
                 }
-
+    
                 const phonePattern = /^((\+7|7|8)[\s\-]?)?(\(?\d{3}\)?[\s\-]?)?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/;
                 if (!phoneInput.value.match(phonePattern)) {
                     alert("Номер телефона должен быть в формате: +79999999999 или 89999999999.");
-                    isValid = false; // Останавливаем выполнение
+                    isValid = false;
                 }
-
+    
                 return isValid;
             }
-
+    
             // Обработчик кнопки "Назад"
             document.querySelector('.back-button').addEventListener('click', function () {
                 const returnUrl = new URL(previousPage, window.location.origin);
-                // Добавляем параметры, если они существуют
                 if (masterId) returnUrl.searchParams.set('master_id', masterId);
                 if (selectedDate) returnUrl.searchParams.set('date', selectedDate);
                 if (selectedTime) returnUrl.searchParams.set('time', selectedTime);
-                window.location.href = returnUrl.toString(); // Переход на правильную страницу с параметрами
+                window.location.href = returnUrl.toString();
             });
-
-            // Привязка события к кнопке "Подтвердить"
-            confirmButton.addEventListener('click', function() {
+    
+           // Привязка события к кнопке "Подтвердить"
+           confirmButton.addEventListener('click', function() {
                 if (!validateForm()) {
                     // Если валидация не прошла, не продолжаем
                     return;
@@ -186,6 +238,6 @@
 
             });
         });
-    </script>
+    </script>    
 </body>
 </html>
