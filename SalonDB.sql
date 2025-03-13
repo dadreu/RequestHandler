@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1:3307
--- Время создания: Мар 13 2025 г., 02:26
+-- Время создания: Мар 13 2025 г., 03:34
 -- Версия сервера: 8.0.30
 -- Версия PHP: 8.1.9
 
@@ -46,7 +46,8 @@ INSERT INTO `Appointments` (`id`, `master_id`, `client_id`, `service_id`, `date_
 (18, 1, 6, 1, '2025-03-13 11:00:00', '1000.00'),
 (19, 3, 6, 2, '2025-03-14 12:30:00', '1000.00'),
 (20, 3, 5, 2, '2025-03-22 14:00:00', '1000.00'),
-(21, 3, 7, 2, '2025-03-21 13:15:00', '1000.00');
+(21, 3, 7, 2, '2025-03-21 13:15:00', '1000.00'),
+(22, 1, 8, 1, '2025-03-30 17:00:00', '1000.00');
 
 -- --------------------------------------------------------
 
@@ -71,7 +72,8 @@ INSERT INTO `Clients` (`id`, `full_name`, `phone`) VALUES
 (4, 'Мария Козлова', '+79005432198'),
 (5, 'Драчёв Андрей Станиславович', '89125965744'),
 (6, 'Женина Татьяна Олеговна', '89125965742'),
-(7, 'Женина Татьяна Олеговна', '8956845733');
+(7, 'Женина Татьяна Олеговна', '8956845733'),
+(8, 'Драчёв Андрей Дмитриевич', '89125965745');
 
 -- --------------------------------------------------------
 
@@ -120,20 +122,46 @@ INSERT INTO `MasterSchedule` (`id`, `master_id`, `day_of_week`, `start_time`, `e
 (46, 3, 'Пт', '15:00:00', '20:00:00'),
 (47, 3, 'Сб', '16:00:00', '20:00:00'),
 (48, 3, 'Вс', '17:00:00', '20:00:00'),
-(70, 2, 'Пн', '09:00:00', '18:00:00'),
-(71, 2, 'Вт', '09:00:00', '18:00:00'),
-(72, 2, 'Ср', '09:00:00', '18:00:00'),
-(73, 2, 'Чт', '09:00:00', '18:00:00'),
-(74, 2, 'Пт', '09:00:00', '18:00:00'),
-(75, 2, 'Сб', '09:00:00', '18:00:00'),
-(76, 2, 'Вс', '09:00:00', '18:00:00'),
-(77, 1, 'Пн', '09:00:00', '18:00:00'),
-(78, 1, 'Вт', '09:00:00', '18:00:00'),
-(79, 1, 'Ср', '09:00:00', '18:00:00'),
-(80, 1, 'Чт', '09:00:00', '14:00:00'),
-(81, 1, 'Пт', '09:00:00', '18:00:00'),
-(82, 1, 'Сб', '09:00:00', '18:00:00'),
-(83, 1, 'Вс', '09:00:00', '18:00:00');
+(84, 2, 'Пн', '09:00:00', '18:00:00'),
+(85, 2, 'Вт', '09:00:00', '18:00:00'),
+(86, 2, 'Ср', '11:00:00', '18:00:00'),
+(87, 2, 'Чт', '09:00:00', '18:00:00'),
+(88, 2, 'Пт', '13:45:00', '18:00:00'),
+(89, 2, 'Сб', '09:00:00', '18:00:00'),
+(90, 2, 'Вс', '09:00:00', '18:00:00'),
+(91, 1, 'Пн', '09:00:00', '18:00:00'),
+(92, 1, 'Вт', '09:15:00', '18:00:00'),
+(93, 1, 'Ср', '09:30:00', '18:00:00'),
+(94, 1, 'Чт', '09:45:00', '14:00:00'),
+(95, 1, 'Пт', '09:00:00', '18:00:00'),
+(96, 1, 'Сб', '09:00:00', '18:00:00'),
+(97, 1, 'Вс', '09:00:00', '18:00:00');
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `MasterServices`
+--
+
+CREATE TABLE `MasterServices` (
+  `id` int NOT NULL,
+  `master_id` int NOT NULL,
+  `service_id` int NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `duration` int NOT NULL,
+  `is_available` tinyint(1) DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Дамп данных таблицы `MasterServices`
+--
+
+INSERT INTO `MasterServices` (`id`, `master_id`, `service_id`, `price`, `duration`, `is_available`) VALUES
+(1, 1, 1, '1000.00', 40, 1),
+(2, 2, 1, '1200.00', 45, 1),
+(3, 3, 2, '1500.00', 60, 1),
+(4, 1, 4, '1200.00', 90, 1),
+(5, 2, 3, '3000.00', 120, 1);
 
 -- --------------------------------------------------------
 
@@ -229,6 +257,14 @@ ALTER TABLE `MasterSchedule`
   ADD KEY `master_id` (`master_id`);
 
 --
+-- Индексы таблицы `MasterServices`
+--
+ALTER TABLE `MasterServices`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `master_id` (`master_id`),
+  ADD KEY `service_id` (`service_id`);
+
+--
 -- Индексы таблицы `Services`
 --
 ALTER TABLE `Services`
@@ -251,13 +287,13 @@ ALTER TABLE `Users`
 -- AUTO_INCREMENT для таблицы `Appointments`
 --
 ALTER TABLE `Appointments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT для таблицы `Clients`
 --
 ALTER TABLE `Clients`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT для таблицы `Masters`
@@ -269,7 +305,13 @@ ALTER TABLE `Masters`
 -- AUTO_INCREMENT для таблицы `MasterSchedule`
 --
 ALTER TABLE `MasterSchedule`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+
+--
+-- AUTO_INCREMENT для таблицы `MasterServices`
+--
+ALTER TABLE `MasterServices`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT для таблицы `Services`
@@ -300,6 +342,13 @@ ALTER TABLE `Appointments`
 --
 ALTER TABLE `MasterSchedule`
   ADD CONSTRAINT `masterschedule_ibfk_1` FOREIGN KEY (`master_id`) REFERENCES `Masters` (`id`) ON DELETE CASCADE;
+
+--
+-- Ограничения внешнего ключа таблицы `MasterServices`
+--
+ALTER TABLE `MasterServices`
+  ADD CONSTRAINT `masterservices_ibfk_1` FOREIGN KEY (`master_id`) REFERENCES `Masters` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `masterservices_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `Services` (`id`) ON DELETE CASCADE;
 
 --
 -- Ограничения внешнего ключа таблицы `Users`
