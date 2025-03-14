@@ -18,10 +18,9 @@
         </div>
         <!-- Кнопки -->
         <div class="buttons-container">
-            <button class="record-button" onclick="goToDateSelection()">Записать</button>
+            <button class="record-button" onclick="goToAppointment()">Записать</button>
             <button onclick="goToWorkMode()">Режим работы</button>
             <button id="servicesSettingsButton" onclick="window.location.href='services-settings.html?master_id=' + masterId">Настройка услуг</button>
-
         </div>
     </div>
 
@@ -34,13 +33,12 @@
             fetch(`http://localhost/get_master_appointments.php?master_id=${masterId}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
                     const container = document.getElementById('appointments-container');
                     if (data.success) {
+                        container.innerHTML = '';
                         data.appointments.forEach(appointment => {
                             const appointmentDiv = document.createElement('div');
                             appointmentDiv.classList.add('record');
-
                             appointmentDiv.innerHTML = `
                                 <span class="record-time">${appointment.date_time}</span>
                                 <span class="record-client">${appointment.client_name}</span>
@@ -59,33 +57,25 @@
                 });
         }
 
-        window.onload = loadAppointments;
-
-        // Функция для перехода на date-selection.html и сохранения источника перехода
-        function goToDateSelection() {
-            const masterId = urlParams.get('master_id'); // Получаем ID мастера из URL текущей страницы
+        function goToAppointment() {
             if (masterId) {
-                const previousPage = window.location.pathname; // Получаем путь текущей страницы
-                window.location.href = `date-selection.html?master_id=${masterId}&previousPage=${encodeURIComponent(previousPage)}`;
+                window.location.href = `appointment.html?master_id=${masterId}`;
             } else {
                 console.error("ID мастера не найден.");
+                alert("Ошибка: ID мастера не указан.");
             }
         }
 
         function goToWorkMode() {
-    console.log("goToWorkMode вызван");
-    const urlParams = new URLSearchParams(window.location.search);
-    const masterId = urlParams.get('master_id'); 
-    
-    console.log("masterId перед переходом:", masterId); // Логирование
+            if (masterId) {
+                window.location.href = `work-mode.html?master_id=${masterId}`;
+            } else {
+                console.error("ID мастера не найден.");
+                alert("Ошибка: ID мастера не указан.");
+            }
+        }
 
-    if (masterId) {
-        window.location.href = `work-mode.html?master_id=${masterId}`;
-    } else {
-        console.error("ID мастера не найден.");
-    }
-}
-
-</script>
+        window.onload = loadAppointments;
+    </script>
 </body>
 </html>
