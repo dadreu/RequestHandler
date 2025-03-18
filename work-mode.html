@@ -93,7 +93,7 @@
             fetch(`load_schedule.php?master_id=${masterId}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
+                    if (data.success && data.schedule) {
                         data.schedule.forEach(item => {
                             const dayIndex = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].indexOf(item.day_of_week);
                             if (dayIndex !== -1) {
@@ -121,10 +121,16 @@
             const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
             days.forEach((day, index) => {
+                const startHour = document.getElementById(`day-${index}-start`).value.padStart(2, '0');
+                const startMinute = document.getElementById(`day-${index}-start-minutes`).value.padStart(2, '0');
+                const endHour = document.getElementById(`day-${index}-end`).value.padStart(2, '0');
+                const endMinute = document.getElementById(`day-${index}-end-minutes`).value.padStart(2, '0');
+                const startTime = `${startHour}:${startMinute}:00`;
+                const endTime = `${endHour}:${endMinute}:00`;
                 scheduleData.push({
                     day_of_week: day,
-                    start_time: `${document.getElementById(`day-${index}-start`).value}:${document.getElementById(`day-${index}-start-minutes`).value}`,
-                    end_time: `${document.getElementById(`day-${index}-end`).value}:${document.getElementById(`day-${index}-end-minutes`).value}`
+                    start_time: startTime,
+                    end_time: endTime
                 });
             });
 
@@ -138,7 +144,7 @@
                 if (data.success) {
                     alert("Расписание сохранено!");
                 } else {
-                    alert("Ошибка сохранения расписания.");
+                    alert("Ошибка сохранения расписания: " + (data.error || "Неизвестная ошибка"));
                 }
             })
             .catch(error => console.error("Ошибка сохранения:", error));

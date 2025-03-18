@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1:3307
--- Время создания: Мар 13 2025 г., 18:53
+-- Время создания: Мар 18 2025 г., 03:06
 -- Версия сервера: 8.0.30
 -- Версия PHP: 8.1.9
 
@@ -33,22 +33,17 @@ CREATE TABLE `Appointments` (
   `client_id` int NOT NULL,
   `service_id` int NOT NULL,
   `date_time` datetime NOT NULL,
-  `price` decimal(10,2) NOT NULL
+  `price` decimal(10,2) NOT NULL,
+  `duration` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Дамп данных таблицы `Appointments`
 --
 
-INSERT INTO `Appointments` (`id`, `master_id`, `client_id`, `service_id`, `date_time`, `price`) VALUES
-(16, 1, 5, 1, '2025-03-08 12:30:00', '1000.00'),
-(17, 2, 6, 1, '2025-03-28 11:00:00', '1000.00'),
-(18, 1, 6, 1, '2025-03-13 11:00:00', '1000.00'),
-(19, 3, 6, 2, '2025-03-14 12:30:00', '1000.00'),
-(20, 3, 5, 2, '2025-03-22 14:00:00', '1000.00'),
-(21, 3, 7, 2, '2025-03-21 13:15:00', '1000.00'),
-(22, 1, 8, 1, '2025-03-30 17:00:00', '1000.00'),
-(23, 2, 9, 5, '2025-03-21 12:15:00', '1000.00');
+INSERT INTO `Appointments` (`id`, `master_id`, `client_id`, `service_id`, `date_time`, `price`, `duration`) VALUES
+(24, 2, 10, 3, '2025-03-17 13:45:00', '3000.00', 120),
+(25, 2, 11, 3, '2025-03-17 15:45:00', '3000.00', 120);
 
 -- --------------------------------------------------------
 
@@ -75,7 +70,9 @@ INSERT INTO `Clients` (`id`, `full_name`, `phone`) VALUES
 (6, 'Женина Татьяна Олеговна', '89125965742'),
 (7, 'Женина Татьяна Олеговна', '8956845733'),
 (8, 'Драчёв Андрей Дмитриевич', '89125965745'),
-(9, 'Драчёв Андрей Григорьевич', '89125965767');
+(9, 'Драчёв Андрей Григорьевич', '89125965767'),
+(10, 'Тепляков Игорь Дмитриевич', '89125965749'),
+(11, 'Еремин Лаврентий Павлович', '+7 (957) 385-77-20');
 
 -- --------------------------------------------------------
 
@@ -107,7 +104,7 @@ INSERT INTO `Masters` (`id`, `full_name`, `phone`) VALUES
 CREATE TABLE `MasterSchedule` (
   `id` int NOT NULL,
   `master_id` int NOT NULL,
-  `day_of_week` enum('Пн','Вт','Ср','Чт','Пт','Сб','Вс') NOT NULL,
+  `day_of_week` enum('Вс','Пн','Вт','Ср','Чт','Пт','Сб') NOT NULL,
   `start_time` time NOT NULL,
   `end_time` time NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -131,13 +128,13 @@ INSERT INTO `MasterSchedule` (`id`, `master_id`, `day_of_week`, `start_time`, `e
 (102, 1, 'Пт', '09:15:00', '18:00:00'),
 (103, 1, 'Сб', '09:30:00', '18:00:00'),
 (104, 1, 'Вс', '09:45:00', '18:00:00'),
-(105, 2, 'Пн', '09:00:00', '18:00:00'),
-(106, 2, 'Вт', '11:30:00', '18:00:00'),
-(107, 2, 'Ср', '11:00:00', '18:00:00'),
-(108, 2, 'Чт', '09:00:00', '18:00:00'),
-(109, 2, 'Пт', '13:45:00', '18:00:00'),
-(110, 2, 'Сб', '09:00:00', '18:00:00'),
-(111, 2, 'Вс', '09:00:00', '18:00:00');
+(175, 2, 'Пн', '09:00:00', '18:00:00'),
+(176, 2, 'Вт', '10:00:00', '18:00:00'),
+(177, 2, 'Ср', '11:00:00', '18:00:00'),
+(178, 2, 'Чт', '12:00:00', '18:00:00'),
+(179, 2, 'Пт', '13:00:00', '18:00:00'),
+(180, 2, 'Сб', '14:00:00', '18:00:00'),
+(181, 2, 'Вс', '09:00:00', '11:00:00');
 
 -- --------------------------------------------------------
 
@@ -160,7 +157,7 @@ CREATE TABLE `MasterServices` (
 
 INSERT INTO `MasterServices` (`id`, `master_id`, `service_id`, `price`, `duration`, `is_available`) VALUES
 (1, 1, 1, '1000.00', 40, 1),
-(2, 2, 1, '1200.00', 45, 0),
+(2, 2, 1, '1200.00', 45, 1),
 (3, 3, 2, '1500.00', 60, 1),
 (4, 1, 4, '1200.00', 90, 1),
 (5, 2, 3, '3000.00', 120, 1);
@@ -286,13 +283,13 @@ ALTER TABLE `Users`
 -- AUTO_INCREMENT для таблицы `Appointments`
 --
 ALTER TABLE `Appointments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT для таблицы `Clients`
 --
 ALTER TABLE `Clients`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT для таблицы `Masters`
@@ -304,7 +301,7 @@ ALTER TABLE `Masters`
 -- AUTO_INCREMENT для таблицы `MasterSchedule`
 --
 ALTER TABLE `MasterSchedule`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=182;
 
 --
 -- AUTO_INCREMENT для таблицы `MasterServices`

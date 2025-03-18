@@ -16,7 +16,7 @@ if (!empty($_GET['master_id'])) {
 
         // Если расписание отсутствует, создаем его по умолчанию
         if (empty($schedule)) {
-            $days_of_week = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            $days_of_week = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']; // Новый порядок
             $start_time = '09:00:00';
             $end_time = '18:00:00';
 
@@ -35,7 +35,9 @@ if (!empty($_GET['master_id'])) {
                 ]);
             }
 
-            // После добавления выводим расписание для мастера
+            // Повторно загружаем расписание после вставки
+            $stmt = $pdo->prepare("SELECT day_of_week, start_time, end_time FROM MasterSchedule WHERE master_id = :master_id");
+            $stmt->execute(['master_id' => $master_id]);
             $schedule = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 

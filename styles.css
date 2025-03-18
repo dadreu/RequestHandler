@@ -180,8 +180,8 @@ body {
 }
 
 .calendar-body {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    display: flex; /* Дни в строке выстраиваются горизонтально */
+    justify-content: space-between; /* Равномерное распределение дней */
     gap: 3px;
 }
 
@@ -665,6 +665,13 @@ body {
     display: inline-block;
     width: 60px;
     height: 34px;
+}
+
+.unavailable {
+    background-color: #ccc;
+    color: #666;
+    pointer-events: none;
+    text-decoration: line-through;
 }
 
 .switch input {
