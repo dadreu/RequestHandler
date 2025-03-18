@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Выбор времени</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .calendar .calendar-body {
+            display: grid !important;
+            grid-template-columns: repeat(7, 1fr) !important;
+            gap: 3px !important;
+            height: auto !important;
+        }
+    </style>
 </head>
 <body>
     <div class="top-bar">
@@ -93,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }).format(currentDate);
 
         const firstDay = new Date(year, month, 1);
-        const startDay = (firstDay.getDay() + 5) % 7; // Сдвиг: ВТ=0, ПН=6
+        const startDay = (firstDay.getDay() + 6) % 7; // Сдвиг: ПН=0, ВС=6
         const totalDays = new Date(year, month + 1, 0).getDate();
 
         // 1. Добавляем пустые ячейки в начале месяца
@@ -115,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 day.classList.add('selected');
 
                 const selectedDate = new Date(year, month, date);
-                const dayIndex = (selectedDate.getDay() + 5) % 7; // Сдвиг для ВТ=0
+                const dayIndex = (selectedDate.getDay() + 6) % 7; // Сдвиг для ПН=0
                 console.log('Выбранная дата:', selectedDate.toISOString().split('T')[0]);
                 console.log('getDay:', selectedDate.getDay());
                 console.log('День недели:', daysOfWeek[dayIndex]);
@@ -137,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function fetchAvailableSlots(date) {
-        const formattedDate = date.toISOString().split('T')[0];
+        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
         fetch(`get_available_slots.php?master_id=${selectedMasterId}&service_id=${serviceId}&date=${formattedDate}`)
             .then(response => response.json())
             .then(data => {
@@ -183,6 +191,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function confirmAppointment(date, time) {
+        const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const year = localDate.getFullYear();
+        const month = String(localDate.getMonth() + 1).padStart(2, '0');
+        const day = String(localDate.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+        const formattedTime = time;
+
+        console.log('Отправляемая дата:', formattedDate);
+
         fetch('create_appointment.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -191,8 +208,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 service_id: serviceId,
                 fio: decodeURIComponent(fio),
                 phone: phone,
-                date: date,
-                time: time
+                date: formattedDate,
+                time: formattedTime
             })
         })
         .then(response => response.json())
@@ -214,9 +231,8 @@ document.addEventListener('DOMContentLoaded', function () {
     confirmButton.addEventListener('click', () => {
         if (selectedDay && selectedTime) {
             const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), parseInt(selectedDay.textContent));
-            const formattedDate = selectedDate.toISOString().split('T')[0];
             const formattedTime = selectedTime.textContent;
-            confirmAppointment(formattedDate, formattedTime);
+            confirmAppointment(selectedDate, formattedTime);
         }
     });
 

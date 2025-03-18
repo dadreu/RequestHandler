@@ -137,7 +137,7 @@ body {
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    min-width: 240px; /* Минимальная ширина для всего тела */
+    min-width: 240px;
 }
 
 .month-navigation {
@@ -163,26 +163,18 @@ body {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    min-width: 240px; /* Минимальная ширина для всего тела */
+    min-width: 240px;
 }
 
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
-    color: #333;
-    font-size: 12px;
-}
-
-.calendar-header div {
-    flex: 1;
-    text-align: center;
-}
-
-.calendar-body {
-    display: flex; /* Дни в строке выстраиваются горизонтально */
-    justify-content: space-between; /* Равномерное распределение дней */
+.date-selection .calendar .calendar-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
     gap: 3px;
+    height: auto;
+}
+
+.calendar .calendar-header div {
+    text-align: center;
 }
 
 .calendar-day {
@@ -196,6 +188,8 @@ body {
     font-size: 12px;
     text-align: center;
     border: 1px solid #ddd;
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
 }
 
 .calendar-day.empty {
@@ -804,10 +798,20 @@ input:checked + .slider:before {
 @media (max-width: 399px) {
 
     /* Обеспечиваем, чтобы все дни в календаре заполняли блок */
-    .calendar-body {
-        grid-template-columns: repeat(7, 1fr);
-
+    .calendar .calendar-header {
+        font-size: 10px;
     }
+    .calendar-day {
+        font-size: 10px;
+        padding: 4px;
+    }
+
+    .calendar .calendar-body {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 3px !important;
+    }
+
     .content{
         width: 90%;
     }
