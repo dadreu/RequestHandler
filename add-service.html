@@ -3,23 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавление услуги</title>
+    <title>Добавить услугу</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Верхний белый хедер с кнопкой возврата -->
     <header class="top-bar">
-        <button class="back-button" onclick="window.location.href='services-settings.html'">Назад</button>
-        <h1>Добавление услуги</h1>
-        <div></div> <!-- Пространство для выравнивания -->
+        <button class="back-button" onclick="goBack()">Назад</button>
+        <h1>Добавить услугу</h1>
     </header>
-
-    <!-- Основной контент с серым фоном -->
-    <div class="content" style="background-color: #f1f1f1;">
-        <!-- Подпись над блоком ввода данных -->
+    <div class="content">
         <p class="input-data">Введите данные</p>
-
-        <!-- Поля для ввода названия, длительности и стоимости услуги -->
         <div class="input-group">
             <div class="input-item">
                 <label for="service-name">Название услуги</label>
@@ -28,7 +21,7 @@
             </div>
             <div class="input-item">
                 <label for="service-duration">Длительность (мин.)</label>
-                <input type="number" id="service-duration" placeholder="Введите длительность">
+                <input type="number" id="service-duration" placeholder="Введите длительность" step="15" min="15">
                 <button class="reset-btn" onclick="resetField('service-duration')">Обнулить</button>
             </div>
             <div class="input-item">
@@ -37,13 +30,64 @@
                 <button class="reset-btn" onclick="resetField('service-price')">Обнулить</button>
             </div>
         </div>
-
-        <!-- Кнопка для сохранения данных -->
         <div class="buttons-container">
             <button class="save-button" onclick="saveService()">Сохранить</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const masterId = urlParams.get('master_id');
+
+            if (!masterId) {
+                alert("ID мастера не указан.");
+                window.history.back();
+                return;
+            }
+
+            window.saveService = function() {
+                const serviceName = document.getElementById('service-name').value;
+                const serviceDuration = document.getElementById('service-duration').value;
+                const servicePrice = document.getElementById('service-price').value;
+
+                if (!serviceName || !serviceDuration || !servicePrice) {
+                    alert("Пожалуйста, заполните все поля.");
+                    return;
+                }
+
+                fetch('add_service.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        master_id: masterId,
+                        service_name: serviceName,
+                        duration: serviceDuration,
+                        price: servicePrice
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Услуга успешно добавлена!');
+                        window.location.href = `service-settings.html?master_id=${masterId}`;
+                    } else {
+                        alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                    }
+                })
+                .catch(error => {
+                    alert('Ошибка при отправке данных: ' + error);
+                });
+            };
+
+            window.goBack = function() {
+                window.location.href = `services-settings.html?master_id=${masterId}`;
+            };
+
+            window.resetField = function(fieldId) {
+                document.getElementById(fieldId).value = '';
+            };
+        });
+    </script>
 </body>
 </html>

@@ -26,10 +26,8 @@
 
         <!-- Кнопки для сохранения и добавления услуги -->
         <div class="buttons-container">
-            <!-- Кнопка сохранения, которая вызывает функцию для отправки изменений на сервер -->
             <button class="save-button" onclick="saveChanges()">Сохранить</button>
-            <!-- Ссылка на страницу добавления услуги -->
-            <a href="add-service.html"><button class="add-service-button">Добавить услугу</button></a>
+            <button class="add-service-button" onclick="goToAddService()">Добавить услугу</button>
         </div>
     </div>
 
@@ -58,7 +56,6 @@
                             const serviceItemDiv = document.createElement('div');
                             serviceItemDiv.classList.add('service-item');
 
-                            // Сохраняем начальное состояние доступности услуги
                             servicesAvailability[service.id] = service.is_available;
 
                             serviceItemDiv.innerHTML = `
@@ -82,7 +79,6 @@
 
         // Функция для изменения состояния доступности услуги
         function toggleServiceAvailability(serviceId, checkbox) {
-            // Обновляем состояние доступности в объекте
             servicesAvailability[serviceId] = checkbox.checked;
         }
 
@@ -91,22 +87,18 @@
             const updatedServices = Object.keys(servicesAvailability).map(serviceId => ({
                 master_id: masterId,
                 service_id: serviceId,
-                available: servicesAvailability[serviceId] ? 1 : 0 // Преобразуем в 1 или 0 для базы данных
+                available: servicesAvailability[serviceId] ? 1 : 0
             }));
 
-            // Отправляем данные на сервер
             fetch('http://localhost/toggle_service_availability.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedServices)
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     alert("Настройки успешно сохранены.");
-                    // После успешного сохранения переходим на страницу masterReq с параметром master_id
                     window.location.href = `masterReq.html?master_id=${masterId}`;
                 } else {
                     alert("Ошибка при сохранении настроек.");
@@ -116,6 +108,15 @@
                 console.error('Ошибка при сохранении изменений:', error);
                 alert('Ошибка при сохранении изменений. Попробуйте снова.');
             });
+        }
+
+        // Функция для перехода на страницу добавления услуги
+        function goToAddService() {
+            if (masterId) {
+                window.location.href = `add-service.html?master_id=${masterId}`;
+            } else {
+                alert("ID мастера не указан.");
+            }
         }
     </script>
 </body>
