@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="top-bar">
+        <h1>Регистрация</h1>
+    </header>
+    <div class="content">
+        <form id="registerForm">
+            <div class="form-input-group">
+                <label for="phone">Номер телефона</label>
+                <input type="text" id="phone" name="phone" placeholder="+7 (XXX) XXX-XX-XX" required>
+            </div>
+            <div id="code-group" class="form-input-group" style="display: none;">
+                <label for="code">Код подтверждения</label>
+                <input type="text" id="code" name="code">
+            </div>
+            <div id="password-group" class="form-input-group" style="display: none;">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password">
+            </div>
+            <div class="form-input-group">
+                <button type="submit">Далее</button>
+            </div>
+            <div id="notification" class="error-message" style="display: none;"></div>
+        </form>
+    </div>
+    <script>
+        let isMaster = false;
+        let isClient = false;
+        let phoneChecked = false;
+
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const phone = document.getElementById('phone').value;
+            const code = document.getElementById('code').value;
+            const password = document.getElementById('password').value;
+            const notification = document.getElementById('notification');
+
+            if (!phoneChecked) {
+                // Проверка номера телефона
+                fetch('http://localhost/check_phone.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `phone=${encodeURIComponent(phone)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    phoneChecked = true;
+                    if (data.role === 'master') {
+                        isMaster = true;
+                        notification.style.display = 'block';
+                        notification.textContent = 'Регистрация для мастеров не предусмотрена.';
+                    } else if (data.role === 'client') {
+                        isClient = true;
+                        document.getElementById('code-group').style.display = 'block';
+                        sendCode(phone);
+                    } else {
+                        document.getElementById('code-group').style.display = 'block';
+                        sendCode(phone);
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    notification.style.display = 'block';
+                    notification.textContent = 'Ошибка сервера. Попробуйте снова.';
+                });
+            } else if (isMaster) {
+                // Ничего не делать, уведомление уже отображено
+            } else if (isClient && code) {
+                verifyCode(phone, code, true);
+            } else if (!isClient && code) {
+                verifyCode(phone, code, false);
+            } else if (!isClient && password) {
+                registerNewClient(phone, password);
+            }
+        });
+
+        function sendCode(phone) {
+            fetch('http://localhost/send_code.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `phone=${encodeURIComponent(phone)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    alert('Ошибка отправки кода.');
+                }
+            });
+        }
+
+        function verifyCode(phone, code, isExistingClient) {
+            fetch('http://localhost/verify_code.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `phone=${encodeURIComponent(phone)}&code=${encodeURIComponent(code)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (isExistingClient) {
+                        alert('Код подтверждён. Вы можете войти.');
+                        window.location.href = 'index.html';
+                    } else {
+                        document.getElementById('code-group').style.display = 'none';
+                        document.getElementById('password-group').style.display = 'block';
+                    }
+                } else {
+                    alert('Неверный код.');
+                }
+            });
+        }
+
+        function registerNewClient(phone, password) {
+            fetch('http://localhost/register_client.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Регистрация завершена!');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Ошибка регистрации.');
+                }
+            });
+        }
+
+
+    </script>
+</body>
+</html>
