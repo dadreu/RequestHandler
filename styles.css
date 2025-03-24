@@ -166,6 +166,7 @@ body {
     min-width: 240px;
 }
 
+
 .date-selection .calendar .calendar-body {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -173,8 +174,19 @@ body {
     height: auto;
 }
 
-.calendar .calendar-header div {
+.calendar-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 3px;
     text-align: center;
+}
+
+.calendar-header div {
+    flex: 1;
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
 }
 
 .calendar-day {

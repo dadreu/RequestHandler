@@ -70,7 +70,7 @@
                 .then(data => {
                     if (data.success) {
                         alert('Услуга успешно добавлена!');
-                        window.location.href = `service-settings.html?master_id=${masterId}`;
+                        window.location.href = `services-settings.html?master_id=${masterId}`;
                     } else {
                         alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
                     }
