@@ -9,40 +9,52 @@
 </head>
 <body>
     <div class="content">
-        <p>Проверка авторизации...</p>
+        <h2>Вход</h2>
+        <form id="loginForm">
+            <div class="form-input-group">
+                <label for="username">Логин</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-input-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-input-group">
+                <button type="submit">Войти</button>
+            </div>
+            <div class="error-message" id="error-message" style="display: none;"></div>
+        </form>
+        <button class="register-button" onclick="window.location.href='registration.html'">Регистрация</button>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const user = window.Telegram.WebApp.initDataUnsafe.user;
-            if (!user) {
-                alert("Ошибка: данные пользователя не получены.");
-                window.history.back();
-                return;
-            }
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
 
-            fetch('check_telegram_user.php', {
+            fetch('login.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({
-                    telegram_id: user.id,
-                    initData: window.Telegram.WebApp.initData
-                })
+                body: new URLSearchParams({ username, password })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     if (data.role === 'master') {
-                        window.location.href = `masterReq.html?master_id=${data.master_id}`;
+                        window.location.href = `masterReq.html?master_id=${data.id}`;
                     } else if (data.role === 'client') {
-                        window.location.href = `clientReq.html?client_id=${data.client_id}`;
+                        window.location.href = `clientReq.html?client_id=${data.id}`;
                     }
                 } else {
-                    window.location.href = `register.html?telegram_id=${user.id}`;
+                    errorMessage.style.display = 'block';
+                    errorMessage.textContent = data.message || 'Неверный логин или пароль.';
                 }
             })
             .catch(error => {
                 console.error('Ошибка:', error);
-                alert('Ошибка сервера. Попробуйте снова.');
+                errorMessage.style.display = 'block';
+                errorMessage.textContent = 'Ошибка сервера. Попробуйте снова.';
             });
         });
     </script>

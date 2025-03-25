@@ -8,64 +8,119 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <header class="top-bar">
-        <h1>Регистрация</h1>
-    </header>
     <div class="content">
-        <form id="registerForm">
+        <h2>Регистрация</h2>
+        <form id="registrationForm">
             <div class="form-input-group">
-                <label for="full_name">ФИО</label>
-                <input type="text" id="full_name" name="full_name" placeholder="Введите ваше ФИО" required>
+                <label for="phone">Номер телефона</label>
+                <input type="tel" id="phone" name="phone" placeholder="Введите номер телефона" required>
+            </div>
+            <div class="form-input-group" id="code-group" style="display: none;">
+                <label for="code">Код подтверждения</label>
+                <input type="text" id="code" name="code" placeholder="Введите код">
+            </div>
+            <div class="form-input-group" id="password-group" style="display: none;">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" placeholder="Введите пароль">
+                <button type="button" id="save-password">Сохранить</button>
             </div>
             <div class="form-input-group">
-                <button type="submit">Зарегистрироваться</button>
+                <button type="submit" id="submit-button">Зарегистрироваться</button>
             </div>
-            <div id="notification" class="error-message" style="display: none;"></div>
+            <div class="error-message" id="notification" style="display: none;"></div>
         </form>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const user = window.Telegram.WebApp.initDataUnsafe.user;
-            if (!user) {
-                alert("Ошибка: данные пользователя не получены.");
-                window.history.back();
-                return;
+            const form = document.getElementById('registrationForm');
+            const phoneInput = document.getElementById('phone');
+            const codeGroup = document.getElementById('code-group');
+            const passwordGroup = document.getElementById('password-group');
+            const submitButton = document.getElementById('submit-button');
+            const savePasswordButton = document.getElementById('save-password');
+            const notification = document.getElementById('notification');
+
+            let clientId = null;
+            let verificationCode = null;
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const phone = phoneInput.value;
+
+                fetch('check_phone.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ phone })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.role === 'master') {
+                        notification.style.display = 'block';
+                        notification.textContent = 'Мастера не могут регистрироваться.';
+                    } else if (data.role === 'client') {
+                        clientId = data.client_id;
+                        fetch('send_verification_code.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: new URLSearchParams({ client_id: clientId })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                verificationCode = data.code;
+                                codeGroup.style.display = 'block';
+                                submitButton.textContent = 'Подтвердить код';
+                                form.removeEventListener('submit', arguments.callee);
+                                form.addEventListener('submit', confirmCode);
+                            } else {
+                                notification.style.display = 'block';
+                                notification.textContent = 'Ошибка отправки кода.';
+                            }
+                        });
+                    } else {
+                        notification.style.display = 'block';
+                        notification.textContent = 'Номер телефона не найден.';
+                    }
+                });
+            });
+
+            function confirmCode(event) {
+                event.preventDefault();
+                const code = document.getElementById('code').value;
+                if (code === verificationCode) {
+                    passwordGroup.style.display = 'block';
+                    codeGroup.style.display = 'none';
+                    submitButton.style.display = 'none';
+                    notification.style.display = 'block';
+                    notification.textContent = 'Код подтверждён. Введите пароль.';
+                } else {
+                    notification.style.display = 'block';
+                    notification.textContent = 'Неверный код подтверждения.';
+                }
             }
 
-            document.getElementById('registerForm').addEventListener('submit', function(event) {
-                event.preventDefault();
-                const fullName = document.getElementById('full_name').value;
-                const notification = document.getElementById('notification');
-
-                if (!fullName) {
+            savePasswordButton.addEventListener('click', function() {
+                const password = document.getElementById('password').value;
+                if (!password) {
                     notification.style.display = 'block';
-                    notification.textContent = 'Пожалуйста, введите ФИО.';
+                    notification.textContent = 'Введите пароль.';
                     return;
                 }
 
-                fetch('register_client.php', {
+                fetch('set_password.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        telegram_id: user.id,
-                        full_name: fullName,
-                        initData: window.Telegram.WebApp.initData
-                    })
+                    body: new URLSearchParams({ client_id: clientId, password })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('Регистрация завершена!');
-                        window.location.href = `clientReq.html?client_id=${data.client_id}`;
+                        alert('Пароль успешно сохранён!');
+                        window.location.href = 'index.html';
                     } else {
                         notification.style.display = 'block';
-                        notification.textContent = data.message || 'Ошибка регистрации.';
+                        notification.textContent = data.message || 'Ошибка сохранения пароля.';
                     }
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    notification.style.display = 'block';
-                    notification.textContent = 'Ошибка сервера. Попробуйте снова.';
                 });
             });
         });
