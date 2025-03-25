@@ -1,9 +1,9 @@
 <?php
-$host = getenv('DB_HOST');
-$port = '3307';
-$dbname = getenv('DB_NAME');
-$username = getenv('DB_USER');
-$password = getenv('DB_PASS');
+$host = 'amvera-dadreu-run-salondb';  // Внутреннее доменное имя базы данных
+$port = '3306';  // Стандартный порт MySQL
+$dbname = getenv('MYSQL_DATABASE');  // Имя базы данных из переменной окружения
+$username = getenv('MYSQL_USER');  // Имя пользователя из переменной окружения
+$password = getenv('MYSQL_PASSWORD');  // Пароль из переменной окружения
 
 try {
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8", $username, $password);
