@@ -1,14 +1,22 @@
 <?php
-$host = 'amvera-dadreu-run-salondb';  // Внутреннее доменное имя базы данных
-$port = '3306';  // Стандартный порт MySQL
-$dbname = getenv('MYSQL_DATABASE');  // Имя базы данных из переменной окружения
-$username = getenv('MYSQL_USER');  // Имя пользователя из переменной окружения
-$password = getenv('MYSQL_PASSWORD');  // Пароль из переменной окружения
+// Подключение библиотеки phpdotenv (если используется файл .env)
+require_once 'vendor/autoload.php';
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
+// Получение значений переменных окружения
+$host = 'localhost';
+$port = '3306';
+$dbname = getenv('MYSQL_DATABASE'); // или $_ENV['MYSQL_DATABASE']
+$username = getenv('MYSQL_USER');
+$password = getenv('MYSQL_PASSWORD');
+
+// Подключение к базе данных через PDO
 try {
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    echo "Подключение к базе данных успешно!";
 } catch (PDOException $e) {
-    die(json_encode(["error" => "Ошибка подключения к БД: " . $e->getMessage()]));
+    die("Ошибка подключения: " . $e->getMessage());
 }
 ?>
