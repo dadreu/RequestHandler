@@ -25,7 +25,7 @@ if (!$telegram_id) {
     exit;
 }
 
-$bot_token = 'YOUR_BOT_TOKEN'; // Замените на токен вашего Telegram-бота
+$bot_token = '8168606272:AAFuikWYy8UKjzK3iuyMjRtWHCdS1KKECbE'; // Замените на токен вашего Telegram-бота
 $message = "Ваш код подтверждения: $code";
 $url = "https://api.telegram.org/bot$bot_token/sendMessage?chat_id=$telegram_id&text=" . urlencode($message);
 
