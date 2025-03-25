@@ -15,6 +15,10 @@
                 <label for="phone">Номер телефона</label>
                 <input type="tel" id="phone" name="phone" placeholder="Введите номер телефона" required>
             </div>
+            <div class="form-input-group" id="full-name-group" style="display: none;">
+                <label for="full_name">ФИО</label>
+                <input type="text" id="full_name" name="full_name" placeholder="Введите ФИО" required>
+            </div>
             <div class="form-input-group" id="code-group" style="display: none;">
                 <label for="code">Код подтверждения</label>
                 <input type="text" id="code" name="code" placeholder="Введите код">
@@ -34,10 +38,10 @@
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('registrationForm');
             const phoneInput = document.getElementById('phone');
+            const fullNameGroup = document.getElementById('full-name-group');
             const codeGroup = document.getElementById('code-group');
             const passwordGroup = document.getElementById('password-group');
             const submitButton = document.getElementById('submit-button');
-            const savePasswordButton = document.getElementById('save-password');
             const notification = document.getElementById('notification');
 
             let clientId = null;
@@ -77,12 +81,52 @@
                                 notification.textContent = 'Ошибка отправки кода.';
                             }
                         });
+                    } else if (data.role === 'new_client') {
+                        notification.style.display = 'block';
+                        notification.textContent = 'Номер не найден. Зарегистрируйтесь как новый клиент.';
+                        fullNameGroup.style.display = 'block';
+                        submitButton.textContent = 'Отправить код';
+                        form.removeEventListener('submit', arguments.callee);
+                        form.addEventListener('submit', registerNewClient);
                     } else {
                         notification.style.display = 'block';
-                        notification.textContent = 'Номер телефона не найден.';
+                        notification.textContent = 'Ошибка проверки номера.';
                     }
                 });
             });
+
+            function registerNewClient(event) {
+                event.preventDefault();
+                const phone = phoneInput.value;
+                const fullName = document.getElementById('full_name').value;
+
+                if (!fullName) {
+                    notification.style.display = 'block';
+                    notification.textContent = 'Введите ФИО.';
+                    return;
+                }
+
+                fetch('register_new_client.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ phone, full_name: fullName })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        clientId = data.client_id;
+                        verificationCode = data.code;
+                        codeGroup.style.display = 'block';
+                        fullNameGroup.style.display = 'none';
+                        submitButton.textContent = 'Подтвердить код';
+                        form.removeEventListener('submit', arguments.callee);
+                        form.addEventListener('submit', confirmCode);
+                    } else {
+                        notification.style.display = 'block';
+                        notification.textContent = 'Ошибка регистрации.';
+                    }
+                });
+            }
 
             function confirmCode(event) {
                 event.preventDefault();
@@ -99,7 +143,7 @@
                 }
             }
 
-            savePasswordButton.addEventListener('click', function() {
+            document.getElementById('save-password').addEventListener('click', function() {
                 const password = document.getElementById('password').value;
                 if (!password) {
                     notification.style.display = 'block';

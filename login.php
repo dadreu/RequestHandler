@@ -16,16 +16,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute([$username]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // Для примера из дампа пароли не хешированы, используем прямое сравнение
-    // В реальном проекте замените на password_verify($password, $user['password'])
-    if ($user && $password === $user['password']) {
-        echo json_encode([
-            'success' => true,
-            'role' => $user['role'],
-            'id' => $user['role'] === 'master' ? $user['master_id'] : $user['client_id']
-        ]);
+    if ($user) {
+        if ($password === $user['password']) {
+            echo json_encode([
+                'success' => true,
+                'role' => $user['role'],
+                'id' => $user['role'] === 'master' ? $user['master_id'] : $user['client_id']
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Неверный пароль.']);
+        }
     } else {
-        echo json_encode(['success' => false, 'message' => 'Неверный логин или пароль.']);
+        echo json_encode(['success' => false, 'message' => 'Пользователь не найден.']);
     }
 } else {
     echo json_encode(['success' => false, 'message' => 'Неверный метод запроса.']);
