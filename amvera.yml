@@ -1,0 +1,7 @@
+meta:
+  environment: php
+build:
+  additionalCommands: composer install
+run:
+  command: php -S 0.0.0.0:8080 -t /app
+  containerPort: 8080
