@@ -3,33 +3,30 @@ include 'config.php';
 
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
+$response = ['success' => false];
 
-    if (empty($username) || empty($password)) {
-        echo json_encode(['success' => false, 'message' => 'Логин и пароль обязательны.']);
-        exit;
-    }
+if (isset($_POST['username']) && isset($_POST['password'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
 
-    $stmt = $pdo->prepare("SELECT * FROM Users WHERE username = ?");
-    $stmt->execute([$username]);
+    // Поиск пользователя
+    $stmt = $pdo->prepare("SELECT * FROM Users WHERE username = :username");
+    $stmt->execute(['username' => $username]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user) {
-        if ($password === $user['password']) {
-            echo json_encode([
-                'success' => true,
-                'role' => $user['role'],
-                'id' => $user['role'] === 'master' ? $user['master_id'] : $user['client_id']
-            ]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Неверный пароль.']);
+    // Проверка пароля
+    if ($user && $user['password'] === $password) {
+        $response['success'] = true;
+        $response['role'] = $user['role']; // Передаем роль
+
+        if ($user['role'] === 'master') {
+            $response['master_id'] = $user['master_id']; // Передаем master_id
+        } elseif ($user['role'] === 'client') {
+            $response['client_id'] = $user['client_id']; // Передаем client_id
         }
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Пользователь не найден.']);
     }
-} else {
-    echo json_encode(['success' => false, 'message' => 'Неверный метод запроса.']);
 }
+
+// Отправка ответа
+echo json_encode($response);
 ?>
