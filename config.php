@@ -1,7 +1,7 @@
 <?php
 $host = 'amvera-dadreu-run-salondb';  // Внутреннее доменное имя базы данных
 $port = '3306';  // Стандартный порт MySQL
-$dbname = getenv('MYSQL_DATABASE');  // Имя базы данных из переменной окружения
+$dbname = 'SalonDB';  // Имя базы данных из переменной окружения
 $username = getenv('MYSQL_USER');  // Имя пользователя из переменной окружения
 $password = getenv('MYSQL_PASSWORD');  // Пароль из переменной окружения
 
