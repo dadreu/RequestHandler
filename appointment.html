@@ -179,7 +179,6 @@
                     alert("Выберите мастера и услугу.");
                     return;
                 }
-
                 // Перенаправление на date-selection.html
                 const redirectUrl = `date-selection.html?selected_master_id=${selectedMasterId}&service_id=${serviceId}&fio=${encodeURIComponent(fio)}&phone=${encodeURIComponent(phone)}&original_master_id=${originalMasterId}`;
                 window.location.href = redirectUrl;
