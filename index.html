@@ -1,77 +1,50 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Вход</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <header class="top-bar">
-    <h1>Вход</h1>
-  </header>
-
-  <div class="content">
-    <div class="login-form">
-      <h2>Авторизация</h2>
-      <form id="loginForm">
-        <div class="form-input-group">
-          <label for="username">Логин</label>
-          <input type="text" id="username" name="username" required>
-        </div>
-        <div class="form-input-group">
-          <label for="password">Пароль</label>
-          <input type="password" id="password" name="password" required>
-        </div>
-        <div class="form-input-group">
-          <button type="submit">Войти</button>
-        </div>
-        <div id="error-message" class="error-message" style="display: none;"></div>
-      </form>
-      <button id="registerButton" class="register-button">Регистрация</button>
+    <div class="content">
+        <p>Проверка авторизации...</p>
     </div>
-  </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const user = window.Telegram.WebApp.initDataUnsafe.user;
+            if (!user) {
+                alert("Ошибка: данные пользователя не получены.");
+                window.history.back();
+                return;
+            }
 
-  <script>
-
-    document.getElementById('loginForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      const errorMessage = document.getElementById('error-message');
-      
-      fetch('http://localhost/login.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Ответ от сервера:', data);
-        if (data.success) {
-          if (data.role === 'master') {
-            window.location.href = `masterReq.html?master_id=${data.master_id}`;
-          } else if (data.role === 'client') {
-            window.location.href = `clientReq.html?client_id=${data.client_id}`;
-          }
-        } else {
-          errorMessage.style.display = 'block';
-          errorMessage.textContent = 'Неверный логин или пароль';
-        }
-      })
-      .catch(error => {
-        console.error('Ошибка:', error);
-        errorMessage.style.display = 'block';
-        errorMessage.textContent = 'Ошибка подключения. Попробуйте снова.';
-      });
-    });
-
-    document.getElementById('registerButton').addEventListener('click', function() {
-      window.location.href = 'register.html';
-    });
-  </script>
+            fetch('check_telegram_user.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    telegram_id: user.id,
+                    initData: window.Telegram.WebApp.initData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.role === 'master') {
+                        window.location.href = `masterReq.html?master_id=${data.master_id}`;
+                    } else if (data.role === 'client') {
+                        window.location.href = `clientReq.html?client_id=${data.client_id}`;
+                    }
+                } else {
+                    window.location.href = `register.html?telegram_id=${user.id}`;
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Ошибка сервера. Попробуйте снова.');
+            });
+        });
+    </script>
 </body>
 </html>
