@@ -1,12 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-// Настройки подключения к базе данных
-$servername = "requesthandler-dadreu.amvera.io";
-$username = "root";
-$password = "";
-$dbname = "SalonDB";
-$port = 3307;
+include 'config.php';
 
 $conn = new mysqli($servername, $username, $password, $dbname, $port);
 if ($conn->connect_error) {
