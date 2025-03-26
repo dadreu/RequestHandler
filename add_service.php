@@ -5,14 +5,21 @@ include 'config.php';
 
 $conn = new mysqli($servername, $username, $password, $dbname, $port);
 if ($conn->connect_error) {
-    die(json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]));
+    echo json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]);
+    exit;
 }
 
 // Получаем данные из запроса
-$master_id = $_POST['master_id'];
-$service_name = $_POST['service_name'];
-$duration = $_POST['duration'];
-$price = $_POST['price'];
+$master_id = $_POST['master_id'] ?? null;
+$service_name = $_POST['service_name'] ?? null;
+$duration = $_POST['duration'] ?? null;
+$price = $_POST['price'] ?? null;
+
+// Проверяем, что все поля заполнены
+if (!$master_id || !$service_name || !$duration || !$price) {
+    echo json_encode(["success" => false, "message" => "Все поля обязательны для заполнения."]);
+    exit;
+}
 
 // Проверяем, существует ли услуга в таблице Services
 $sql = "SELECT id FROM Services WHERE name = ?";
@@ -42,8 +49,10 @@ $stmt = $conn->prepare($sql);
 $stmt->bind_param("iidi", $master_id, $service_id, $price, $duration);
 if ($stmt->execute()) {
     echo json_encode(["success" => true]);
+    exit;
 } else {
     echo json_encode(["success" => false, "message" => "Ошибка при привязке услуги к мастеру: " . $stmt->error]);
+    exit;
 }
 
 $conn->close();
