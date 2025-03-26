@@ -38,7 +38,7 @@
                 return;
             }
 
-            fetch(`http://localhost/get_client_appointments.php?client_id=${clientId}`)
+            fetch(`https://requesthandler-dadreu.amvera.io/get_client_appointments.php?client_id=${clientId}`)
                 .then(response => response.json())
                 .then(data => {
                     const recordsContainer = document.getElementById('my-records');

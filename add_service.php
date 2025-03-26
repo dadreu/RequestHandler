@@ -2,7 +2,7 @@
 header('Content-Type: application/json');
 
 // Настройки подключения к базе данных
-$servername = "localhost";
+$servername = "requesthandler-dadreu.amvera.io";
 $username = "root";
 $password = "";
 $dbname = "SalonDB";
