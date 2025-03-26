@@ -31,7 +31,7 @@
         const masterId = urlParams.get('master_id');
 
         function loadAppointments() {
-            fetch(`http://localhost/get_master_appointments.php?master_id=${masterId}`)
+            fetch(`https://requesthandler-dadreu.amvera.io/get_master_appointments.php?master_id=${masterId}`)
                 .then(response => response.json())
                 .then(data => {
                     const container = document.getElementById('appointments-container');

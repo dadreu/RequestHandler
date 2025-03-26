@@ -8,7 +8,7 @@ try {
 
     // Получаем список услуг с доступностью для мастера
     $query = "SELECT s.id, s.name, ms.is_available 
-              FROM services s
+              FROM Services s
               JOIN MasterServices ms ON s.id = ms.service_id
               WHERE ms.master_id = ?";
     $stmt = $pdo->prepare($query);
