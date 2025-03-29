@@ -465,71 +465,46 @@
         margin: 0 0 10px;
         font-size: 18px;
     }
-
-    /* Контейнер для записи */
+    
+    /* Контейнер записи */
     .record {
         display: flex;
-        justify-content: space-between; /* Распределяем столбцы равномерно */
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 7px;
+        border-radius: 10px;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 10px;
         width: 100%;
-        padding: 10px;
         box-sizing: border-box;
+        overflow: hidden;
     }
 
-    /* Столбцы внутри записи */
-    .record-time,
-    .record-client,
-    .record-service,
-    .record-price {
-        flex: 1; /* Каждый столбец занимает равное пространство */
-        white-space: normal; /* Разрешаем перенос текста */
-        word-wrap: break-word; /* Переносим длинные слова */
-        padding: 0 5px; /* Небольшие отступы внутри столбцов */
-        overflow-wrap: break-word;
-    }
     .record:hover {
         background-color: #f9f9f9;
     }
 
+    /* Элементы записи */
+    .record-time,
+    .record-client,
+    .record-service,
     .record-price {
-        color: #007bff; /* Синий цвет */
-    }
-
-    /* Стили для группы записей по дням */
-    .record-day {
-        margin-bottom: 20px;
-    }
-
-    .record-day h3 {
-        font-size: 18px;
-        margin-bottom: 10px;
+        font-size: 14px;
         color: #333;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
-    /* Заголовок записи на приём */
-    .record-group h2 {
-        font-size: 20px;
-        margin-bottom: 15px;
-        color: #333;
+    .record-price {
+        color: #007bff;
     }
 
-    .record-button {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        padding: 18px 25px;
-        border-radius: 12px;
-        cursor: pointer;
-        font-size: 18px;
-        width: 100%;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1), 0 4px 15px rgba(0, 0, 0, 0.05);
-        transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-    }
-
-    .record-button:hover {
-        background-color: #0056b3;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
-    }
 
     /* Кнопки снизу страницы */
 
@@ -874,7 +849,7 @@
 
         .time-column {
             align-items: flex-start;
-        }
+        }ф
 
         .save-btn {
             width: 100%;
