@@ -866,7 +866,7 @@
         }
 
     }
-    @media (max-width: 500px) {
+    @media (max-width: 599px) {
 
         .day label {
             margin-bottom: 5px; /* Отступ для label */
