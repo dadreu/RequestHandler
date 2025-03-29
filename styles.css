@@ -466,38 +466,30 @@
         font-size: 18px;
     }
 
-    /* Общие стили для записей */
+    /* Контейнер для записи */
     .record {
         display: flex;
-        justify-content: space-between; /* Выравнивание по краям */
-        align-items: center;
-        padding: 12px 7px; /* Отступы */
-        border-radius: 10px;
-        background-color: #fff;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        margin-bottom: 10px;
+        justify-content: space-between; /* Распределяем столбцы равномерно */
         width: 100%;
-        box-sizing: border-box; /* Учитывать padding в ширине */
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    /* Столбцы внутри записи */
+    .record-time,
+    .record-client,
+    .record-service,
+    .record-price {
+        flex: 1; /* Каждый столбец занимает равное пространство */
+        white-space: normal; /* Разрешаем перенос текста */
+        word-wrap: break-word; /* Переносим длинные слова */
+        padding: 0 5px; /* Небольшие отступы внутри столбцов */
     }
     .record:hover {
         background-color: #f9f9f9;
     }
 
-    /* Стили для времени записи, клиента, услуги и цены */
-    .record-time,
-    .record-client,
-    .record-service {
-        font-size: 14px;
-        color: #333;
-        margin-right: 10px; /* Отступ между элементами */
-    }
 
-    .record-price {
-        font-size: 14px;
-        color: #007bff;
-        font-weight: bold;
-        margin-left: 10px; /* Отступ слева для цены */
-    }
 
     /* Стили для группы записей по дням */
     .record-day {
@@ -886,21 +878,17 @@
             font-size: 18px;
         }
         .record {
-            flex-direction: column; /* Переключаем на вертикальное расположение */
-            align-items: flex-start; /* Выравниваем по левому краю */
+            flex-direction: column; /* Столбцы становятся вертикальными */
         }
     
         .record-time,
         .record-client,
         .record-service,
         .record-price {
-            width: 100%; /* Каждый элемент занимает всю ширину */
+            width: 100%; /* Каждый столбец занимает всю ширину */
             margin-bottom: 5px; /* Отступ между элементами */
         }
-    
-        .record-price {
-            margin-left: 0; /* Убираем отступ для цены */
-        }
+
     }
     @media (min-width: 600px) {
         .content{
