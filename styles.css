@@ -484,12 +484,15 @@
         white-space: normal; /* Разрешаем перенос текста */
         word-wrap: break-word; /* Переносим длинные слова */
         padding: 0 5px; /* Небольшие отступы внутри столбцов */
+        overflow-wrap: break-word;
     }
     .record:hover {
         background-color: #f9f9f9;
     }
 
-
+    .record-price {
+        color: #007bff; /* Синий цвет */
+    }
 
     /* Стили для группы записей по дням */
     .record-day {
@@ -877,6 +880,17 @@
             width: 100%;
             font-size: 18px;
         }
+
+
+    }
+    @media (min-width: 600px) {
+        .content{
+            width: 75%;
+        }
+        .time-slots {
+            grid-template-columns: repeat(4, 1fr); /* 4 колонки при ширине от 600px */
+        }
+
         .record {
             flex-direction: column; /* Столбцы становятся вертикальными */
         }
@@ -887,15 +901,6 @@
         .record-price {
             width: 100%; /* Каждый столбец занимает всю ширину */
             margin-bottom: 5px; /* Отступ между элементами */
-        }
-
-    }
-    @media (min-width: 600px) {
-        .content{
-            width: 75%;
-        }
-        .time-slots {
-            grid-template-columns: repeat(4, 1fr); /* 4 колонки при ширине от 600px */
         }
     }
 
