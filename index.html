@@ -16,58 +16,90 @@
   <div class="content">
     <div class="login-form">
       <h2>Авторизация</h2>
-      <form id="loginForm">
-        <div class="form-input-group">
-          <label for="username">Логин</label>
-          <input type="text" id="username" name="username" required>
-        </div>
-        <div class="form-input-group">
-          <label for="password">Пароль</label>
-          <input type="password" id="password" name="password" required>
-        </div>
-        <div class="form-input-group">
-          <button type="submit">Войти</button>
-        </div>
-        <div id="error-message" class="error-message" style="display: none;"></div>
-      </form>
+      <div id="phone-step">
+        <label for="phone">Номер телефона</label>
+        <input type="tel" id="phone" name="phone" required>
+        <button id="request-code">Получить код</button>
+      </div>
+      <div id="code-step" style="display: none;">
+        <label for="code">Код подтверждения</label>
+        <input type="text" id="code" name="code" required>
+        <button id="verify-code">Подтвердить</button>
+      </div>
+      <div id="error-message" class="error-message" style="display: none;"></div>
     </div>
   </div>
 
   <script>
-    document.getElementById('loginForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
+    document.addEventListener('DOMContentLoaded', function() {
+      const telegramId = Telegram.WebApp.initDataUnsafe.user.id;
+      const phoneStep = document.getElementById('phone-step');
+      const codeStep = document.getElementById('code-step');
       const errorMessage = document.getElementById('error-message');
-      
-      fetch('https://requesthandler-dadreu.amvera.io/login.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Ответ от сервера:', data);
-        if (data.success) {
-          if (data.role === 'master') {
-            // Перенаправляем мастера с параметром master_id
-            window.location.href = `masterReq.html?master_id=${data.master_id}`;
-          } else if (data.role === 'client') {
-            // Перенаправляем клиента с параметром client_id
-            window.location.href = `clientReq.html?client_id=${data.client_id}`;
-          }
-        } else {
+      const requestCodeButton = document.getElementById('request-code');
+      const verifyCodeButton = document.getElementById('verify-code');
+      const phoneInput = document.getElementById('phone');
+      const codeInput = document.getElementById('code');
+
+      requestCodeButton.addEventListener('click', function() {
+        const phone = phoneInput.value;
+        if (!phone) {
+          errorMessage.textContent = 'Введите номер телефона';
           errorMessage.style.display = 'block';
-          errorMessage.textContent = 'Неверный логин или пароль';
+          return;
         }
-      })
-      .catch(error => {
-        console.error('Ошибка:', error);
-        errorMessage.style.display = 'block';
-        errorMessage.textContent = 'Ошибка подключения. Попробуйте снова.';
+        fetch('request_code.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `phone=${encodeURIComponent(phone)}&telegram_id=${telegramId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            phoneStep.style.display = 'none';
+            codeStep.style.display = 'block';
+          } else {
+            errorMessage.textContent = data.message || 'Ошибка';
+            errorMessage.style.display = 'block';
+          }
+        })
+        .catch(error => {
+          console.error('Ошибка:', error);
+          errorMessage.textContent = 'Ошибка подключения';
+          errorMessage.style.display = 'block';
+        });
+      });
+
+      verifyCodeButton.addEventListener('click', function() {
+        const code = codeInput.value;
+        if (!code) {
+          errorMessage.textContent = 'Введите код';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        fetch('verify_code.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `phone=${encodeURIComponent(phoneInput.value)}&telegram_id=${telegramId}&code=${code}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            if (data.role === 'master') {
+              window.location.href = `masterReq.html?master_id=${data.master_id}`;
+            } else if (data.role === 'client') {
+              window.location.href = `clientReq.html?client_id=${data.client_id}`;
+            }
+          } else {
+            errorMessage.textContent = data.message || 'Неверный код';
+            errorMessage.style.display = 'block';
+          }
+        })
+        .catch(error => {
+          console.error('Ошибка:', error);
+          errorMessage.textContent = 'Ошибка подключения';
+          errorMessage.style.display = 'block';
+        });
       });
     });
   </script>
