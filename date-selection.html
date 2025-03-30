@@ -58,6 +58,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const phone = urlParams.get('phone');
     const originalMasterId = urlParams.get('original_master_id');
     const daysOfWeek = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС']; // ПН=0, ВС=6
+    const clientId = urlParams.get('client_id');
+
 
     if (!selectedMasterId || !serviceId || !fio || !phone || !originalMasterId) {
         alert("Ошибка: не все данные переданы.");

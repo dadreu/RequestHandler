@@ -56,7 +56,7 @@
             const serviceId = urlParams.get('service_id'); // Восстановление услуги
             const fio = urlParams.get('fio'); // Восстановление ФИО
             const phone = urlParams.get('phone'); // Восстановление телефона
-
+            const clientId = urlParams.get('client_id');
             const fioInput = document.getElementById('fio-input');
             const phoneInput = document.getElementById('phone-input');
             const confirmButton = document.getElementById('confirm-button');
@@ -166,25 +166,23 @@
 
             // Обработчик кнопки "Подтвердить запись"
             confirmButton.addEventListener('click', function () {
-                if (!validateForm()) {
-                    return;
-                }
+            if (!validateForm()) {
+                return;
+            }
+            const selectedMasterId = masterSelect.value;
+            const serviceId = serviceSelect.value;
+            const fio = fioInput.value;
+            const phone = phoneInput.value;
+            const originalMasterId = urlParams.get('master_id');
 
-                const selectedMasterId = masterSelect.value;
-                const serviceId = serviceSelect.value;
-                const fio = fioInput.value;
-                const phone = phoneInput.value;
-                const originalMasterId = urlParams.get('master_id');
+            if (!selectedMasterId || !serviceId) {
+                alert("Выберите мастера и услугу.");
+                return;
+            }
 
-                if (!selectedMasterId || !serviceId) {
-                    alert("Выберите мастера и услугу.");
-                    return;
-                }
-
-                // Перенаправление на date-selection.html
-                const redirectUrl = `date-selection.html?selected_master_id=${selectedMasterId}&service_id=${serviceId}&fio=${encodeURIComponent(fio)}&phone=${encodeURIComponent(phone)}&original_master_id=${originalMasterId}`;
-                window.location.href = redirectUrl;
-            });
+            const redirectUrl = `date-selection.html?selected_master_id=${selectedMasterId}&service_id=${serviceId}&fio=${encodeURIComponent(fio)}&phone=${encodeURIComponent(phone)}&original_master_id=${originalMasterId}&client_id=${clientId}`;
+            window.location.href = redirectUrl;
+        });
         });
     </script>
 </body>

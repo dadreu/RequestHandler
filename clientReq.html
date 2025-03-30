@@ -23,7 +23,7 @@
         </div>
 
         <!-- Кнопка "Записаться" -->
-        <button class="record-button" onclick="goToDateSelection('clientReq.html')">Записаться</button>
+        <button class="record-button" onclick="goToAppointment()">Записаться</button>
     </div>
 
     <script>
@@ -47,9 +47,9 @@
                             const recordDiv = document.createElement('div');
                             recordDiv.classList.add('record');
                             recordDiv.innerHTML = `
-                                <span class="record-name">${appointment.service_name}</span>
-                                <span class="record-date">${appointment.date_time}</span>
-                                <span class="record-amount">${appointment.price} ₽</span>
+                                <span class="record-service">${appointment.service_name}</span>
+                                <span class="record-time">${appointment.date_time}</span>
+                                <span class="record-price">${appointment.price} ₽</span>
                             `;
                             recordsContainer.appendChild(recordDiv);
                         });
@@ -70,6 +70,13 @@
                 return;
             }
             window.location.href = `${url}?client_id=${clientId}`;
+        }
+        function goToAppointment() {
+        if (clientId) {
+            window.location.href = `appointment.html?client_id=${clientId}`;
+        } else {
+            alert("Client ID не найден");
+        }
         }
 
         // Загружаем записи при загрузке страницы
