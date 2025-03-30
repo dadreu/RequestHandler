@@ -52,5 +52,6 @@ if (isset($_POST['phone']) && isset($_POST['telegram_id']) && isset($_POST['code
     }
 }
 
+
 echo json_encode($response);
 ?>
