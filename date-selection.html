@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             day.classList.add('calendar-day');
             day.textContent = date;
 
-            const currentDay = new Date(year, month, date);
+            const currentDay = new Date(Date.UTC(year, month, date)); // Устанавливаем дату в UTC
             const isPast = currentDay < permTime.setHours(0, 0, 0, 0); // Сравнение с началом текущего дня в Пермском времени
 
             if (isPast && year === permTime.getFullYear() && month === permTime.getMonth()) {
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (selectedDay) selectedDay.classList.remove('selected');
                     selectedDay = day;
                     day.classList.add('selected');
-                    const selectedDate = new Date(year, month, date);
+                    const selectedDate = new Date(Date.UTC(year, month, date));
                     fetchAvailableSlots(selectedDate);
                     updateConfirmButtonState();
                 });
@@ -201,7 +201,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Создание записи
     const confirmAppointment = (date, time) => {
-        const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD
+        // Форматируем дату в формате YYYY-MM-DD без смещения часового пояса
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
         const formattedTime = time;
 
         fetch('create_appointment.php', {
@@ -239,11 +243,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmButton = confirmButtonContainer.querySelector('.confirm-button');
     confirmButton.addEventListener('click', () => {
         if (selectedDay && selectedTime) {
-            const selectedDate = new Date(
+            const selectedDate = new Date(Date.UTC(
                 currentDate.getFullYear(),
                 currentDate.getMonth(),
                 parseInt(selectedDay.textContent)
-            );
+            ));
             const formattedTime = selectedTime.textContent;
             confirmAppointment(selectedDate, formattedTime);
         }
