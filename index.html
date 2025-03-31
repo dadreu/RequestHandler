@@ -120,38 +120,57 @@
       }
 
       requestCodeButton.addEventListener('click', function() {
-        const phone = phoneInput.value;
-        if (!phone) {
-          errorMessage.textContent = 'Введите номер телефона';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        if (!validateRussianPhone(phone)) {
-          errorMessage.textContent = 'Некорректный номер телефона (пример: +7 (XXX) XXX-XX-XX)';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        fetch('request_code.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `phone=${encodeURIComponent(phone)}&telegram_id=${telegramId}`
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            phoneStep.style.display = 'none';
-            codeStep.style.display = 'block';
-          } else {
-            errorMessage.textContent = data.message || 'Ошибка при запросе кода';
-            errorMessage.style.display = 'block';
-          }
-        })
-        .catch(error => {
-          errorMessage.textContent = 'Ошибка подключения';
-          errorMessage.style.display = 'block';
-        });
-      });
+    // Получение данных из ввода и Telegram
+    const phone = phoneInput.value;
+    const user = Telegram.WebApp.initDataUnsafe.user;
+    const telegramId = (user && user.id) ? user.id : null;
 
+    // Проверка ввода номера телефона
+    if (!phone) {
+      errorMessage.textContent = 'Пожалуйста, введите номер телефона';
+      errorMessage.style.display = 'block';
+      return;
+    }
+    if (!validateRussianPhone(phone)) {
+      errorMessage.textContent = 'Неверный формат номера (пример: +7 (XXX) XXX-XX-XX)';
+      errorMessage.style.display = 'block';
+      return;
+    }
+
+    // Проверка наличия Telegram ID
+    if (!telegramId) {
+      errorMessage.textContent = 'Ошибка: Не удалось получить Telegram ID';
+      errorMessage.style.display = 'block';
+      return;
+    }
+
+    // Отправка запроса на сервер
+    fetch('https://requesthandler-dadreu.amvera.io/request_code.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `phone=${encodeURIComponent(phone)}&telegram_id=${telegramId}`
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Ошибка сервера: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        phoneStep.style.display = 'none';
+        codeStep.style.display = 'block';
+      } else {
+        errorMessage.textContent = data.message || 'Не удалось запросить код';
+        errorMessage.style.display = 'block';
+      }
+    })
+    .catch(error => {
+      console.error('Ошибка запроса:', error);
+      errorMessage.textContent = `Не удалось подключиться: ${error.message}`;
+      errorMessage.style.display = 'block';
+    });
+  });
       verifyCodeButton.addEventListener('click', function() {
         const code = codeInput.value;
         if (!code) {
