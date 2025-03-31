@@ -60,7 +60,7 @@
 
         function goToAppointment() {
             if (masterId) {
-                window.location.href = `appointment.html?master_id=${masterId}`;
+                window.location.href = `appointment.html?master_id=${masterId}&role=master`;
             } else {
                 console.error("ID мастера не найден.");
                 alert("Ошибка: ID мастера не указан.");

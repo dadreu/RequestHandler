@@ -49,141 +49,144 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const masterId = urlParams.get('master_id'); // Первоначальный masterID
-            const selectedMasterId = urlParams.get('selected_master_id') || masterId; // Восстановление выбранного мастера
-            const serviceId = urlParams.get('service_id'); // Восстановление услуги
-            const fio = urlParams.get('fio'); // Восстановление ФИО
-            const phone = urlParams.get('phone'); // Восстановление телефона
-            const clientId = urlParams.get('client_id');
-            const fioInput = document.getElementById('fio-input');
-            const phoneInput = document.getElementById('phone-input');
-            const confirmButton = document.getElementById('confirm-button');
-            const masterSelect = document.getElementById('master-select');
-            const serviceSelect = document.getElementById('service-select');
-            const backButton = document.querySelector('.back-button');
+document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    const masterId = urlParams.get('master_id'); // Первоначальный masterID
+    const selectedMasterId = urlParams.get('selected_master_id') || masterId; // Восстановление выбранного мастера
+    const serviceId = urlParams.get('service_id'); // Восстановление услуги
+    const fio = urlParams.get('fio'); // Восстановление ФИО
+    const phone = urlParams.get('phone'); // Восстановление телефона
+    const clientId = urlParams.get('client_id');
+    const role = urlParams.get('role'); // Получаем роль из URL
+    const fioInput = document.getElementById('fio-input');
+    const phoneInput = document.getElementById('phone-input');
+    const confirmButton = document.getElementById('confirm-button');
+    const masterSelect = document.getElementById('master-select');
+    const serviceSelect = document.getElementById('service-select');
+    const backButton = document.querySelector('.back-button');
 
-            // Функция возврата на masterReq.html
-            function goBack() {
-                window.location.href = `masterReq.html?master_id=${masterId}`;
-            }
+    // Функция возврата в зависимости от роли
+    function goBack() {
+        if (role === 'master') {
+            window.location.href = `masterReq.html?master_id=${masterId}`;
+        } else if (role === 'client') {
+            window.location.href = `clientReq.html?client_id=${clientId}`;
+        }
+    }
 
-            // Привязка обработчика к кнопке "Назад"
-            backButton.addEventListener('click', goBack);
+    backButton.addEventListener('click', goBack);
 
-            // Загрузка списка мастеров
-            function loadMasters(selectedMasterId = '') {
-                fetch('get_masters.php')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            console.error("Ошибка сервера:", data.error);
-                            alert("Ошибка сервера: " + data.error);
-                            return;
-                        }
-                        masterSelect.innerHTML = '';
-                        if (data.masters.length > 0) {
-                            data.masters.forEach(master => {
-                                const option = document.createElement('option');
-                                option.value = master.id;
-                                option.textContent = master.full_name;
-                                masterSelect.appendChild(option);
-                            });
-                            if (selectedMasterId) {
-                                masterSelect.value = selectedMasterId; // Предварительный выбор мастера
-                            }
-                            loadServices(masterSelect.value);
-                        } else {
-                            masterSelect.innerHTML = '<option disabled selected>Нет мастеров</option>';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Ошибка при загрузке мастеров:', error);
-                        alert('Ошибка загрузки мастеров.');
-                    });
-            }
-
-            // Загрузка услуг для выбранного мастера
-            function loadServices(masterId) {
-                if (!masterId) {
-                    serviceSelect.innerHTML = '<option disabled selected>Выберите мастера</option>';
+    // Загрузка списка мастеров
+    function loadMasters(selectedMasterId = '') {
+        fetch('get_masters.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Ошибка сервера:", data.error);
+                    alert("Ошибка сервера: " + data.error);
                     return;
                 }
-                fetch(`get_services.php?master_id=${masterId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            console.error("Ошибка сервера:", data.error);
-                            alert("Ошибка сервера: " + data.error);
-                            return;
-                        }
-                        serviceSelect.innerHTML = '';
-                        if (data.services.length > 0) {
-                            data.services.forEach(service => {
-                                const option = document.createElement('option');
-                                option.value = service.id;
-                                option.textContent = service.name;
-                                serviceSelect.appendChild(option);
-                            });
-                            if (serviceId) {
-                                serviceSelect.value = serviceId; // Восстановление выбранной услуги
-                            }
-                        } else {
-                            serviceSelect.innerHTML = '<option disabled selected>Нет услуг</option>';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Ошибка при загрузке услуг:', error);
-                        alert('Ошибка загрузки услуг.');
+                masterSelect.innerHTML = '';
+                if (data.masters.length > 0) {
+                    data.masters.forEach(master => {
+                        const option = document.createElement('option');
+                        option.value = master.id;
+                        option.textContent = master.full_name;
+                        masterSelect.appendChild(option);
                     });
-            }
-
-            // Инициализация формы
-            loadMasters(selectedMasterId);
-            if (fio) fioInput.value = decodeURIComponent(fio); // Восстановление ФИО
-            if (phone) phoneInput.value = phone; // Восстановление телефона
-
-            // Обновление услуг при смене мастера
-            masterSelect.addEventListener('change', function () {
-                loadServices(masterSelect.value);
+                    if (selectedMasterId) {
+                        masterSelect.value = selectedMasterId;
+                    }
+                    loadServices(masterSelect.value);
+                } else {
+                    masterSelect.innerHTML = '<option disabled selected>Нет мастеров</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке мастеров:', error);
+                alert('Ошибка загрузки мастеров.');
             });
+    }
 
-            // Валидация формы
-            function validateForm() {
-                const fioPattern = /^[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*)?)?$/;
-                const phonePattern = /^((\+7|7|8)[\s\-]?)?(\(?\d{3}\)?[\s\-]?)?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/;
-                if (!fioInput.value.match(fioPattern)) {
-                    alert("ФИО должно начинаться с заглавной буквы и содержать только буквы, пробелы или дефисы.");
-                    return false;
+    // Загрузка услуг для выбранного мастера
+    function loadServices(masterId) {
+        if (!masterId) {
+            serviceSelect.innerHTML = '<option disabled selected>Выберите мастера</option>';
+            return;
+        }
+        fetch(`get_services.php?master_id=${masterId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Ошибка сервера:", data.error);
+                    alert("Ошибка сервера: " + data.error);
+                    return;
                 }
-                if (!phoneInput.value.match(phonePattern)) {
-                    alert("Номер телефона должен быть в формате: +79999999999 или 89999999999.");
-                    return false;
+                serviceSelect.innerHTML = '';
+                if (data.services.length > 0) {
+                    data.services.forEach(service => {
+                        const option = document.createElement('option');
+                        option.value = service.id;
+                        option.textContent = service.name;
+                        serviceSelect.appendChild(option);
+                    });
+                    if (serviceId) {
+                        serviceSelect.value = serviceId;
+                    }
+                } else {
+                    serviceSelect.innerHTML = '<option disabled selected>Нет услуг</option>';
                 }
-                return true;
-            }
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке услуг:', error);
+                alert('Ошибка загрузки услуг.');
+            });
+    }
 
-            // Обработчик кнопки "Подтвердить запись"
-            confirmButton.addEventListener('click', function () {
-            if (!validateForm()) {
-                return;
-            }
-            const selectedMasterId = masterSelect.value;
-            const serviceId = serviceSelect.value;
-            const fio = fioInput.value;
-            const phone = phoneInput.value;
-            const originalMasterId = urlParams.get('master_id');
+    // Инициализация формы
+    loadMasters(selectedMasterId);
+    if (fio) fioInput.value = decodeURIComponent(fio);
+    if (phone) phoneInput.value = phone;
 
-            if (!selectedMasterId || !serviceId) {
-                alert("Выберите мастера и услугу.");
-                return;
-            }
+    masterSelect.addEventListener('change', function () {
+        loadServices(masterSelect.value);
+    });
 
-            const redirectUrl = `date-selection.html?selected_master_id=${selectedMasterId}&service_id=${serviceId}&fio=${encodeURIComponent(fio)}&phone=${encodeURIComponent(phone)}&original_master_id=${originalMasterId}&client_id=${clientId}`;
-            window.location.href = redirectUrl;
-        });
-        });
+    // Валидация формы
+    function validateForm() {
+        const fioPattern = /^[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*)?)?$/;
+        const phonePattern = /^((\+7|7|8)[\s\-]?)?(\(?\d{3}\)?[\s\-]?)?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/;
+        if (!fioInput.value.match(fioPattern)) {
+            alert("ФИО должно начинаться с заглавной буквы и содержать только буквы, пробелы или дефисы.");
+            return false;
+        }
+        if (!phoneInput.value.match(phonePattern)) {
+            alert("Номер телефона должен быть в формате: +79999999999 или 89999999999.");
+            return false;
+        }
+        return true;
+    }
+
+    // Обработчик кнопки "Подтвердить запись"
+    confirmButton.addEventListener('click', function () {
+        if (!validateForm()) {
+            return;
+        }
+        const selectedMasterId = masterSelect.value;
+        const serviceId = serviceSelect.value;
+        const fio = fioInput.value;
+        const phone = phoneInput.value;
+        const originalMasterId = urlParams.get('master_id');
+
+        if (!selectedMasterId || !serviceId) {
+            alert("Выберите мастера и услугу.");
+            return;
+        }
+
+        const redirectUrl = `date-selection.html?selected_master_id=${selectedMasterId}&service_id=${serviceId}&fio=${encodeURIComponent(fio)}&phone=${encodeURIComponent(phone)}&original_master_id=${originalMasterId}&client_id=${clientId}&role=${role}`;
+        window.location.href = redirectUrl;
+    });
+});
     </script>
 </body>
 </html>

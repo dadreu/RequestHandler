@@ -67,7 +67,7 @@
         // Функция для перехода на страницу записи с передачей client_id
         function goToAppointment() {
             if (clientId) {
-                window.location.href = `appointment.html?client_id=${clientId}`;
+                window.location.href = `appointment.html?client_id=${clientId}&role=client`;
             } else {
                 alert("Client ID не найден");
             }
