@@ -50,6 +50,24 @@
           <button id="verify-code" class="confirm-button">Подтвердить</button>
         </div>
       </div>
+      <!-- Блок для завершения регистрации -->
+      <div id="complete-registration-step" style="display: none;">
+        <div class="form-input-group">
+          <label for="full_name">ФИО</label>
+          <input type="text" id="full_name" name="full_name" class="form-input" required>
+        </div>
+        <div class="form-input-group">
+          <label for="new_password">Пароль</label>
+          <input type="password" id="new_password" name="new_password" class="form-input" required>
+        </div>
+        <div class="form-input-group">
+          <label for="confirm_password">Подтверждение пароля</label>
+          <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
+        </div>
+        <div class="form-input-group">
+          <button id="complete-registration-button" class="confirm-button">Завершить регистрацию</button>
+        </div>
+      </div>
       <!-- Сообщение об ошибке -->
       <div id="error-message" class="error-message" style="display: none;"></div>
       <!-- Кнопка переключения режима -->
@@ -62,17 +80,20 @@
       const loginStep = document.getElementById('login-step');
       const phoneStep = document.getElementById('phone-step');
       const codeStep = document.getElementById('code-step');
+      const completeRegistrationStep = document.getElementById('complete-registration-step');
       const errorMessage = document.getElementById('error-message');
       const switchAuthButton = document.getElementById('switch-auth');
       const loginButton = document.getElementById('login-button');
       const requestCodeButton = document.getElementById('request-code');
       const verifyCodeButton = document.getElementById('verify-code');
+      const completeRegistrationButton = document.getElementById('complete-registration-button');
       const phoneInput = document.getElementById('phone');
       const codeInput = document.getElementById('code');
-      const usernameInput = document.getElementById('username');
-      const passwordInput = document.getElementById('password');
+      const fullNameInput = document.getElementById('full_name');
+      const newPasswordInput = document.getElementById('new_password');
+      const confirmPasswordInput = document.getElementById('confirm_password');
       const telegramId = Telegram.WebApp.initDataUnsafe.user.id;
-
+      let clientId = null;
       let isLoginMode = true;
 
       function toggleAuthMode() {
@@ -83,6 +104,7 @@
         } else {
           phoneStep.style.display = 'none';
           codeStep.style.display = 'none';
+          completeRegistrationStep.style.display = 'none';
           loginStep.style.display = 'block';
           switchAuthButton.textContent = 'Войти с помощью кода подтверждения';
         }
@@ -96,38 +118,6 @@
         const regex = /^(\+7|8)\s?\(?\d{3}\)?\s?\d{3}-?\d{2}-?\d{2}$/;
         return regex.test(phone);
       }
-
-      loginButton.addEventListener('click', function() {
-        const username = usernameInput.value;
-        const password = passwordInput.value;
-        if (!username || !password) {
-          errorMessage.textContent = 'Введите логин и пароль';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        fetch('login.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            if (data.role === 'master') {
-              window.location.href = `masterReq.html?master_id=${data.master_id}`;
-            } else if (data.role === 'client') {
-              window.location.href = `clientReq.html?client_id=${data.client_id}`;
-            }
-          } else {
-            errorMessage.textContent = data.message || 'Неверный логин или пароль';
-            errorMessage.style.display = 'block';
-          }
-        })
-        .catch(error => {
-          errorMessage.textContent = 'Ошибка подключения';
-          errorMessage.style.display = 'block';
-        });
-      });
 
       requestCodeButton.addEventListener('click', function() {
         const phone = phoneInput.value;
@@ -177,13 +167,83 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
+            clientId = data.client_id;
+            if (data.complete_registration) {
+              codeStep.style.display = 'none';
+              completeRegistrationStep.style.display = 'block';
+            } else {
+              window.location.href = `clientReq.html?client_id=${clientId}`;
+            }
+          } else {
+            errorMessage.textContent = data.message || 'Неверный код';
+            errorMessage.style.display = 'block';
+          }
+        })
+        .catch(error => {
+          errorMessage.textContent = 'Ошибка подключения';
+          errorMessage.style.display = 'block';
+        });
+      });
+
+      completeRegistrationButton.addEventListener('click', function() {
+        const fullName = fullNameInput.value;
+        const password = newPasswordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (!fullName || !password || !confirmPassword) {
+          errorMessage.textContent = 'Заполните все поля';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        if (password !== confirmPassword) {
+          errorMessage.textContent = 'Пароли не совпадают';
+          errorMessage.style.display = 'block';
+          return;
+        }
+
+        fetch('complete_registration.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `client_id=${clientId}&full_name=${encodeURIComponent(fullName)}&password=${encodeURIComponent(password)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = `clientReq.html?client_id=${clientId}`;
+          } else {
+            errorMessage.textContent = data.message || 'Ошибка при завершении регистрации';
+            errorMessage.style.display = 'block';
+          }
+        })
+        .catch(error => {
+          errorMessage.textContent = 'Ошибка подключения';
+          errorMessage.style.display = 'block';
+        });
+      });
+
+      loginButton.addEventListener('click', function() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        if (!username || !password) {
+          errorMessage.textContent = 'Введите логин и пароль';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        fetch('login.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
             if (data.role === 'master') {
               window.location.href = `masterReq.html?master_id=${data.master_id}`;
             } else if (data.role === 'client') {
               window.location.href = `clientReq.html?client_id=${data.client_id}`;
             }
           } else {
-            errorMessage.textContent = data.message || 'Неверный код';
+            errorMessage.textContent = data.message || 'Неверный логин или пароль';
             errorMessage.style.display = 'block';
           }
         })

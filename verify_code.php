@@ -8,7 +8,7 @@ if (isset($_POST['phone']) && isset($_POST['telegram_id']) && isset($_POST['code
     $telegram_id = $_POST['telegram_id'];
     $code = $_POST['code'];
 
-    // Проверка кода (действителен в течение 5 минут)
+    // Проверка кода (действителен 5 минут)
     $stmt = $pdo->prepare("SELECT * FROM ConfirmationCodes WHERE phone = :phone AND telegram_id = :telegram_id AND code = :code AND created_at > NOW() - INTERVAL 5 MINUTE");
     $stmt->execute(['phone' => $phone, 'telegram_id' => $telegram_id, 'code' => $code]);
     $confirmation = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -29,18 +29,17 @@ if (isset($_POST['phone']) && isset($_POST['telegram_id']) && isset($_POST['code
                 $response['master_id'] = $master_id;
             }
         } else {
-            $stmt = $pdo->prepare("SELECT id FROM Clients WHERE phone = :phone");
+            $stmt = $pdo->prepare("SELECT id, password FROM Clients WHERE phone = :phone");
             $stmt->execute(['phone' => $phone]);
             $client = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($client) {
                 $client_id = $client['id'];
-                $stmt = $pdo->prepare("SELECT id FROM Users WHERE role = 'client' AND client_id = :client_id");
-                $stmt->execute(['client_id' => $client_id]);
-                $user = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($user) {
-                    $response['success'] = true;
+                $response['success'] = true;
+                $response['client_id'] = $client_id;
+                if (empty($client['password'])) {
+                    $response['complete_registration'] = true;
+                } else {
                     $response['role'] = 'client';
-                    $response['client_id'] = $client_id;
                 }
             }
         }
@@ -51,7 +50,6 @@ if (isset($_POST['phone']) && isset($_POST['telegram_id']) && isset($_POST['code
         $response['message'] = 'Неверный код или код устарел';
     }
 }
-
 
 echo json_encode($response);
 ?>
