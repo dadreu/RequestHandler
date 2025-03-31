@@ -16,35 +16,128 @@
   <div class="content">
     <div class="login-form">
       <h2>Авторизация</h2>
-      <div id="phone-step">
-        <label for="phone">Номер телефона</label>
-        <input type="tel" id="phone" name="phone" required>
-        <button id="request-code">Получить код</button>
+      <!-- Блок для ввода логина и пароля -->
+      <div id="login-step">
+        <div class="form-input-group">
+          <label for="username">Логин</label>
+          <input type="text" id="username" name="username" class="form-input" required>
+        </div>
+        <div class="form-input-group">
+          <label for="password">Пароль</label>
+          <input type="password" id="password" name="password" class="form-input" required>
+        </div>
+        <div class="form-input-group">
+          <button id="login-button" class="confirm-button">Войти</button>
+        </div>
       </div>
+      <!-- Блок для ввода номера телефона -->
+      <div id="phone-step" style="display: none;">
+        <div class="form-input-group">
+          <label for="phone">Номер телефона</label>
+          <input type="tel" id="phone" name="phone" class="form-input" required placeholder="+7 (XXX) XXX-XX-XX">
+        </div>
+        <div class="form-input-group">
+          <button id="request-code" class="confirm-button">Получить код</button>
+        </div>
+      </div>
+      <!-- Блок для ввода кода подтверждения -->
       <div id="code-step" style="display: none;">
-        <label for="code">Код подтверждения</label>
-        <input type="text" id="code" name="code" required>
-        <button id="verify-code">Подтвердить</button>
+        <div class="form-input-group">
+          <label for="code">Код подтверждения</label>
+          <input type="text" id="code" name="code" class="form-input" required>
+        </div>
+        <div class="form-input-group">
+          <button id="verify-code" class="confirm-button">Подтвердить</button>
+        </div>
       </div>
+      <!-- Сообщение об ошибке -->
       <div id="error-message" class="error-message" style="display: none;"></div>
+      <!-- Кнопка переключения режима -->
+      <button id="switch-auth" class="back-button">Войти с помощью кода подтверждения</button>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const telegramId = Telegram.WebApp.initDataUnsafe.user.id;
+      const loginStep = document.getElementById('login-step');
       const phoneStep = document.getElementById('phone-step');
       const codeStep = document.getElementById('code-step');
       const errorMessage = document.getElementById('error-message');
+      const switchAuthButton = document.getElementById('switch-auth');
+      const loginButton = document.getElementById('login-button');
       const requestCodeButton = document.getElementById('request-code');
       const verifyCodeButton = document.getElementById('verify-code');
       const phoneInput = document.getElementById('phone');
       const codeInput = document.getElementById('code');
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const telegramId = Telegram.WebApp.initDataUnsafe.user.id;
+
+      let isLoginMode = true;
+
+      function toggleAuthMode() {
+        if (isLoginMode) {
+          loginStep.style.display = 'none';
+          phoneStep.style.display = 'block';
+          switchAuthButton.textContent = 'Войти с помощью пароля';
+        } else {
+          phoneStep.style.display = 'none';
+          codeStep.style.display = 'none';
+          loginStep.style.display = 'block';
+          switchAuthButton.textContent = 'Войти с помощью кода подтверждения';
+        }
+        isLoginMode = !isLoginMode;
+        errorMessage.style.display = 'none';
+      }
+
+      switchAuthButton.addEventListener('click', toggleAuthMode);
+
+      function validateRussianPhone(phone) {
+        const regex = /^(\+7|8)\s?\(?\d{3}\)?\s?\d{3}-?\d{2}-?\d{2}$/;
+        return regex.test(phone);
+      }
+
+      loginButton.addEventListener('click', function() {
+        const username = usernameInput.value;
+        const password = passwordInput.value;
+        if (!username || !password) {
+          errorMessage.textContent = 'Введите логин и пароль';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        fetch('login.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            if (data.role === 'master') {
+              window.location.href = `masterReq.html?master_id=${data.master_id}`;
+            } else if (data.role === 'client') {
+              window.location.href = `clientReq.html?client_id=${data.client_id}`;
+            }
+          } else {
+            errorMessage.textContent = data.message || 'Неверный логин или пароль';
+            errorMessage.style.display = 'block';
+          }
+        })
+        .catch(error => {
+          errorMessage.textContent = 'Ошибка подключения';
+          errorMessage.style.display = 'block';
+        });
+      });
 
       requestCodeButton.addEventListener('click', function() {
         const phone = phoneInput.value;
         if (!phone) {
           errorMessage.textContent = 'Введите номер телефона';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        if (!validateRussianPhone(phone)) {
+          errorMessage.textContent = 'Некорректный номер телефона (пример: +7 (XXX) XXX-XX-XX)';
           errorMessage.style.display = 'block';
           return;
         }
@@ -59,12 +152,11 @@
             phoneStep.style.display = 'none';
             codeStep.style.display = 'block';
           } else {
-            errorMessage.textContent = data.message || 'Ошибка';
+            errorMessage.textContent = data.message || 'Ошибка при запросе кода';
             errorMessage.style.display = 'block';
           }
         })
         .catch(error => {
-          console.error('Ошибка:', error);
           errorMessage.textContent = 'Ошибка подключения';
           errorMessage.style.display = 'block';
         });
@@ -96,7 +188,6 @@
           }
         })
         .catch(error => {
-          console.error('Ошибка:', error);
           errorMessage.textContent = 'Ошибка подключения';
           errorMessage.style.display = 'block';
         });
