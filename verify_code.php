@@ -4,7 +4,10 @@ header('Content-Type: application/json');
 $response = ['success' => false];
 
 if (isset($_POST['phone']) && isset($_POST['code'])) {
-    $phone = $_POST['phone'];
+    $phone = preg_replace('/[^0-9]/', '', $_POST['phone']); // Удаляем все нечисловые символы
+    if (strlen($phone) == 11 && $phone[0] == '8') {
+        $phone = '7' . substr($phone, 1); // Заменяем 8 на 7 для российских номеров
+    }
     $code = $_POST['code'];
 
     $stmt = $pdo->prepare("SELECT * FROM ConfirmationCodes WHERE phone = :phone AND code = :code AND created_at > NOW() - INTERVAL 5 MINUTE");
@@ -23,6 +26,8 @@ if (isset($_POST['phone']) && isset($_POST['code'])) {
     } else {
         $response['message'] = 'Неверный код или код устарел';
     }
+} else {
+    $response['message'] = 'Недостаточно данных';
 }
 
 echo json_encode($response);

@@ -30,7 +30,8 @@
         // Получаем ID клиента из параметров URL
         const urlParams = new URLSearchParams(window.location.search);
         const clientId = urlParams.get('client_id');
-        
+        console.log('clientId:', clientId); // Отладочный вывод
+
         // Функция загрузки записей
         function loadClientRecords() {
             if (!clientId) {
@@ -64,19 +65,12 @@
         }
 
         // Функция для перехода на страницу записи с передачей client_id
-        function goToDateSelection(url) {
-            if (!clientId) {
-                alert("Client ID не найден");
-                return;
-            }
-            window.location.href = `${url}?client_id=${clientId}`;
-        }
         function goToAppointment() {
-        if (clientId) {
-            window.location.href = `appointment.html?client_id=${clientId}`;
-        } else {
-            alert("Client ID не найден");
-        }
+            if (clientId) {
+                window.location.href = `appointment.html?client_id=${clientId}`;
+            } else {
+                alert("Client ID не найден");
+            }
         }
 
         // Загружаем записи при загрузке страницы
