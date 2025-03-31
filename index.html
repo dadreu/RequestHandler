@@ -16,21 +16,21 @@
   <div class="content">
     <div class="login-form">
       <h2>Авторизация</h2>
-      <!-- Блок для ввода логина и пароля -->
-      <div id="login-step">
+      <!-- Блок для входа мастеров -->
+      <div id="master-login-step">
         <div class="form-input-group">
-          <label for="username">Логин</label>
-          <input type="text" id="username" name="username" class="form-input" required>
+          <label for="master_phone">Номер телефона</label>
+          <input type="tel" id="master_phone" name="master_phone" class="form-input" required placeholder="+7 (XXX) XXX-XX-XX">
         </div>
         <div class="form-input-group">
-          <label for="password">Пароль</label>
-          <input type="password" id="password" name="password" class="form-input" required>
+          <label for="master_password">Пароль</label>
+          <input type="password" id="master_password" name="master_password" class="form-input" required>
         </div>
         <div class="form-input-group">
-          <button id="login-button" class="confirm-button">Войти</button>
+          <button id="master-login-button" class="confirm-button">Войти</button>
         </div>
       </div>
-      <!-- Блок для ввода номера телефона -->
+      <!-- Блок для ввода номера телефона клиентов -->
       <div id="phone-step" style="display: none;">
         <div class="form-input-group">
           <label for="phone">Номер телефона</label>
@@ -50,86 +50,95 @@
           <button id="verify-code" class="confirm-button">Подтвердить</button>
         </div>
       </div>
-      <!-- Блок для завершения регистрации -->
-      <div id="complete-registration-step" style="display: none;">
-        <div class="form-input-group">
-          <label for="full_name">ФИО</label>
-          <input type="text" id="full_name" name="full_name" class="form-input" required>
-        </div>
-        <div class="form-input-group">
-          <label for="new_password">Пароль</label>
-          <input type="password" id="new_password" name="new_password" class="form-input" required>
-        </div>
-        <div class="form-input-group">
-          <label for="confirm_password">Подтверждение пароля</label>
-          <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
-        </div>
-        <div class="form-input-group">
-          <button id="complete-registration-button" class="confirm-button">Завершить регистрацию</button>
-        </div>
-      </div>
       <!-- Сообщение об ошибке -->
       <div id="error-message" class="error-message" style="display: none;"></div>
       <!-- Кнопка переключения режима -->
-      <button id="switch-auth" class="back-button">Войти с помощью кода подтверждения</button>
+      <button id="switch-auth" class="back-button">Войти как клиент</button>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const loginStep = document.getElementById('login-step');
+      const masterLoginStep = document.getElementById('master-login-step');
       const phoneStep = document.getElementById('phone-step');
       const codeStep = document.getElementById('code-step');
-      const completeRegistrationStep = document.getElementById('complete-registration-step');
       const errorMessage = document.getElementById('error-message');
       const switchAuthButton = document.getElementById('switch-auth');
-      const loginButton = document.getElementById('login-button');
+      const masterLoginButton = document.getElementById('master-login-button');
       const requestCodeButton = document.getElementById('request-code');
       const verifyCodeButton = document.getElementById('verify-code');
-      const completeRegistrationButton = document.getElementById('complete-registration-button');
+      const masterPhoneInput = document.getElementById('master_phone');
+      const masterPasswordInput = document.getElementById('master_password');
       const phoneInput = document.getElementById('phone');
       const codeInput = document.getElementById('code');
-      const fullNameInput = document.getElementById('full_name');
-      const newPasswordInput = document.getElementById('new_password');
-      const confirmPasswordInput = document.getElementById('confirm_password');
-      const usernameInput = document.getElementById('username');
-      const passwordInput = document.getElementById('password');
       const serverUrl = 'https://requesthandler-dadreu.amvera.io/';
       const user = Telegram.WebApp.initDataUnsafe.user;
       const telegramId = (user && user.id) ? user.id : null;
-      let clientId = null;
-      let isLoginMode = true;
+      let isMasterMode = true;
 
-      // Функция для переключения режима авторизации
+      // Переключение режима авторизации
       function toggleAuthMode() {
-        if (isLoginMode) {
-          loginStep.style.display = 'none';
+        if (isMasterMode) {
+          masterLoginStep.style.display = 'none';
           phoneStep.style.display = 'block';
-          switchAuthButton.textContent = 'Войти с помощью пароля';
+          switchAuthButton.textContent = 'Войти как мастер';
         } else {
           phoneStep.style.display = 'none';
           codeStep.style.display = 'none';
-          completeRegistrationStep.style.display = 'none';
-          loginStep.style.display = 'block';
-          switchAuthButton.textContent = 'Войти с помощью кода подтверждения';
+          masterLoginStep.style.display = 'block';
+          switchAuthButton.textContent = 'Войти как клиент';
         }
-        isLoginMode = !isLoginMode;
+        isMasterMode = !isMasterMode;
         errorMessage.style.display = 'none';
       }
 
       switchAuthButton.addEventListener('click', toggleAuthMode);
 
-      // Функция для проверки российского номера телефона
+      // Проверка российского номера телефона
       function validateRussianPhone(phone) {
         const regex = /^(\+7|8)\s?\(?\d{3}\)?\s?\d{3}-?\d{2}-?\d{2}$/;
         return regex.test(phone);
       }
 
-      // Обработчик для кнопки "Получить код"
+      // Вход мастеров
+      masterLoginButton.addEventListener('click', function() {
+        const phone = masterPhoneInput.value;
+        const password = masterPasswordInput.value;
+        if (!phone || !password) {
+          errorMessage.textContent = 'Введите номер телефона и пароль';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        if (!validateRussianPhone(phone)) {
+          errorMessage.textContent = 'Неверный формат номера (пример: +7 (XXX) XXX-XX-XX)';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        fetch(serverUrl + 'login.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            window.location.href = `masterReq.html?master_id=${data.master_id}`;
+          } else {
+            errorMessage.textContent = data.message || 'Неверный номер телефона или пароль';
+            errorMessage.style.display = 'block';
+          }
+        })
+        .catch(error => {
+          errorMessage.textContent = 'Ошибка подключения: ' + error.message;
+          errorMessage.style.display = 'block';
+        });
+      });
+
+      // Запрос кода для клиентов
       requestCodeButton.addEventListener('click', function() {
         const phone = phoneInput.value;
         if (!phone) {
-          errorMessage.textContent = 'Пожалуйста, введите номер телефона';
+          errorMessage.textContent = 'Введите номер телефона';
           errorMessage.style.display = 'block';
           return;
         }
@@ -148,12 +157,7 @@
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `phone=${encodeURIComponent(phone)}&telegram_id=${telegramId}`
         })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Сетевая ошибка: ' + response.status);
-          }
-          return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
           if (data.success) {
             phoneStep.style.display = 'none';
@@ -164,13 +168,12 @@
           }
         })
         .catch(error => {
-          console.error('Ошибка:', error);
           errorMessage.textContent = 'Ошибка подключения: ' + error.message;
           errorMessage.style.display = 'block';
         });
       });
 
-      // Обработчик для кнопки "Подтвердить" (код подтверждения)
+      // Проверка кода для клиентов
       verifyCodeButton.addEventListener('click', function() {
         const code = codeInput.value;
         if (!code) {
@@ -178,124 +181,21 @@
           errorMessage.style.display = 'block';
           return;
         }
-        if (!telegramId) {
-          errorMessage.textContent = 'Ошибка: Telegram ID не найден';
-          errorMessage.style.display = 'block';
-          return;
-        }
         fetch(serverUrl + 'verify_code.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `phone=${encodeURIComponent(phoneInput.value)}&telegram_id=${telegramId}&code=${code}`
+          body: `phone=${encodeURIComponent(phoneInput.value)}&code=${encodeURIComponent(code)}`
         })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Сетевая ошибка: ' + response.status);
-          }
-          return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
           if (data.success) {
-            clientId = data.client_id;
-            if (data.complete_registration) {
-              codeStep.style.display = 'none';
-              completeRegistrationStep.style.display = 'block';
-            } else {
-              window.location.href = `clientReq.html?client_id=${clientId}`;
-            }
+            window.location.href = `clientReq.html?client_id=${data.client_id}`;
           } else {
             errorMessage.textContent = data.message || 'Неверный код';
             errorMessage.style.display = 'block';
           }
         })
         .catch(error => {
-          console.error('Ошибка:', error);
-          errorMessage.textContent = 'Ошибка подключения: ' + error.message;
-          errorMessage.style.display = 'block';
-        });
-      });
-
-      // Обработчик для кнопки "Завершить регистрацию"
-      completeRegistrationButton.addEventListener('click', function() {
-        const fullName = fullNameInput.value;
-        const password = newPasswordInput.value;
-        const confirmPassword = confirmPasswordInput.value;
-
-        if (!fullName || !password || !confirmPassword) {
-          errorMessage.textContent = 'Заполните все поля';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        if (password !== confirmPassword) {
-          errorMessage.textContent = 'Пароли не совпадают';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        if (!clientId) {
-          errorMessage.textContent = 'Ошибка: ID клиента не найден';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        fetch(serverUrl + 'complete_registration.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `client_id=${clientId}&full_name=${encodeURIComponent(fullName)}&password=${encodeURIComponent(password)}`
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Сетевая ошибка: ' + response.status);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            window.location.href = `clientReq.html?client_id=${clientId}`;
-          } else {
-            errorMessage.textContent = data.message || 'Ошибка при завершении регистрации';
-            errorMessage.style.display = 'block';
-          }
-        })
-        .catch(error => {
-          console.error('Ошибка:', error);
-          errorMessage.textContent = 'Ошибка подключения: ' + error.message;
-          errorMessage.style.display = 'block';
-        });
-      });
-
-      // Обработчик для кнопки "Войти" (логин и пароль)
-      loginButton.addEventListener('click', function() {
-        const username = usernameInput.value;
-        const password = passwordInput.value;
-        if (!username || !password) {
-          errorMessage.textContent = 'Введите логин и пароль';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        fetch(serverUrl + 'login.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Сетевая ошибка: ' + response.status);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.success) {
-            if (data.role === 'master') {
-              window.location.href = `masterReq.html?master_id=${data.master_id}`;
-            } else if (data.role === 'client') {
-              window.location.href = `clientReq.html?client_id=${data.client_id}`;
-            }
-          } else {
-            errorMessage.textContent = data.message || 'Неверный логин или пароль';
-            errorMessage.style.display = 'block';
-          }
-        })
-        .catch(error => {
-          console.error('Ошибка:', error);
           errorMessage.textContent = 'Ошибка подключения: ' + error.message;
           errorMessage.style.display = 'block';
         });
