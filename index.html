@@ -92,10 +92,15 @@
       const fullNameInput = document.getElementById('full_name');
       const newPasswordInput = document.getElementById('new_password');
       const confirmPasswordInput = document.getElementById('confirm_password');
-      const telegramId = Telegram.WebApp.initDataUnsafe.user.id;
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const serverUrl = 'https://requesthandler-dadreu.amvera.io/';
+      const user = Telegram.WebApp.initDataUnsafe.user;
+      const telegramId = (user && user.id) ? user.id : null;
       let clientId = null;
       let isLoginMode = true;
 
+      // Функция для переключения режима авторизации
       function toggleAuthMode() {
         if (isLoginMode) {
           loginStep.style.display = 'none';
@@ -114,63 +119,58 @@
 
       switchAuthButton.addEventListener('click', toggleAuthMode);
 
+      // Функция для проверки российского номера телефона
       function validateRussianPhone(phone) {
         const regex = /^(\+7|8)\s?\(?\d{3}\)?\s?\d{3}-?\d{2}-?\d{2}$/;
         return regex.test(phone);
       }
 
+      // Обработчик для кнопки "Получить код"
       requestCodeButton.addEventListener('click', function() {
-    // Получение данных из ввода и Telegram
-    const phone = phoneInput.value;
-    const user = Telegram.WebApp.initDataUnsafe.user;
-    const telegramId = (user && user.id) ? user.id : null;
+        const phone = phoneInput.value;
+        if (!phone) {
+          errorMessage.textContent = 'Пожалуйста, введите номер телефона';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        if (!validateRussianPhone(phone)) {
+          errorMessage.textContent = 'Неверный формат номера (пример: +7 (XXX) XXX-XX-XX)';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        if (!telegramId) {
+          errorMessage.textContent = 'Ошибка: Telegram ID не найден';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        fetch(serverUrl + 'request_code.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `phone=${encodeURIComponent(phone)}&telegram_id=${telegramId}`
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Сетевая ошибка: ' + response.status);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data.success) {
+            phoneStep.style.display = 'none';
+            codeStep.style.display = 'block';
+          } else {
+            errorMessage.textContent = data.message || 'Не удалось запросить код';
+            errorMessage.style.display = 'block';
+          }
+        })
+        .catch(error => {
+          console.error('Ошибка:', error);
+          errorMessage.textContent = 'Ошибка подключения: ' + error.message;
+          errorMessage.style.display = 'block';
+        });
+      });
 
-    // Проверка ввода номера телефона
-    if (!phone) {
-      errorMessage.textContent = 'Пожалуйста, введите номер телефона';
-      errorMessage.style.display = 'block';
-      return;
-    }
-    if (!validateRussianPhone(phone)) {
-      errorMessage.textContent = 'Неверный формат номера (пример: +7 (XXX) XXX-XX-XX)';
-      errorMessage.style.display = 'block';
-      return;
-    }
-
-    // Проверка наличия Telegram ID
-    if (!telegramId) {
-      errorMessage.textContent = 'Ошибка: Не удалось получить Telegram ID';
-      errorMessage.style.display = 'block';
-      return;
-    }
-
-    // Отправка запроса на сервер
-    fetch('https://requesthandler-dadreu.amvera.io/request_code.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `phone=${encodeURIComponent(phone)}&telegram_id=${telegramId}`
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Ошибка сервера: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      if (data.success) {
-        phoneStep.style.display = 'none';
-        codeStep.style.display = 'block';
-      } else {
-        errorMessage.textContent = data.message || 'Не удалось запросить код';
-        errorMessage.style.display = 'block';
-      }
-    })
-    .catch(error => {
-      console.error('Ошибка запроса:', error);
-      errorMessage.textContent = `Не удалось подключиться: ${error.message}`;
-      errorMessage.style.display = 'block';
-    });
-  });
+      // Обработчик для кнопки "Подтвердить" (код подтверждения)
       verifyCodeButton.addEventListener('click', function() {
         const code = codeInput.value;
         if (!code) {
@@ -178,12 +178,22 @@
           errorMessage.style.display = 'block';
           return;
         }
-        fetch('verify_code.php', {
+        if (!telegramId) {
+          errorMessage.textContent = 'Ошибка: Telegram ID не найден';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        fetch(serverUrl + 'verify_code.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `phone=${encodeURIComponent(phoneInput.value)}&telegram_id=${telegramId}&code=${code}`
         })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Сетевая ошибка: ' + response.status);
+          }
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
             clientId = data.client_id;
@@ -199,11 +209,13 @@
           }
         })
         .catch(error => {
-          errorMessage.textContent = 'Ошибка подключения';
+          console.error('Ошибка:', error);
+          errorMessage.textContent = 'Ошибка подключения: ' + error.message;
           errorMessage.style.display = 'block';
         });
       });
 
+      // Обработчик для кнопки "Завершить регистрацию"
       completeRegistrationButton.addEventListener('click', function() {
         const fullName = fullNameInput.value;
         const password = newPasswordInput.value;
@@ -219,13 +231,22 @@
           errorMessage.style.display = 'block';
           return;
         }
-
-        fetch('complete_registration.php', {
+        if (!clientId) {
+          errorMessage.textContent = 'Ошибка: ID клиента не найден';
+          errorMessage.style.display = 'block';
+          return;
+        }
+        fetch(serverUrl + 'complete_registration.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `client_id=${clientId}&full_name=${encodeURIComponent(fullName)}&password=${encodeURIComponent(password)}`
         })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Сетевая ошибка: ' + response.status);
+          }
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
             window.location.href = `clientReq.html?client_id=${clientId}`;
@@ -235,25 +256,32 @@
           }
         })
         .catch(error => {
-          errorMessage.textContent = 'Ошибка подключения';
+          console.error('Ошибка:', error);
+          errorMessage.textContent = 'Ошибка подключения: ' + error.message;
           errorMessage.style.display = 'block';
         });
       });
 
+      // Обработчик для кнопки "Войти" (логин и пароль)
       loginButton.addEventListener('click', function() {
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+        const username = usernameInput.value;
+        const password = passwordInput.value;
         if (!username || !password) {
           errorMessage.textContent = 'Введите логин и пароль';
           errorMessage.style.display = 'block';
           return;
         }
-        fetch('login.php', {
+        fetch(serverUrl + 'login.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
         })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Сетевая ошибка: ' + response.status);
+          }
+          return response.json();
+        })
         .then(data => {
           if (data.success) {
             if (data.role === 'master') {
@@ -267,7 +295,8 @@
           }
         })
         .catch(error => {
-          errorMessage.textContent = 'Ошибка подключения';
+          console.error('Ошибка:', error);
+          errorMessage.textContent = 'Ошибка подключения: ' + error.message;
           errorMessage.style.display = 'block';
         });
       });
