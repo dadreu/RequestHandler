@@ -31,31 +31,31 @@
         </div>
       </div>
       <!-- Блок для ввода номера телефона клиентов -->
-      <div id="phone-step" style="display: none;">
-        <div class="form-input-group">
-          <label for="phone">Номер телефона</label>
-          <input type="tel" id="phone" name="phone" class="form-input" required placeholder="+7 (XXX) XXX-XX-XX">
+        <div id="phone-step" style="display: none;">
+          <div class="form-input-group">
+            <label for="phone">Номер телефона</label>
+            <input type="tel" id="phone" name="phone" class="form-input" required placeholder="+7 (XXX) XXX-XX-XX">
+          </div>
+          <div class="form-input-group">
+            <button id="request-code" class="confirm-button">Получить код</button>
+          </div>
         </div>
-        <div class="form-input-group">
-          <button id="request-code" class="confirm-button">Получить код</button>
+        <!-- Блок для ввода кода подтверждения -->
+        <div id="code-step" style="display: none;">
+          <div class="form-input-group">
+            <label for="code">Код подтверждения</label>
+            <input type="text" id="code" name="code" class="form-input" required>
+          </div>
+          <div class="form-input-group">
+            <button id="verify-code" class="confirm-button">Подтвердить</button>
+          </div>
         </div>
+        <!-- Сообщение об ошибке -->
+        <div id="error-message" class="error-message" style="display: none;"></div>
+        <!-- Кнопка переключения режима -->
+        <button id="switch-auth" class="back-button">Войти как клиент</button>
       </div>
-      <!-- Блок для ввода кода подтверждения -->
-      <div id="code-step" style="display: none;">
-        <div class="form-input-group">
-          <label for="code">Код подтверждения</label>
-          <input type="text" id="code" name="code" class="form-input" required>
-        </div>
-        <div class="form-input-group">
-          <button id="verify-code" class="confirm-button">Подтвердить</button>
-        </div>
-      </div>
-      <!-- Сообщение об ошибке -->
-      <div id="error-message" class="error-message" style="display: none;"></div>
-      <!-- Кнопка переключения режима -->
-      <button id="switch-auth" class="back-button">Войти как клиент</button>
     </div>
-  </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -97,7 +97,9 @@
       // Функция нормализации номера телефона
       function normalizePhone(phone) {
         phone = phone.replace(/[^0-9]/g, ''); // Удаляем все нечисловые символы
-        if (phone.length === 11 && phone[0] === '8') {
+        if (phone.length === 10) {
+          phone = '7' + phone; // Если введено 10 цифр, добавляем 7
+        } else if (phone.length === 11 && phone[0] === '8') {
           phone = '7' + phone.slice(1); // Заменяем 8 на 7
         }
         return phone;
@@ -111,7 +113,7 @@
 
       // Вход мастеров
       masterLoginButton.addEventListener('click', function() {
-        let phone = masterPhoneInput.value;
+        let phone = masterLogicInput.value;
         const password = masterPasswordInput.value;
         if (!phone || !password) {
           errorMessage.textContent = 'Введите номер телефона и пароль';
