@@ -16,8 +16,13 @@ if (isset($_POST['phone']) && isset($_POST['telegram_id'])) {
     $client = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($client) {
-        // Проверяем, что Telegram ID совпадает
-        if ($client['telegram_id'] === $telegram_id) {
+        // Если telegram_id не установлен (NULL), обновляем его
+        if ($client['telegram_id'] === null) {
+            $stmt_update = $pdo->prepare("UPDATE Clients SET telegram_id = :telegram_id WHERE id = :client_id");
+            $stmt_update->execute(['telegram_id' => $telegram_id, 'client_id' => $client['id']]);
+        }
+        // Проверяем, что Telegram ID совпадает (или был NULL)
+        if ($client['telegram_id'] === $telegram_id || $client['telegram_id'] === null) {
             $client_id = $client['id'];
         } else {
             $response['message'] = 'Номер телефона не связан с этим Telegram аккаунтом';

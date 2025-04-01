@@ -35,23 +35,20 @@ try {
     $client = $stmt_check_client->fetch(PDO::FETCH_ASSOC);
 
     if (!$client) {
-        // Если клиента нет, создаём нового
-        $stmt_insert_client = $pdo->prepare("INSERT INTO Clients (full_name, phone) VALUES (:fio, :phone)");
+        // Если клиента нет, создаём нового с telegram_id = NULL
+        $stmt_insert_client = $pdo->prepare("INSERT INTO Clients (full_name, phone, telegram_id) VALUES (:fio, :phone, NULL)");
         $stmt_insert_client->bindParam(':fio', $fio);
         $stmt_insert_client->bindParam(':phone', $phone);
         $stmt_insert_client->execute();
         $client_id = $pdo->lastInsertId();
     } else {
         $client_id = $client['id'];
-        // Проверяем, связан ли номер с Telegram-профилем (telegram_id не 0 и не NULL)
-        if (!empty($client['telegram_id']) && $client['telegram_id'] != '0') {
-            // Если full_name пустое или отличается, обновляем его
-            if ($client['full_name'] === null || $client['full_name'] !== $fio) {
-                $stmt_update_client = $pdo->prepare("UPDATE Clients SET full_name = :fio WHERE id = :client_id");
-                $stmt_update_client->bindParam(':fio', $fio);
-                $stmt_update_client->bindParam(':client_id', $client_id);
-                $stmt_update_client->execute();
-            }
+        // Если full_name пустое или отличается, обновляем его
+        if ($client['full_name'] === null || $client['full_name'] !== $fio) {
+            $stmt_update_client = $pdo->prepare("UPDATE Clients SET full_name = :fio WHERE id = :client_id");
+            $stmt_update_client->bindParam(':fio', $fio);
+            $stmt_update_client->bindParam(':client_id', $client_id);
+            $stmt_update_client->execute();
         }
     }
 
@@ -59,7 +56,7 @@ try {
     $sql = "INSERT INTO Appointments (master_id, client_id, service_id, date_time, price, duration)
             SELECT :master_id, :client_id, :service_id, :date_time, ms.price, ms.duration
             FROM MasterServices ms
-            WHERE ms.master_id = :master_id AND ms.service_id = :service_id";
+            WHERE ms.master_id = :master_id AND ms.service_id = :勧_id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':master_id', $master_id);
     $stmt->bindValue(':client_id', $client_id);
