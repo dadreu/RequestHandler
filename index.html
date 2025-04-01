@@ -95,15 +95,15 @@
       switchAuthButton.addEventListener('click', toggleAuthMode);
 
       // Функция нормализации номера телефона
-      function normalizePhone($phone) {
-      $phone = preg_replace('/[^0-9]/', '', $phone); // Удаляем все нечисловые символы
-      if (strlen($phone) == 11 && $phone[0] == '8') {
-          $phone = '7' . substr($phone, 1); // Заменяем 8 на 7
+      function normalizePhone(phone) {
+        phone = phone.replace(/[^0-9]/g, ''); // Удаляем все нечисловые символы
+        if (phone.length === 10) {
+          phone = '7' + phone; // Если введено 10 цифр, добавляем 7
+        } else if (phone.length === 11 && phone[0] === '8') {
+          phone = '7' + phone.slice(1); // Заменяем 8 на 7
+        }
+        return phone;
       }
-      return $phone;
-  }
-
-$phone = normalizePhone($_POST['phone']);
 
       // Проверка российского номера телефона с поддержкой всех форматов
       function validateRussianPhone(phone) {
@@ -126,13 +126,21 @@ $phone = normalizePhone($_POST['phone']);
           return;
         }
         phone = normalizePhone(phone); // Нормализуем номер перед отправкой
+        console.log("Отправляемый номер:", phone); // Логирование для отладки
+        console.log("Отправляемый пароль:", password);
         fetch(serverUrl + 'master_login.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: `phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}`
         })
-        .then(response => response.json())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Сетевая ошибка: ' + response.status);
+          }
+          return response.json();
+        })
         .then(data => {
+          console.log("Ответ сервера:", data); // Логирование для отладки
           if (data.success) {
             window.location.href = `masterReq.html?master_id=${data.master_id}`;
           } else {
@@ -141,6 +149,7 @@ $phone = normalizePhone($_POST['phone']);
           }
         })
         .catch(error => {
+          console.error("Ошибка:", error); // Логирование для отладки
           errorMessage.textContent = 'Ошибка подключения: ' + error.message;
           errorMessage.style.display = 'block';
         });
