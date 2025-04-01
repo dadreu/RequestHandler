@@ -82,78 +82,80 @@ document.addEventListener('DOMContentLoaded', async () => {
     backButton.addEventListener('click', goBack);
 
     // Загрузка списка мастеров
-    const loadMasters = (defaultMasterId = '') => {
-        fetch('get_masters.php')
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    console.error('Ошибка сервера:', data.error);
-                    alert(`Ошибка сервера: ${data.error}`);
-                    masterSelect.innerHTML = '<option disabled selected>Ошибка загрузки</option>';
-                    return;
-                }
-                masterSelect.innerHTML = '';
-                if (data.masters && data.masters.length > 0) {
-                    data.masters.forEach(master => {
-                        const option = document.createElement('option');
-                        option.value = master.id;
-                        option.textContent = master.full_name;
-                        masterSelect.appendChild(option);
-                    });
-                    if (defaultMasterId) {
-                        masterSelect.value = defaultMasterId;
-                        loadServices(masterSelect.value);
-                    }
-                } else {
-                    masterSelect.innerHTML = '<option disabled selected>Нет мастеров</option>';
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при загрузке мастеров:', error);
-                alert('Не удалось загрузить список мастеров.');
+    const loadMasters = async (defaultMasterId = '') => {
+        try {
+            const response = await fetch('get_masters.php');
+            const data = await response.json();
+            if (data.error) {
+                console.error('Ошибка сервера:', data.error);
+                alert(`Ошибка сервера: ${data.error}`);
                 masterSelect.innerHTML = '<option disabled selected>Ошибка загрузки</option>';
-            });
+                return;
+            }
+            masterSelect.innerHTML = '';
+            if (data.masters && data.masters.length > 0) {
+                data.masters.forEach(master => {
+                    const option = document.createElement('option');
+                    option.value = master.id;
+                    option.textContent = master.full_name;
+                    masterSelect.appendChild(option);
+                });
+                // Устанавливаем первый мастер по умолчанию, если defaultMasterId не передан
+                if (defaultMasterId && masterSelect.querySelector(`option[value="${defaultMasterId}"]`)) {
+                    masterSelect.value = defaultMasterId;
+                } else {
+                    masterSelect.value = data.masters[0].id; // Первый мастер по умолчанию
+                }
+                // Загружаем услуги для выбранного мастера
+                await loadServices(masterSelect.value);
+            } else {
+                masterSelect.innerHTML = '<option disabled selected>Нет мастеров</option>';
+            }
+        } catch (error) {
+            console.error('Ошибка при загрузке мастеров:', error);
+            alert('Не удалось загрузить список мастеров.');
+            masterSelect.innerHTML = '<option disabled selected>Ошибка загрузки</option>';
+        }
     };
 
     // Загрузка услуг для выбранного мастера
-    const loadServices = (masterId) => {
+    const loadServices = async (masterId) => {
         if (!masterId) {
             serviceSelect.innerHTML = '<option disabled selected>Выберите мастера</option>';
             return;
         }
-        fetch(`get_services.php?master_id=${masterId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    console.error('Ошибка сервера:', data.error);
-                    alert(`Ошибка сервера: ${data.error}`);
-                    serviceSelect.innerHTML = '<option disabled selected>Ошибка загрузки</option>';
-                    return;
-                }
-                serviceSelect.innerHTML = '';
-                if (data.services && data.services.length > 0) {
-                    data.services.forEach(service => {
-                        const option = document.createElement('option');
-                        option.value = service.id;
-                        option.textContent = service.name;
-                        serviceSelect.appendChild(option);
-                    });
-                    if (serviceId) {
-                        serviceSelect.value = serviceId;
-                    }
-                } else {
-                    serviceSelect.innerHTML = '<option disabled selected>Нет услуг</option>';
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при загрузке услуг:', error);
-                alert('Не удалось загрузить список услуг.');
+        try {
+            const response = await fetch(`get_services.php?master_id=${masterId}`);
+            const data = await response.json();
+            if (data.error) {
+                console.error('Ошибка сервера:', data.error);
+                alert(`Ошибка сервера: ${data.error}`);
                 serviceSelect.innerHTML = '<option disabled selected>Ошибка загрузки</option>';
-            });
+                return;
+            }
+            serviceSelect.innerHTML = '';
+            if (data.services && data.services.length > 0) {
+                data.services.forEach(service => {
+                    const option = document.createElement('option');
+                    option.value = service.id;
+                    option.textContent = service.name;
+                    serviceSelect.appendChild(option);
+                });
+                if (serviceId) {
+                    serviceSelect.value = serviceId;
+                }
+            } else {
+                serviceSelect.innerHTML = '<option disabled selected>Нет услуг</option>';
+            }
+        } catch (error) {
+            console.error('Ошибка при загрузке услуг:', error);
+            alert('Не удалось загрузить список услуг.');
+            serviceSelect.innerHTML = '<option disabled selected>Ошибка загрузки</option>';
+        }
     };
 
     // Инициализация формы
-    loadMasters(selectedMasterId);
+    await loadMasters(selectedMasterId);
     if (fio) fioInput.value = decodeURIComponent(fio);
     if (phone && role === 'master') phoneInput.value = phone;
 
