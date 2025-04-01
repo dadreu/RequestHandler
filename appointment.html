@@ -16,8 +16,7 @@
     <div class="content">
         <div class="form-section">
             <h2>Выберите мастера</h2>
-            <select class="form-input" id="master-select">
-                <option disabled selected>Загрузка...</option>
+            <select class="form  <option disabled selected>Загрузка...</option>
             </select>
         </div>
 
@@ -33,7 +32,7 @@
             <input type="text" class="form-input" id="fio-input" placeholder="Введите ваше ФИО" pattern="^[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*)?)?$" required>
         </div>
 
-        <div class="form-section">
+        <div class="form-section" id="phone-section" style="display: none;">
             <h2>Номер телефона</h2>
             <input type="tel" class="form-input" id="phone-input" placeholder="Введите номер телефона" pattern="^((\+7|7|8)[\s\-]?)?(\(?\d{3}\)?[\s\-]?)?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$" required>
         </div>
@@ -43,7 +42,6 @@
 
     <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Извлечение параметров из URL
     const urlParams = new URLSearchParams(window.location.search);
     const masterId = urlParams.get('master_id');
     const clientId = urlParams.get('client_id');
@@ -52,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fio = urlParams.get('fio');
     const phone = urlParams.get('phone');
 
-    // Определение роли пользователя
     const role = masterId ? 'master' : (clientId ? 'client' : null);
     if (!role) {
         alert('Ошибка: не удалось определить роль пользователя. Пожалуйста, вернитесь и попробуйте снова.');
@@ -60,27 +57,25 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Элементы DOM
     const fioInput = document.getElementById('fio-input');
     const phoneInput = document.getElementById('phone-input');
     const confirmButton = document.getElementById('confirm-button');
     const masterSelect = document.getElementById('master-select');
     const serviceSelect = document.getElementById('service-select');
     const backButton = document.querySelector('.back-button');
+    const phoneSection = document.getElementById('phone-section');
 
-    // Функция возврата в зависимости от роли
     const goBack = () => {
         if (role === 'master' && masterId) {
             window.location.href = `masterReq.html?master_id=${masterId}`;
         } else if (role === 'client' && clientId) {
             window.location.href = `clientReq.html?client_id=${clientId}`;
         } else {
-            window.history.back(); // Если ID нет, просто возвращаемся назад
+            window.history.back();
         }
     };
     backButton.addEventListener('click', goBack);
 
-    // Загрузка списка мастеров
     const loadMasters = (defaultMasterId = '') => {
         fetch('get_masters.php')
             .then(response => response.json())
@@ -114,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     };
 
-    // Загрузка услуг для выбранного мастера
     const loadServices = (masterId) => {
         if (!masterId) {
             serviceSelect.innerHTML = '<option disabled selected>Выберите мастера</option>';
@@ -151,37 +145,60 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     };
 
-    // Инициализация формы
     loadMasters(selectedMasterId);
     if (fio) fioInput.value = decodeURIComponent(fio);
-    if (phone) phoneInput.value = phone;
+    if (phone && role === 'master') phoneInput.value = phone;
 
-    // Обновление услуг при смене мастера
+    if (role === 'master') {
+        phoneSection.style.display = 'block';
+    } else {
+        phoneSection.style.display = 'none';
+    }
+
+    let clientPhone = '';
+    if (role === 'client') {
+        fetch(`get_client_phone.php?client_id=${clientId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.phone) {
+                    clientPhone = data.phone;
+                } else {
+                    alert('Ошибка: не удалось получить номер телефона клиента.');
+                    window.history.back();
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при получении номера телефона:', error);
+                alert('Произошла ошибка при получении данных. Пожалуйста, попробуйте снова.');
+                window.history.back();
+            });
+    }
+
     masterSelect.addEventListener('change', () => loadServices(masterSelect.value));
 
-    // Валидация формы
     const validateForm = () => {
         const fioPattern = /^[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*)?)?$/;
-        const phonePattern = /^((\+7|7|8)[\s\-]?)?(\(?\d{3}\)?[\s\-]?)?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/;
         if (!fioInput.value.match(fioPattern)) {
             alert('ФИО должно начинаться с заглавной буквы и содержать только буквы, пробелы или дефисы.');
             return false;
         }
-        if (!phoneInput.value.match(phonePattern)) {
-            alert('Номер телефона должен быть в формате: +79999999999 или 89999999999.');
-            return false;
+        if (role === 'master') {
+            const phonePattern = /^((\+7|7|8)[\s\-]?)?(\(?\d{3}\)?[\s\-]?)?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/;
+            if (!phoneInput.value.match(phonePattern)) {
+                alert('Номер телефона должен быть в формате: +79999999999 или 89999999999.');
+                return false;
+            }
         }
         return true;
     };
 
-    // Обработчик кнопки "Подтвердить запись"
     confirmButton.addEventListener('click', () => {
-        if (!validateForm()) return;
+        if (role === 'master' && !validateForm()) return;
 
         const selectedMasterId = masterSelect.value;
         const serviceId = serviceSelect.value;
         const fio = fioInput.value;
-        const phone = phoneInput.value;
+        const phone = role === 'client' ? clientPhone : phoneInput.value;
         const originalMasterId = masterId || null;
 
         if (!selectedMasterId || !serviceId) {
