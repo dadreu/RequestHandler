@@ -124,6 +124,8 @@
 .record-time,
 .record-client,
 .record-service,
+.record-master-phone,
+.record-phone,
 .record-price {
     font-size: 14px;
     color: #333;
