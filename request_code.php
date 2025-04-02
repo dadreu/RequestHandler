@@ -4,11 +4,27 @@ header('Content-Type: application/json');
 $response = ['success' => false];
 
 if (isset($_POST['phone']) && isset($_POST['telegram_id'])) {
-    $phone = preg_replace('/[^0-9]/', '', $_POST['phone']); // Удаляем все нечисловые символы
+    $phone = preg_replace('/[^0-9]/', '', $_POST['phone']);
     if (strlen($phone) == 11 && $phone[0] == '8') {
-        $phone = '7' . substr($phone, 1); // Заменяем 8 на 7
+        $phone = '7' . substr($phone, 1);
     }
     $telegram_id = $_POST['telegram_id'];
+
+    // Проверка времени последней отправки
+    $stmt = $pdo->prepare("SELECT MAX(created_at) as last_sent FROM ConfirmationCodes WHERE phone = :phone AND telegram_id = :telegram_id");
+    $stmt->execute(['phone' => $phone, 'telegram_id' => $telegram_id]);
+    $last_sent = $stmt->fetch(PDO::FETCH_ASSOC)['last_sent'];
+
+    if ($last_sent) {
+        $last_sent_time = new DateTime($last_sent);
+        $now = new DateTime();
+        $interval = $now->diff($last_sent_time);
+        if ($interval->i < 1) { // Меньше 1 минуты
+            $response['message'] = 'Новый код можно запросить через ' . (60 - $interval->s) . ' секунд';
+            echo json_encode($response);
+            exit;
+        }
+    }
 
     // Проверка в таблице Clients
     $stmt = $pdo->prepare("SELECT id, telegram_id FROM Clients WHERE phone = :phone");
@@ -16,14 +32,11 @@ if (isset($_POST['phone']) && isset($_POST['telegram_id'])) {
     $client = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($client) {
-        // Если telegram_id равен NULL, обновляем его
         if ($client['telegram_id'] === null) {
             $stmt_update = $pdo->prepare("UPDATE Clients SET telegram_id = :telegram_id WHERE id = :client_id");
             $stmt_update->execute(['telegram_id' => $telegram_id, 'client_id' => $client['id']]);
             $client_id = $client['id'];
-        }
-        // Если telegram_id уже установлен, проверяем совпадение
-        elseif ($client['telegram_id'] === $telegram_id) {
+        } elseif ($client['telegram_id'] === $telegram_id) {
             $client_id = $client['id'];
         } else {
             $response['message'] = 'Номер телефона не связан с этим Telegram аккаунтом';
@@ -31,7 +44,6 @@ if (isset($_POST['phone']) && isset($_POST['telegram_id'])) {
             exit;
         }
     } else {
-        // Регистрация нового клиента с указанным Telegram ID
         $stmt = $pdo->prepare("INSERT INTO Clients (phone, telegram_id) VALUES (:phone, :telegram_id)");
         $stmt->execute(['phone' => $phone, 'telegram_id' => $telegram_id]);
         $client_id = $pdo->lastInsertId();
@@ -43,7 +55,7 @@ if (isset($_POST['phone']) && isset($_POST['telegram_id'])) {
     $stmt->execute(['phone' => $phone, 'telegram_id' => $telegram_id, 'code' => $code]);
 
     // Отправка кода через Telegram
-    $botToken = '8168606272:AAFuikWYy8UKjzK3iuyMjRtWHCdS1KKECbE'; // Замените на ваш токен
+    $botToken = '8168606272:AAFuikWYy8UKjzK3iuyMjRtWHCdS1KKECbE';
     $text = "Ваш код подтверждения: $code";
     $url = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$telegram_id&text=" . urlencode($text);
     file_get_contents($url);

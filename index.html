@@ -1,230 +1,232 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Вход</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <header class="top-bar">
-    <h1>Вход</h1>
-    <div></div>
-  </header>
+    <header class="top-bar">
+        <h1>Вход</h1>
+        <div></div>
+    </header>
 
-  <div class="content">
-    <div class="login-form">
-      <h2>Авторизация</h2>
-      <!-- Блок для входа мастеров -->
-      <div id="master-login-step">
-        <div class="form-input-group">
-          <label for="master_phone">Номер телефона</label>
-          <input type="tel" id="master_phone" name="master_phone" class="form-input" required placeholder="+7 (XXX) XXX-XX-XX">
+    <div class="content">
+        <div class="login-form">
+            <h2>Авторизация</h2>
+            <!-- Блок для входа мастеров -->
+            <div id="master-login-step">
+                <div class="form-input-group">
+                    <label for="master_phone">Номер телефона</label>
+                    <input type="tel" id="master_phone" name="master_phone" class="form-input" required placeholder="+7 (XXX) XXX-XX-XX">
+                </div>
+                <div class="form-input-group">
+                    <label for="master_password">Пароль</label>
+                    <input type="password" id="master_password" name="master_password" class="form-input" required>
+                </div>
+                <div class="form-input-group">
+                    <button id="master-login-button" class="confirm-button">Войти</button>
+                </div>
+            </div>
+            <!-- Блок для ввода номера телефона клиентов -->
+            <div id="phone-step" style="display: none;">
+                <div class="form-input-group">
+                    <label for="phone">Номер телефона</label>
+                    <input type="tel" id="phone" name="phone" class="form-input" required placeholder="+7 (XXX) XXX-XX-XX">
+                </div>
+                <div class="form-input-group">
+                    <button id="request-code" class="confirm-button">Получить код</button>
+                </div>
+            </div>
+            <!-- Блок для ввода кода подтверждения -->
+            <div id="code-step" style="display: none;">
+                <div class="form-input-group">
+                    <label for="code">Код подтверждения</label>
+                    <input type="text" id="code" name="code" class="form-input" required>
+                </div>
+                <div class="form-input-group">
+                    <button id="verify-code" class="confirm-button">Подтвердить</button>
+                </div>
+                <div class="form-input-group">
+                    <button id="resend-code" class="confirm-button">Отправить код повторно</button>
+                </div>
+            </div>
+            <!-- Сообщение об ошибке -->
+            <div id="error-message" class="error-message" style="display: none;"></div>
+            <!-- Кнопка переключения режима -->
+            <button id="switch-auth" class="back-button">Войти как клиент</button>
         </div>
-        <div class="form-input-group">
-          <label for="master_password">Пароль</label>
-          <input type="password" id="master_password" name="master_password" class="form-input" required>
-        </div>
-        <div class="form-input-group">
-          <button id="master-login-button" class="confirm-button">Войти</button>
-        </div>
-      </div>
-      <!-- Блок для ввода номера телефона клиентов -->
-      <div id="phone-step" style="display: none;">
-        <div class="form-input-group">
-          <label for="phone">Номер телефона</label>
-          <input type="tel" id="phone" name="phone" class="form-input" required placeholder="+7 (XXX) XXX-XX-XX">
-        </div>
-        <div class="form-input-group">
-          <button id="request-code" class="confirm-button">Получить код</button>
-        </div>
-      </div>
-      <!-- Блок для ввода кода подтверждения -->
-      <div id="code-step" style="display: none;">
-        <div class="form-input-group">
-          <label for="code">Код подтверждения</label>
-          <input type="text" id="code" name="code" class="form-input" required>
-        </div>
-        <div class="form-input-group">
-          <button id="verify-code" class="confirm-button">Подтвердить</button>
-        </div>
-      </div>
-      <!-- Сообщение об ошибке -->
-      <div id="error-message" class="error-message" style="display: none;"></div>
-      <!-- Кнопка переключения режима -->
-      <button id="switch-auth" class="back-button">Войти как клиент</button>
     </div>
-  </div>
 
-  <script>
+    <script>
     document.addEventListener('DOMContentLoaded', function() {
-      const masterLoginStep = document.getElementById('master-login-step');
-      const phoneStep = document.getElementById('phone-step');
-      const codeStep = document.getElementById('code-step');
-      const errorMessage = document.getElementById('error-message');
-      const switchAuthButton = document.getElementById('switch-auth');
-      const masterLoginButton = document.getElementById('master-login-button');
-      const requestCodeButton = document.getElementById('request-code');
-      const verifyCodeButton = document.getElementById('verify-code');
-      const masterPhoneInput = document.getElementById('master_phone');
-      const masterPasswordInput = document.getElementById('master_password');
-      const phoneInput = document.getElementById('phone');
-      const codeInput = document.getElementById('code');
-      const serverUrl = 'https://requesthandler-dadreu.amvera.io/';
-      const user = Telegram.WebApp.initDataUnsafe.user;
-      const telegramId = (user && user.id) ? user.id : null;
-      let isMasterMode = true;
+        const masterLoginStep = document.getElementById('master-login-step');
+        const phoneStep = document.getElementById('phone-step');
+        const codeStep = document.getElementById('code-step');
+        const errorMessage = document.getElementById('error-message');
+        const switchAuthButton = document.getElementById('switch-auth');
+        const masterLoginButton = document.getElementById('master-login-button');
+        const requestCodeButton = document.getElementById('request-code');
+        const verifyCodeButton = document.getElementById('verify-code');
+        const resendCodeButton = document.getElementById('resend-code');
+        const masterPhoneInput = document.getElementById('master_phone');
+        const masterPasswordInput = document.getElementById('master_password');
+        const phoneInput = document.getElementById('phone');
+        const codeInput = document.getElementById('code');
+        const serverUrl = 'https://requesthandler-dadreu.amvera.io/';
+        const user = Telegram.WebApp.initDataUnsafe.user;
+        const telegramId = (user && user.id) ? user.id : null;
+        let isMasterMode = true;
 
-      // Переключение режима авторизации
-      function toggleAuthMode() {
-        if (isMasterMode) {
-          masterLoginStep.style.display = 'none';
-          phoneStep.style.display = 'block';
-          switchAuthButton.textContent = 'Войти как мастер';
-        } else {
-          phoneStep.style.display = 'none';
-          codeStep.style.display = 'none';
-          masterLoginStep.style.display = 'block';
-          switchAuthButton.textContent = 'Войти как клиент';
+        // Переключение режима авторизации
+        function toggleAuthMode() {
+            if (isMasterMode) {
+                masterLoginStep.style.display = 'none';
+                phoneStep.style.display = 'block';
+                switchAuthButton.textContent = 'Войти как мастер';
+            } else {
+                phoneStep.style.display = 'none';
+                codeStep.style.display = 'none';
+                masterLoginStep.style.display = 'block';
+                switchAuthButton.textContent = 'Войти как клиент';
+            }
+            isMasterMode = !isMasterMode;
+            errorMessage.style.display = 'none';
         }
-        isMasterMode = !isMasterMode;
-        errorMessage.style.display = 'none';
-      }
 
-      switchAuthButton.addEventListener('click', toggleAuthMode);
+        switchAuthButton.addEventListener('click', toggleAuthMode);
 
-      // Функция нормализации номера телефона
-      function normalizePhone(phone) {
-        phone = phone.replace(/[^0-9]/g, ''); // Удаляем все нечисловые символы
-        if (phone.length === 10) {
-          phone = '7' + phone; // Если введено 10 цифр, добавляем 7
-        } else if (phone.length === 11 && phone[0] === '8') {
-          phone = '7' + phone.slice(1); // Заменяем 8 на 7
+        // Функция нормализации номера телефона
+        function normalizePhone(phone) {
+            phone = phone.replace(/[^0-9]/g, '');
+            if (phone.length === 10) {
+                phone = '7' + phone;
+            } else if (phone.length === 11 && phone[0] === '8') {
+                phone = '7' + phone.slice(1);
+            }
+            return phone;
         }
-        return phone;
-      }
 
-      // Проверка российского номера телефона с поддержкой всех форматов
-      function validateRussianPhone(phone) {
-        const regex = /^(\+7|8|7)?[\s\-]?\(?(\d{3})\)?[\s\-]?(\d{3})[\s\-]?(\d{2})[\s\-]?(\d{2})$/;
-        return regex.test(phone);
-      }
+        // Проверка российского номера телефона
+        function validateRussianPhone(phone) {
+            const regex = /^(\+7|8|7)?[\s\-]?\(?(\d{3})\)?[\s\-]?(\d{3})[\s\-]?(\d{2})[\s\-]?(\d{2})$/;
+            return regex.test(phone);
+        }
 
-      // Вход мастеров
-      masterLoginButton.addEventListener('click', function() {
-        let phone = masterPhoneInput.value;
-        const password = masterPasswordInput.value;
-        if (!phone || !password) {
-          errorMessage.textContent = 'Введите номер телефона и пароль';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        if (!validateRussianPhone(phone)) {
-          errorMessage.textContent = 'Неверный формат номера (пример: +7 (XXX) XXX-XX-XX)';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        phone = normalizePhone(phone); // Нормализуем номер перед отправкой
-        console.log("Отправляемый номер:", phone); // Логирование для отладки
-        console.log("Отправляемый пароль:", password);
-        fetch(serverUrl + 'master_login.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}`
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Сетевая ошибка: ' + response.status);
-          }
-          return response.json();
-        })
-        .then(data => {
-          console.log("Ответ сервера:", data); // Логирование для отладки
-          if (data.success) {
-            window.location.href = `masterReq.html?master_id=${data.master_id}`;
-          } else {
-            errorMessage.textContent = data.message || 'Неверный номер телефона или пароль';
-            errorMessage.style.display = 'block';
-          }
-        })
-        .catch(error => {
-          console.error("Ошибка:", error); // Логирование для отладки
-          errorMessage.textContent = 'Ошибка подключения: ' + error.message;
-          errorMessage.style.display = 'block';
+        // Вход мастеров
+        masterLoginButton.addEventListener('click', function() {
+            let phone = masterPhoneInput.value;
+            const password = masterPasswordInput.value;
+            if (!phone || !password) {
+                errorMessage.textContent = 'Введите номер телефона и пароль';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            if (!validateRussianPhone(phone)) {
+                errorMessage.textContent = 'Неверный формат номера (пример: +7 (XXX) XXX-XX-XX)';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            phone = normalizePhone(phone);
+            fetch(serverUrl + 'master_login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = `masterReq.html?master_id=${data.master_id}`;
+                } else {
+                    errorMessage.textContent = data.message || 'Неверный номер телефона или пароль';
+                    errorMessage.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                errorMessage.textContent = 'Ошибка подключения: ' + error.message;
+                errorMessage.style.display = 'block';
+            });
         });
-      });
 
-      // Запрос кода для клиентов
-      requestCodeButton.addEventListener('click', function() {
-        let phone = phoneInput.value;
-        if (!phone) {
-          errorMessage.textContent = 'Введите номер телефона';
-          errorMessage.style.display = 'block';
-          return;
+        // Функция запроса кода
+        function requestCode() {
+            let phone = phoneInput.value;
+            if (!phone) {
+                errorMessage.textContent = 'Введите номер телефона';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            if (!validateRussianPhone(phone)) {
+                errorMessage.textContent = 'Неверный формат номера (пример: +7 (XXX) XXX-XX-XX)';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            phone = normalizePhone(phone);
+            if (!telegramId) {
+                errorMessage.textContent = 'Ошибка: Telegram ID не найден';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            fetch(serverUrl + 'request_code.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `phone=${encodeURIComponent(phone)}&telegram_id=${telegramId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    phoneStep.style.display = 'none';
+                    codeStep.style.display = 'block';
+                    errorMessage.style.display = 'none';
+                } else {
+                    errorMessage.textContent = data.message || 'Не удалось запросить код';
+                    errorMessage.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                errorMessage.textContent = 'Ошибка подключения: ' + error.message;
+                errorMessage.style.display = 'block';
+            });
         }
-        if (!validateRussianPhone(phone)) {
-          errorMessage.textContent = 'Неверный формат номера (пример: +7 (XXX) XXX-XX-XX)';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        phone = normalizePhone(phone); // Нормализуем номер перед отправкой
-        if (!telegramId) {
-          errorMessage.textContent = 'Ошибка: Telegram ID не найден';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        fetch(serverUrl + 'request_code.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `phone=${encodeURIComponent(phone)}&telegram_id=${telegramId}`
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            phoneStep.style.display = 'none';
-            codeStep.style.display = 'block';
-          } else {
-            errorMessage.textContent = data.message || 'Не удалось запросить код';
-            errorMessage.style.display = 'block';
-          }
-        })
-        .catch(error => {
-          errorMessage.textContent = 'Ошибка подключения: ' + error.message;
-          errorMessage.style.display = 'block';
-        });
-      });
 
-      // Проверка кода для клиентов
-      verifyCodeButton.addEventListener('click', function() {
-        let phone = phoneInput.value;
-        const code = codeInput.value;
-        if (!code) {
-          errorMessage.textContent = 'Введите код';
-          errorMessage.style.display = 'block';
-          return;
-        }
-        phone = normalizePhone(phone); // Нормализуем номер перед отправкой
-        fetch(serverUrl + 'verify_code.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `phone=${encodeURIComponent(phone)}&code=${encodeURIComponent(code)}`
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            window.location.href = `clientReq.html?client_id=${data.client_id}`;
-          } else {
-            errorMessage.textContent = data.message || 'Неверный код';
-            errorMessage.style.display = 'block';
-          }
-        })
-        .catch(error => {
-          errorMessage.textContent = 'Ошибка подключения: ' + error.message;
-          errorMessage.style.display = 'block';
+        // Запрос кода для клиентов
+        requestCodeButton.addEventListener('click', requestCode);
+
+        // Повторная отправка кода
+        resendCodeButton.addEventListener('click', requestCode);
+
+        // Проверка кода для клиентов
+        verifyCodeButton.addEventListener('click', function() {
+            let phone = phoneInput.value;
+            const code = codeInput.value;
+            if (!code) {
+                errorMessage.textContent = 'Введите код';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            phone = normalizePhone(phone);
+            fetch(serverUrl + 'verify_code.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `phone=${encodeURIComponent(phone)}&code=${encodeURIComponent(code)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = `clientReq.html?client_id=${data.client_id}`;
+                } else {
+                    errorMessage.textContent = data.message || 'Неверный код';
+                    errorMessage.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                errorMessage.textContent = 'Ошибка подключения: ' + error.message;
+                errorMessage.style.display = 'block';
+            });
         });
-      });
     });
-  </script>
+    </script>
 </body>
 </html>
