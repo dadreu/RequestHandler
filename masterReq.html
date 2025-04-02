@@ -44,54 +44,57 @@
         const masterId = urlParams.get('master_id');
 
         function loadAppointments() {
-            const sortField = document.getElementById('sort_field').value;
-            const sortOrder = document.getElementById('sort_order').value;
-            fetch(`https://requesthandler-dadreu.amvera.io/get_master_appointments.php?master_id=${masterId}&sort_field=${sortField}&sort_order=${sortOrder}`)
-                .then(response => response.json())
-                .then(data => {
-                    const container = document.getElementById('appointments-container');
-                    if (data.success) {
-                        container.innerHTML = '';
-                        data.appointments.forEach(appointment => {
-                            const appointmentDiv = document.createElement('div');
-                            appointmentDiv.classList.add('record');
-                            appointmentDiv.innerHTML = `
-                                <span class="record-time">${appointment.date_time}</span>
-                                <span class="record-client">${appointment.client_name}</span>
-                                <span class="record-phone">${appointment.phone}</span>
-                                <span class="record-service">${appointment.service_name}</span>
-                                <span class="record-price">${appointment.price} ₽</span>
-                                <button class="edit-button" data-id="${appointment.id}">Изменить</button>
-                                <button class="delete-button" data-id="${appointment.id}">Удалить</button>
-                            `;
-                            container.appendChild(appointmentDiv);
-                        });
-
-                        document.querySelectorAll('.delete-button').forEach(button => {
-                            button.addEventListener('click', function() {
-                                const appointmentId = this.getAttribute('data-id');
-                                if (confirm('Вы уверены, что хотите удалить эту запись?')) {
-                                    deleteAppointment(appointmentId);
-                                }
-                            });
-                        });
-
-                        document.querySelectorAll('.edit-button').forEach(button => {
-                            button.addEventListener('click', function() {
-                                const appointmentId = this.getAttribute('data-id');
-                                editAppointment(appointmentId);
-                            });
-                        });
-                    } else {
-                        container.innerHTML = `<p>${data.message || "Записи отсутствуют."}</p>`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка при загрузке записей:', error);
-                    container.innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
+    const sortField = document.getElementById('sort_field').value;
+    const sortOrder = document.getElementById('sort_order').value;
+    fetch(`https://requesthandler-dadreu.amvera.io/get_master_appointments.php?master_id=${masterId}&sort_field=${sortField}&sort_order=${sortOrder}`)
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('appointments-container');
+            if (data.success) {
+                container.innerHTML = '';
+                data.appointments.forEach(appointment => {
+                    const appointmentDiv = document.createElement('div');
+                    appointmentDiv.classList.add('record');
+                    appointmentDiv.innerHTML = `
+                        <div class="record-text">
+                            <span class="record-time">${appointment.date_time}</span>
+                            <span class="record-client">${appointment.client_name}</span>
+                            <span class="record-phone">${appointment.phone}</span>
+                            <span class="record-service">${appointment.service_name}</span>
+                            <span class="record-price">${appointment.price} ₽</span>
+                        </div>
+                        <div class="record-buttons">
+                            <button class="edit-button" data-id="${appointment.id}">Изменить</button>
+                            <button class="delete-button" data-id="${appointment.id}">Удалить</button>
+                        </div>
+                    `;
+                    container.appendChild(appointmentDiv);
                 });
-        }
+                // Остальной код для обработчиков событий кнопок остается без изменений
+                document.querySelectorAll('.delete-button').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const appointmentId = this.getAttribute('data-id');
+                        if (confirm('Вы уверены, что хотите удалить эту запись?')) {
+                            deleteAppointment(appointmentId);
+                        }
+                    });
+                });
 
+                document.querySelectorAll('.edit-button').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const appointmentId = this.getAttribute('data-id');
+                        editAppointment(appointmentId);
+                    });
+                });
+            } else {
+                container.innerHTML = `<p>${data.message || "Записи отсутствуют."}</p>`;
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при загрузке записей:', error);
+            container.innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
+        });
+}
         function deleteAppointment(appointmentId) {
             fetch(`https://requesthandler-dadreu.amvera.io/delete_appointment.php`, {
                 method: 'POST',
