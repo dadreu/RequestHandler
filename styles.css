@@ -504,6 +504,38 @@
         color: #007bff; /* Синий цвет */
     }
 
+    /* Стили для кнопки "Изменить" */
+.edit-button {
+    background-color: #007bff; /* Синий фон */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin: 0 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-button:hover {
+    background-color: #0056b3; /* Темнее при наведении */
+}
+
+/* Стили для кнопки "Удалить" */
+.delete-button {
+    background-color: #dc3545; /* Красный фон */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin: 0 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.delete-button:hover {
+    background-color: #c82333; /* Темнее при наведении */
+}
+
     .sort-options {
         background-color: #fff;
         padding: 15px;

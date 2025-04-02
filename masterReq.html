@@ -93,8 +93,12 @@
         }
 
         function deleteAppointment(appointmentId) {
-            fetch(`https://requesthandler-dadreu.amvera.io/delete_appointment.php?id=${appointmentId}`, {
-                method: 'DELETE'
+            fetch(`https://requesthandler-dadreu.amvera.io/delete_appointment.php`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: appointmentId })
             })
             .then(response => response.json())
             .then(data => {

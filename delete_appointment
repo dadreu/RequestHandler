@@ -4,8 +4,11 @@ header('Content-Type: application/json');
 
 $response = ['success' => false];
 
-if (!empty($_GET['id'])) {
-    $appointment_id = intval($_GET['id']);
+// Получаем данные из тела запроса
+$data = json_decode(file_get_contents('php://input'), true);
+
+if (!empty($data['id'])) {
+    $appointment_id = intval($data['id']);
     try {
         $stmt = $pdo->prepare("DELETE FROM Appointments WHERE id = ?");
         $stmt->execute([$appointment_id]);
