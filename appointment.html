@@ -43,7 +43,6 @@
 
     <script>
 document.addEventListener('DOMContentLoaded', async () => {
-    // Извлечение параметров из URL
     const urlParams = new URLSearchParams(window.location.search);
     const masterId = urlParams.get('master_id');
     const clientId = urlParams.get('client_id');
@@ -51,16 +50,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const serviceId = urlParams.get('service_id');
     const fio = urlParams.get('fio');
     const phone = urlParams.get('phone');
+    const appointmentId = urlParams.get('appointment_id');
+    const dateTime = urlParams.get('date_time');
 
-    // Определение роли пользователя
     const role = masterId ? 'master' : (clientId ? 'client' : null);
     if (!role) {
-        alert('Ошибка: не удалось определить роль пользователя. Пожалуйста, вернитесь и попробуйте снова.');
+        alert('Ошибка: не удалось определить роль пользователя.');
         window.history.back();
         return;
     }
 
-    // Элементы DOM
     const fioInput = document.getElementById('fio-input');
     const phoneInput = document.getElementById('phone-input');
     const confirmButton = document.getElementById('confirm-button');
@@ -69,7 +68,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const backButton = document.querySelector('.back-button');
     const phoneSection = document.getElementById('phone-section');
 
-    // Функция возврата в зависимости от роли
     const goBack = () => {
         if (role === 'master' && masterId) {
             window.location.href = `masterReq.html?master_id=${masterId}`;
@@ -81,17 +79,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     backButton.addEventListener('click', goBack);
 
-    // Загрузка списка мастеров
     const loadMasters = async (defaultMasterId = '') => {
         try {
-            const response = await fetch('get_masters.php');
+            const response = await fetch('https://requesthandler-dadreu.amvera.io/get_masters.php');
             const data = await response.json();
-            if (data.error) {
-                console.error('Ошибка сервера:', data.error);
-                alert(`Ошибка сервера: ${data.error}`);
-                masterSelect.innerHTML = '<option disabled selected>Ошибка загрузки</option>';
-                return;
-            }
+            if (data.error) throw new Error(data.error);
             masterSelect.innerHTML = '';
             if (data.masters && data.masters.length > 0) {
                 data.masters.forEach(master => {
@@ -100,39 +92,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                     option.textContent = master.full_name;
                     masterSelect.appendChild(option);
                 });
-                // Устанавливаем первый мастер по умолчанию, если defaultMasterId не передан
                 if (defaultMasterId && masterSelect.querySelector(`option[value="${defaultMasterId}"]`)) {
                     masterSelect.value = defaultMasterId;
                 } else {
-                    masterSelect.value = data.masters[0].id; // Первый мастер по умолчанию
+                    masterSelect.value = data.masters[0].id;
                 }
-                // Загружаем услуги для выбранного мастера
                 await loadServices(masterSelect.value);
             } else {
                 masterSelect.innerHTML = '<option disabled selected>Нет мастеров</option>';
             }
         } catch (error) {
-            console.error('Ошибка при загрузке мастеров:', error);
-            alert('Не удалось загрузить список мастеров.');
+            console.error('Ошибка:', error);
             masterSelect.innerHTML = '<option disabled selected>Ошибка загрузки</option>';
         }
     };
 
-    // Загрузка услуг для выбранного мастера
     const loadServices = async (masterId) => {
         if (!masterId) {
             serviceSelect.innerHTML = '<option disabled selected>Выберите мастера</option>';
             return;
         }
         try {
-            const response = await fetch(`get_services.php?master_id=${masterId}`);
+            const response = await fetch(`https://requesthandler-dadreu.amvera.io/get_services.php?master_id=${masterId}`);
             const data = await response.json();
-            if (data.error) {
-                console.error('Ошибка сервера:', data.error);
-                alert(`Ошибка сервера: ${data.error}`);
-                serviceSelect.innerHTML = '<option disabled selected>Ошибка загрузки</option>';
-                return;
-            }
+            if (data.error) throw new Error(data.error);
             serviceSelect.innerHTML = '';
             if (data.services && data.services.length > 0) {
                 data.services.forEach(service => {
@@ -141,50 +124,64 @@ document.addEventListener('DOMContentLoaded', async () => {
                     option.textContent = service.name;
                     serviceSelect.appendChild(option);
                 });
-                if (serviceId) {
-                    serviceSelect.value = serviceId;
-                }
+                if (serviceId) serviceSelect.value = serviceId;
             } else {
                 serviceSelect.innerHTML = '<option disabled selected>Нет услуг</option>';
             }
         } catch (error) {
-            console.error('Ошибка при загрузке услуг:', error);
-            alert('Не удалось загрузить список услуг.');
+            console.error('Ошибка:', error);
             serviceSelect.innerHTML = '<option disabled selected>Ошибка загрузки</option>';
         }
     };
 
-    // Инициализация формы
-    await loadMasters(selectedMasterId);
-    if (fio) fioInput.value = decodeURIComponent(fio);
-    if (phone && role === 'master') phoneInput.value = phone;
-
-    // Управление видимостью поля телефона
-    let clientPhone = '';
-    if (role === 'master') {
-        phoneSection.style.display = 'block'; // Показываем поле для мастера
-    } else if (role === 'client') {
-        phoneSection.style.display = 'none'; // Скрываем поле для клиента
+    const checkAvailability = async () => {
+        if (!appointmentId) return;
         try {
-            const response = await fetch(`get_client_phone.php?client_id=${clientId}`);
-            const data = await response.json();
-            if (data.phone) {
-                clientPhone = data.phone;
-            } else {
-                alert('Ошибка: не удалось получить номер телефона клиента.');
-                window.history.back();
+            const masterResponse = await fetch(`https://requesthandler-dadreu.amvera.io/check_master.php?id=${selectedMasterId}`);
+            const masterData = await masterResponse.json();
+            if (!masterData.available) {
+                alert('Выбранный мастер больше не доступен. Выберите другого мастера.');
+                masterSelect.value = '';
+                serviceSelect.innerHTML = '<option disabled selected>Выберите мастера</option>';
+                return;
+            }
+
+            const serviceResponse = await fetch(`https://requesthandler-dadreu.amvera.io/check_service.php?master_id=${selectedMasterId}&service_id=${serviceId}`);
+            const serviceData = await serviceResponse.json();
+            if (!serviceData.available) {
+                alert('Выбранная услуга больше не доступна у этого мастера. Выберите другую услугу.');
+                serviceSelect.value = '';
             }
         } catch (error) {
-            console.error('Ошибка при получении номера телефона:', error);
-            alert('Произошла ошибка при получении данных. Пожалуйста, попробуйте снова.');
+            console.error('Ошибка проверки:', error);
+            alert('Ошибка при проверке доступности.');
+        }
+    };
+
+    await loadMasters(selectedMasterId);
+    if (fio) fioInput.value = decodeURIComponent(fio);
+    if (phone && role === 'master') phoneInput.value = decodeURIComponent(phone);
+    if (appointmentId) await checkAvailability();
+
+    let clientPhone = '';
+    if (role === 'master') {
+        phoneSection.style.display = 'block';
+    } else if (role === 'client') {
+        phoneSection.style.display = 'none';
+        try {
+            const response = await fetch(`https://requesthandler-dadreu.amvera.io/get_client_phone.php?client_id=${clientId}`);
+            const data = await response.json();
+            if (data.phone) clientPhone = data.phone;
+            else throw new Error('Телефон клиента не найден');
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Ошибка получения телефона клиента.');
             window.history.back();
         }
     }
 
-    // Обновление услуг при смене мастера
     masterSelect.addEventListener('change', () => loadServices(masterSelect.value));
 
-    // Валидация формы
     const validateForm = () => {
         const fioPattern = /^[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*(?:\s+[А-ЯЁ][а-яё]+(?:[-][А-ЯЁ][а-яё]+)*)?)?$/;
         if (!fioInput.value.match(fioPattern)) {
@@ -201,7 +198,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return true;
     };
 
-    // Обработчик кнопки "Подтвердить запись"
     confirmButton.addEventListener('click', () => {
         if (role === 'master' && !validateForm()) return;
 
@@ -216,7 +212,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const redirectUrl = `date-selection.html?selected_master_id=${selectedMasterId}&service_id=${serviceId}&fio=${encodeURIComponent(fio)}&phone=${encodeURIComponent(phone)}&original_master_id=${originalMasterId}&client_id=${clientId || null}&role=${role}`;
+        const redirectUrl = `date-selection.html?selected_master_id=${selectedMasterId}&service_id=${serviceId}&fio=${encodeURIComponent(fio)}&phone=${encodeURIComponent(phone)}&original_master_id=${originalMasterId}&client_id=${clientId || null}&role=${role}&appointment_id=${appointmentId || ''}&date_time=${encodeURIComponent(dateTime || '')}`;
         window.location.href = redirectUrl;
     });
 });
