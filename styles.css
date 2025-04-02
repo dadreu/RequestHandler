@@ -477,8 +477,8 @@
     /* Контейнер для записи */
     .record {
         display: flex;
-        flex-direction: column;
         justify-content: space-between;
+        align-items: center;
         padding: 12px 7px;
         border-radius: 10px;
         background-color: #fff;
@@ -486,21 +486,23 @@
         margin-bottom: 10px;
         width: 100%;
         box-sizing: border-box;
-        min-height: 120px; /* Фиксируем минимальную высоту */
     }
+    
     .record-text {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
         flex: 1;
     }
+    
 
     .record-buttons {
         display: flex;
-        justify-content: flex-end;
-        gap: 10px; /* Одинаковый отступ между кнопками */
-        margin-top: 10px; /* Отступ сверху от текста */
+        flex-direction: column;
+        gap: 5px;
+        margin-left: 10px;
     }
+
     .record-time,
     .record-client,
     .record-phone,
@@ -515,6 +517,7 @@
         max-width: 100%;
         box-sizing: border-box;
     }
+
     .record:hover {
         background-color: #f9f9f9;
     }
@@ -985,20 +988,21 @@
             width: 100%;
             font-size: 18px;
         }
+
         .record {
-            min-height: auto; /* Убираем фиксированную высоту */
+            flex-direction: column;
+            align-items: flex-start;
         }
-    
 
         .record-text {
             width: 100%;
         }
 
         .record-buttons {
-            flex-direction: column; /* Кнопки вертикально */
-            align-items: flex-end; /* Выравнивание по правому краю */
-            gap: 5px; /* Уменьшенный отступ между кнопками */
+            width: 100%;
+            align-items: flex-end;
             margin-top: 10px;
+            margin-left: 0;
         }
 
 
