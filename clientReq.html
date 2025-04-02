@@ -8,31 +8,23 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <!-- Верхний блок с белым фоном -->
     <div class="top-bar">
         <button class="back-button" onclick="window.location.href='index.html'">Назад</button>
         <h1>Список записей</h1>
     </div>
 
-    <!-- Основной контент на сером фоне -->
     <div class="content">
-        <!-- Блок "Мои записи" -->
         <div id="my-records" class="my-records">
             <h2>Мои записи</h2>
             <!-- Записи будут добавляться сюда -->
         </div>
-
-        <!-- Кнопка "Записаться" -->
         <button class="record-button" onclick="goToAppointment()">Записаться</button>
     </div>
 
     <script>
-        // Получаем ID клиента из параметров URL
         const urlParams = new URLSearchParams(window.location.search);
         const clientId = urlParams.get('client_id');
-        console.log('clientId:', clientId); // Отладочный вывод
 
-        // Функция загрузки записей
         function loadClientRecords() {
             if (!clientId) {
                 alert("Не найден client_id");
@@ -44,12 +36,14 @@
                 .then(data => {
                     const recordsContainer = document.getElementById('my-records');
                     if (data.success) {
+                        recordsContainer.innerHTML = '<h2>Мои записи</h2>';
                         data.appointments.forEach(appointment => {
                             const recordDiv = document.createElement('div');
                             recordDiv.classList.add('record');
                             recordDiv.innerHTML = `
                                 <span class="record-service">${appointment.service_name}</span>
                                 <span class="record-time">${appointment.date_time}</span>
+                                <span class="record-master-phone">${appointment.master_phone}</span>
                                 <span class="record-price">${appointment.price} ₽</span>
                             `;
                             recordsContainer.appendChild(recordDiv);
@@ -64,7 +58,6 @@
                 });
         }
 
-        // Функция для перехода на страницу записи с передачей client_id
         function goToAppointment() {
             if (clientId) {
                 window.location.href = `appointment.html?client_id=${clientId}&role=client`;
@@ -73,7 +66,6 @@
             }
         }
 
-        // Загружаем записи при загрузке страницы
         window.onload = loadClientRecords;
     </script>
 </body>

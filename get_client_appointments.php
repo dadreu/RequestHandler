@@ -1,22 +1,21 @@
 <?php
 include 'config.php';
-
 header('Content-Type: application/json');
 
 $response = ['success' => false];
 
 if (!empty($_GET['client_id'])) {
-    $client_id = intval($_GET['client_id']); // Преобразуем ID клиента в целое число для безопасности
+    $client_id = intval($_GET['client_id']);
 
     try {
-        error_log("Received client_id: " . $client_id);
-
         $stmt = $pdo->prepare("
-            SELECT a.date_time, a.price, s.name AS service_name
+            SELECT a.date_time, a.price, s.name AS service_name, m.phone AS master_phone
             FROM Appointments a
             JOIN Services s ON a.service_id = s.id
-            WHERE a.client_id = ?
+            JOIN Masters m ON a.master_id = m.id
+            WHERE a.client_id = ? 
             ORDER BY a.date_time
+            LIMIT 0, 50
         ");
         $stmt->execute([$client_id]);
         $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -25,7 +24,7 @@ if (!empty($_GET['client_id'])) {
             $response['success'] = true;
             $response['appointments'] = $appointments;
         } else {
-            $response['message'] = "У вас нет записей.";
+            $response['message'] = "Записи отсутствуют.";
         }
     } catch (Exception $e) {
         $response['error'] = "Ошибка БД: " . $e->getMessage();

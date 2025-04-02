@@ -14,10 +14,24 @@
     </header>
 
     <div class="content">
+        <div class="sort-options">
+            <label for="sort_field">Сортировать по:</label>
+            <select id="sort_field">
+                <option value="date_time">Дата и время</option>
+                <option value="client_name">Имя клиента</option>
+                <option value="phone">Телефон</option>
+                <option value="service_name">Услуга</option>
+                <option value="price">Цена</option>
+            </select>
+            <select id="sort_order">
+                <option value="ASC">По возрастанию</option>
+                <option value="DESC">По убыванию</option>
+            </select>
+            <button onclick="loadAppointments()">Применить</button>
+        </div>
         <div id="appointments-container" class="appointments-container">
             <!-- Здесь будут отображаться записи -->
         </div>
-        <!-- Кнопки -->
         <div class="buttons-container">
             <button class="record-button" onclick="goToAppointment()">Записать</button>
             <button onclick="goToWorkMode()">Режим работы</button>
@@ -26,12 +40,13 @@
     </div>
 
     <script>
-        // Получаем ID мастера из параметров URL
         const urlParams = new URLSearchParams(window.location.search);
         const masterId = urlParams.get('master_id');
 
         function loadAppointments() {
-            fetch(`https://requesthandler-dadreu.amvera.io/get_master_appointments.php?master_id=${masterId}`)
+            const sortField = document.getElementById('sort_field').value;
+            const sortOrder = document.getElementById('sort_order').value;
+            fetch(`https://requesthandler-dadreu.amvera.io/get_master_appointments.php?master_id=${masterId}&sort_field=${sortField}&sort_order=${sortOrder}`)
                 .then(response => response.json())
                 .then(data => {
                     const container = document.getElementById('appointments-container');
@@ -43,6 +58,7 @@
                             appointmentDiv.innerHTML = `
                                 <span class="record-time">${appointment.date_time}</span>
                                 <span class="record-client">${appointment.client_name}</span>
+                                <span class="record-phone">${appointment.phone}</span>
                                 <span class="record-service">${appointment.service_name}</span>
                                 <span class="record-price">${appointment.price} ₽</span>
                             `;
@@ -54,7 +70,7 @@
                 })
                 .catch(error => {
                     console.error('Ошибка при загрузке записей:', error);
-                    document.getElementById('appointments-container').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
+                    container.innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
                 });
         }
 
@@ -62,7 +78,6 @@
             if (masterId) {
                 window.location.href = `appointment.html?master_id=${masterId}&role=master`;
             } else {
-                console.error("ID мастера не найден.");
                 alert("Ошибка: ID мастера не указан.");
             }
         }
@@ -71,7 +86,6 @@
             if (masterId) {
                 window.location.href = `work-mode.html?master_id=${masterId}`;
             } else {
-                console.error("ID мастера не найден.");
                 alert("Ошибка: ID мастера не указан.");
             }
         }
