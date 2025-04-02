@@ -484,6 +484,8 @@
     /* Столбцы внутри записи */
     .record-time,
     .record-client,
+    .record-phone,
+    .record-master-phone,
     .record-service,
     .record-price {
         flex: 1; /* Каждый столбец занимает равное пространство */
@@ -498,6 +500,47 @@
 
     .record-price {
         color: #007bff; /* Синий цвет */
+    }
+
+    .sort-options {
+        background-color: #fff;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .sort-options label {
+        font-size: 14px;
+        color: #333;
+    }
+    
+    .sort-options select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #f9f9f9;
+        cursor: pointer;
+    }
+    
+    .sort-options button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+    }
+    
+    .sort-options button:hover {
+        background-color: #0056b3;
     }
 
     /* Стили для группы записей по дням */
@@ -893,9 +936,20 @@
         .record-time,
         .record-client,
         .record-service,
+        .record-phone,
+        .record-master-phone,
         .record-price {
             width: 100%; /* Каждый столбец занимает всю ширину */
             margin-bottom: 5px; /* Отступ между элементами */
+        }
+        .sort-options {
+            flex-direction: column;
+            gap: 10px;
+        }
+    
+        .sort-options select,
+        .sort-options button {
+            width: 100%;
         }
 
     }
