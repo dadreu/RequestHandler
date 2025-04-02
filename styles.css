@@ -477,8 +477,8 @@
     /* Контейнер для записи */
     .record {
         display: flex;
+        flex-direction: column;
         justify-content: space-between;
-        align-items: center;
         padding: 12px 7px;
         border-radius: 10px;
         background-color: #fff;
@@ -486,6 +486,7 @@
         margin-bottom: 10px;
         width: 100%;
         box-sizing: border-box;
+        min-height: 120px; /* Фиксируем минимальную высоту */
     }
     .record-text {
         display: flex;
@@ -496,11 +497,10 @@
 
     .record-buttons {
         display: flex;
-        flex-direction: column;
-        gap: 5px;
-        margin-left: 10px;
+        justify-content: flex-end;
+        gap: 10px; /* Одинаковый отступ между кнопками */
+        margin-top: 10px; /* Отступ сверху от текста */
     }
-    
     .record-time,
     .record-client,
     .record-phone,
@@ -524,30 +524,35 @@
     }
 
     /* Стили для кнопки "Изменить" */
-.edit-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
-.edit-button:hover {
-    background-color: #0056b3; /* Темнее при наведении */
-}
+    .edit-button,
+    .delete-button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 8px 15px; /* Одинаковые внутренние отступы */
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        width: 100px; /* Фиксированная ширина для одинакового размера */
+        text-align: center;
+    }
+    
+    .delete-button {
+        background-color: #dc3545; /* Другой цвет для кнопки "Удалить" */
+    }
+    
+    .edit-button:hover {
+        background-color: #0056b3;
+    }
+    
+    .delete-button:hover {
+        background-color: #c82333;
+    }
+    
+    .edit-button:hover {
+        background-color: #0056b3; /* Темнее при наведении */
+    }
 
-/* Стили для кнопки "Удалить" */
-.delete-button {
-    background-color: #dc3545; /* Красный фон */
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    margin: 0 5px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
 
 .delete-button:hover {
     background-color: #c82333; /* Темнее при наведении */
@@ -981,25 +986,25 @@
             font-size: 18px;
         }
         .record {
-            flex-direction: column; /* Столбцы становятся вертикальными */
-            align-items: flex-start; 
+            min-height: auto; /* Убираем фиксированную высоту */
         }
+    
 
         .record-text {
             width: 100%;
         }
 
         .record-buttons {
-            width: 100%;
-            align-items: flex-end;
+            flex-direction: column; /* Кнопки вертикально */
+            align-items: flex-end; /* Выравнивание по правому краю */
+            gap: 5px; /* Уменьшенный отступ между кнопками */
             margin-top: 10px;
-            margin-left: 0;
         }
+
 
         .edit-button,
         .delete-button {
-            width: 100%;
-            text-align: center;
+            width: 100%; /* Кнопки на всю ширину */
         }
     
         .record-time,
