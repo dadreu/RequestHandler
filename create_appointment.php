@@ -39,6 +39,17 @@ if (strlen($phone) !== 11 || $phone[0] !== '7') {
     exit;
 }
 
+// Проверка, что дата не в прошлом
+$selectedDateTime = new DateTime("$date $time", new DateTimeZone('UTC'));
+$now = new DateTime('now', new DateTimeZone('UTC'));
+$now->setTimezone(new DateTimeZone('Asia/Yekaterinburg')); // Пермское время (UTC+5)
+$selectedDateTime->setTimezone(new DateTimeZone('Asia/Yekaterinburg'));
+
+if ($selectedDateTime < $now) {
+    echo json_encode(['success' => false, 'message' => 'Нельзя записаться на прошедшую дату или время.']);
+    exit;
+}
+
 try {
     $pdo->beginTransaction();
 

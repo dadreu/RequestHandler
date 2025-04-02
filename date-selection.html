@@ -72,7 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const DAYS_OF_WEEK = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     const now = new Date();
     const permTime = new Date(now.getTime() + (5 * 60 * 60 * 1000)); // Пермское время (UTC+5)
-    let currentDate = new Date(permTime.getFullYear(), permTime.getMonth(), 1); // Начало текущего месяца
+    const minDate = new Date(permTime.getFullYear(), permTime.getMonth(), 1); // Минимальная дата — начало текущего месяца
+    let currentDate = new Date(minDate); // Текущий отображаемый месяц
     let selectedDay = null;
     let selectedTime = null;
 
@@ -103,6 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
             year: 'numeric',
             month: 'long'
         }).format(currentDate);
+
+        // Блокировка кнопки "Предыдущий месяц", если это минимальный месяц
+        prevMonthButton.disabled = (year === minDate.getFullYear() && month === minDate.getMonth());
 
         const firstDay = new Date(year, month, 1);
         const startDay = (firstDay.getDay() + 6) % 7; // ПН=0, ВС=6
@@ -201,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Создание записи
     const confirmAppointment = (date, time) => {
-        // Форматируем дату в формате YYYY-MM-DD без смещения часового пояса
         const year = date.getUTCFullYear();
         const month = String(date.getUTCMonth() + 1).padStart(2, '0');
         const day = String(date.getUTCDate()).padStart(2, '0');
