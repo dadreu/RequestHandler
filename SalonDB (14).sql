@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: amvera-dadreu-run-salondb
--- Время создания: Апр 01 2025 г., 19:14
+-- Время создания: Апр 04 2025 г., 21:42
 -- Версия сервера: 8.1.0
 -- Версия PHP: 8.2.27
 
@@ -32,35 +32,31 @@ CREATE TABLE `Appointments` (
   `master_id` int NOT NULL,
   `client_id` int NOT NULL,
   `service_id` int NOT NULL,
-  `date_time` datetime NOT NULL,
-  `price` decimal(10,2) NOT NULL,
-  `duration` int NOT NULL
+  `date_time` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Дамп данных таблицы `Appointments`
 --
 
-INSERT INTO `Appointments` (`id`, `master_id`, `client_id`, `service_id`, `date_time`, `price`, `duration`) VALUES
-(24, 2, 10, 3, '2025-03-17 13:45:00', 3000.00, 120),
-(26, 1, 12, 4, '2025-03-26 13:00:00', 1200.00, 90),
-(27, 2, 13, 1, '2025-03-21 15:15:00', 1200.00, 45),
-(28, 2, 14, 7, '2025-03-26 15:00:00', 1200.00, 60),
-(29, 2, 15, 3, '2025-03-18 10:00:00', 3000.00, 120),
-(30, 2, 16, 3, '2025-03-31 12:15:00', 3000.00, 120),
-(33, 2, 23, 1, '2025-03-31 15:00:00', 1200.00, 45),
-(37, 2, 23, 3, '2025-03-31 15:45:00', 3000.00, 120),
-(38, 2, 23, 7, '2025-03-31 11:15:00', 1200.00, 60),
-(42, 2, 23, 3, '2025-03-31 09:15:00', 3000.00, 120),
-(43, 2, 23, 3, '2025-04-01 10:00:00', 3000.00, 120),
-(44, 2, 27, 3, '2025-04-01 12:00:00', 3000.00, 120),
-(45, 1, 23, 4, '2025-03-31 10:00:00', 1200.00, 90),
-(46, 1, 23, 1, '2025-04-01 09:30:00', 1000.00, 40),
-(47, 1, 23, 4, '2025-04-01 10:15:00', 1200.00, 90),
-(48, 1, 23, 4, '2025-03-30 13:00:00', 1200.00, 90),
-(49, 2, 23, 7, '2025-04-01 16:30:00', 1200.00, 60),
-(50, 2, 23, 3, '2025-04-02 11:00:00', 3000.00, 120),
-(52, 2, 23, 3, '2025-04-02 15:45:00', 3000.00, 120);
+INSERT INTO `Appointments` (`id`, `master_id`, `client_id`, `service_id`, `date_time`) VALUES
+(24, 2, 10, 3, '2025-03-17 13:45:00'),
+(26, 1, 12, 4, '2025-03-26 13:00:00'),
+(28, 2, 14, 7, '2025-03-26 15:00:00'),
+(29, 2, 15, 3, '2025-03-18 10:00:00'),
+(30, 2, 16, 3, '2025-03-31 12:15:00'),
+(37, 2, 23, 3, '2025-03-31 15:45:00'),
+(38, 2, 23, 7, '2025-03-31 11:15:00'),
+(42, 2, 23, 3, '2025-03-31 09:15:00'),
+(43, 2, 23, 3, '2025-04-01 10:00:00'),
+(45, 1, 23, 4, '2025-03-31 10:00:00'),
+(46, 1, 23, 1, '2025-04-01 09:30:00'),
+(47, 1, 23, 4, '2025-04-01 10:15:00'),
+(48, 1, 23, 4, '2025-03-30 13:00:00'),
+(50, 2, 23, 3, '2025-04-02 11:00:00'),
+(52, 2, 23, 3, '2025-04-02 15:45:00'),
+(53, 1, 23, 1, '2025-04-02 09:45:00'),
+(56, 2, 32, 7, '2025-04-02 14:45:00');
 
 -- --------------------------------------------------------
 
@@ -72,7 +68,7 @@ CREATE TABLE `Clients` (
   `id` int NOT NULL,
   `full_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `phone` varchar(20) NOT NULL,
-  `telegram_id` varchar(255) DEFAULT '0'
+  `telegram_id` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -80,17 +76,17 @@ CREATE TABLE `Clients` (
 --
 
 INSERT INTO `Clients` (`id`, `full_name`, `phone`, `telegram_id`) VALUES
-(8, 'Драчёв Андрей Дмитриевич', '79125965745', '0'),
-(9, 'Драчёв Андрей Григорьевич', '79125965767', '0'),
-(10, 'Тепляков Игорь Дмитриевич', '79125965749', '0'),
-(12, 'Силуанов Геннадий Викторович', '79125965758', '0'),
-(13, 'Медведев Алексей Ефимович', '79125965642', '0'),
-(14, 'Силуанов Геннадий Ефремович', '79125976422', '0'),
-(15, 'Константинов Микки Константинович', '79794774461', '0'),
-(16, 'Сергеев Валерий Фёдорович', '79995994523', '0'),
-(18, 'Самойлов Сармат Игнатович', '79563422233', '0'),
+(8, 'Драчёв Андрей Дмитриевич', '79125965745', NULL),
+(9, 'Драчёв Андрей Григорьевич', '79125965767', NULL),
+(10, 'Тепляков Игорь Дмитриевич', '79125965749', NULL),
+(12, 'Силуанов Геннадий Викторович', '79125965758', NULL),
+(13, 'Медведев Алексей Ефимович', '79125965642', NULL),
+(14, 'Силуанов Геннадий Ефремович', '79125976422', NULL),
+(15, 'Константинов Микки Константинович', '79794774461', NULL),
+(16, 'Сергеев Валерий Фёдорович', '79995994523', NULL),
+(18, 'Самойлов Сармат Игнатович', '79563422233', NULL),
 (23, 'Драчёв Андрей Станиславович', '79125965744', '806176907'),
-(27, 'Глебов Игорь Александрович', '79125965740', '0');
+(32, 'Глебов Игорь Александрович', '79125951905', '5069005058');
 
 -- --------------------------------------------------------
 
@@ -154,7 +150,22 @@ INSERT INTO `ConfirmationCodes` (`id`, `phone`, `telegram_id`, `code`, `created_
 (45, '79125965744', 806176907, '382812', '2025-03-31 23:58:22'),
 (46, '79125965744', 806176907, '941355', '2025-04-01 12:28:36'),
 (47, '79125965744', 806176907, '625497', '2025-04-01 12:29:26'),
-(48, '79125965744', 806176907, '669110', '2025-04-01 19:11:39');
+(48, '79125965744', 806176907, '669110', '2025-04-01 19:11:39'),
+(49, '79125965744', 806176907, '993491', '2025-04-01 19:42:37'),
+(50, '79125965744', 806176907, '192609', '2025-04-01 19:44:45'),
+(51, '79125965744', 806176907, '184861', '2025-04-01 19:52:06'),
+(52, '79125965744', 806176907, '659431', '2025-04-01 20:01:04'),
+(53, '79125965744', 806176907, '681529', '2025-04-01 21:01:47'),
+(54, '79125965744', 806176907, '970008', '2025-04-01 21:49:17'),
+(55, '79125951905', 806176907, '971215', '2025-04-01 22:01:08'),
+(56, '79125951905', 5069005058, '785566', '2025-04-01 22:14:20'),
+(57, '79125951905', 5069005058, '645288', '2025-04-01 22:16:54'),
+(58, '79125951905', 5069005058, '325317', '2025-04-01 22:18:37'),
+(59, '79125965744', 806176907, '743056', '2025-04-02 10:36:36'),
+(60, '79125965744', 806176907, '856870', '2025-04-02 18:41:11'),
+(61, '79125965744', 806176907, '944240', '2025-04-02 21:51:12'),
+(62, '79125965744', 806176907, '566180', '2025-04-02 21:52:19'),
+(63, '79125965744', 806176907, '636757', '2025-04-02 22:33:50');
 
 -- --------------------------------------------------------
 
@@ -174,9 +185,9 @@ CREATE TABLE `Masters` (
 --
 
 INSERT INTO `Masters` (`id`, `full_name`, `phone`, `password`) VALUES
-(1, 'Алексей Сидоров', '891111111111', 'password1'),
-(2, 'Екатерина Морозова', '89222222222', 'password2'),
-(3, 'Дмитрий Орлов', '89333333333', 'password3');
+(1, 'Алексей Сидоров', '791111111111', 'password1'),
+(2, 'Екатерина Морозова', '79222222222', 'password2'),
+(3, 'Дмитрий Орлов', '79333333333', 'password3');
 
 -- --------------------------------------------------------
 
@@ -271,39 +282,6 @@ INSERT INTO `Services` (`id`, `name`, `description`) VALUES
 (6, 'Массаж лица', 'Расслабляющий массаж лица'),
 (7, 'Формирование бороды', '');
 
--- --------------------------------------------------------
-
---
--- Структура таблицы `Users`
---
-
-CREATE TABLE `Users` (
-  `id` int NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` enum('admin','master','client') NOT NULL,
-  `master_id` int DEFAULT NULL,
-  `client_id` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Дамп данных таблицы `Users`
---
-
-INSERT INTO `Users` (`id`, `username`, `password`, `role`, `master_id`, `client_id`) VALUES
-(1, 'admin', 'admin123', 'admin', NULL, NULL),
-(2, 'master1', 'password1', 'master', 1, NULL),
-(3, 'master2', 'password2', 'master', 2, NULL),
-(4, 'master3', 'password3', 'master', 3, NULL),
-(5, 'client1', 'clientpass1', 'client', NULL, NULL),
-(6, 'client2', 'clientpass2', 'client', NULL, NULL),
-(7, 'client3', 'clientpass3', 'client', NULL, NULL),
-(8, 'client4', 'clientpass4', 'client', NULL, NULL),
-(13, 'client_zhenina', '5678', 'client', NULL, NULL),
-(14, 'client_drachev', '1234', 'client', NULL, NULL),
-(15, 'client_zhenina2', '5678', 'client', NULL, NULL),
-(16, 'client10', 'passwordc10', 'client', NULL, 10);
-
 --
 -- Индексы сохранённых таблиц
 --
@@ -361,15 +339,6 @@ ALTER TABLE `Services`
   ADD PRIMARY KEY (`id`);
 
 --
--- Индексы таблицы `Users`
---
-ALTER TABLE `Users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`),
-  ADD KEY `master_id` (`master_id`),
-  ADD KEY `client_id` (`client_id`);
-
---
 -- AUTO_INCREMENT для сохранённых таблиц
 --
 
@@ -377,19 +346,19 @@ ALTER TABLE `Users`
 -- AUTO_INCREMENT для таблицы `Appointments`
 --
 ALTER TABLE `Appointments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT для таблицы `Clients`
 --
 ALTER TABLE `Clients`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT для таблицы `ConfirmationCodes`
 --
 ALTER TABLE `ConfirmationCodes`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT для таблицы `Masters`
@@ -416,12 +385,6 @@ ALTER TABLE `Services`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
--- AUTO_INCREMENT для таблицы `Users`
---
-ALTER TABLE `Users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
-
---
 -- Ограничения внешнего ключа сохраненных таблиц
 --
 
@@ -445,13 +408,6 @@ ALTER TABLE `MasterSchedule`
 ALTER TABLE `MasterServices`
   ADD CONSTRAINT `masterservices_ibfk_1` FOREIGN KEY (`master_id`) REFERENCES `Masters` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `masterservices_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `Services` (`id`) ON DELETE CASCADE;
-
---
--- Ограничения внешнего ключа таблицы `Users`
---
-ALTER TABLE `Users`
-  ADD CONSTRAINT `Users_ibfk_1` FOREIGN KEY (`master_id`) REFERENCES `Masters` (`id`) ON DELETE SET NULL,
-  ADD CONSTRAINT `Users_ibfk_2` FOREIGN KEY (`client_id`) REFERENCES `Clients` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

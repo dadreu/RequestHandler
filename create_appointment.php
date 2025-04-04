@@ -78,10 +78,8 @@ try {
     }
 
     // Вставка записи на приём
-    $sql = "INSERT INTO Appointments (master_id, client_id, service_id, date_time, price, duration)
-            SELECT :master_id, :client_id, :service_id, :date_time, ms.price, ms.duration
-            FROM MasterServices ms
-            WHERE ms.master_id = :master_id AND ms.service_id = :service_id";
+    $sql = "INSERT INTO Appointments (master_id, client_id, service_id, date_time)
+            VALUES (:master_id, :client_id, :service_id, :date_time)";
     $stmt = $pdo->prepare($sql);
     $stmt->bindValue(':master_id', $master_id);
     $stmt->bindValue(':client_id', $client_id);

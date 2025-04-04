@@ -10,7 +10,7 @@ if (!empty($_GET['master_id'])) {
     $sort_order = $_GET['sort_order'] ?? 'ASC';
 
     // Допустимые поля для сортировки
-    $allowed_fields = ['date_time', 'client_name', 'phone', 'service_name', 'price'];
+    $allowed_fields = ['date_time', 'client_name', 'phone', 'service_name', 'price', 'duration'];
     $allowed_orders = ['ASC', 'DESC'];
     $sort_field = in_array($sort_field, $allowed_fields) ? $sort_field : 'date_time';
     $sort_order = in_array($sort_order, $allowed_orders) ? $sort_order : 'ASC';
@@ -27,8 +27,9 @@ if (!empty($_GET['master_id'])) {
 
         // Запрос записей мастера
         $stmt = $pdo->prepare("
-            SELECT a.id, a.date_time, a.price, c.full_name AS client_name, c.phone, s.name AS service_name
+            SELECT a.id, a.date_time, ms.price, ms.duration, c.full_name AS client_name, c.phone, s.name AS service_name
             FROM Appointments a
+            JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
             JOIN Services s ON a.service_id = s.id
             JOIN Clients c ON a.client_id = c.id
             WHERE a.master_id = ?
