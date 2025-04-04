@@ -913,7 +913,31 @@
         border-radius: 5px;
         align-self: flex-end;
     }
+    
+    /* Улучшение отображения полей ввода на мобильных устройствах */
+    .input-item input[type="number"] {
+        -webkit-appearance: none; /* Убираем стандартные стрелки на iOS */
+        -moz-appearance: textfield; /* Убираем стандартные стрелки на Firefox */
+        width: 100%;
+        box-sizing: border-box;
+    }
 
+    /* Стили для стрелок управления шагом */
+    .input-item input[type="number"]::-webkit-inner-spin-button,
+    .input-item input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: inner-spin-button; /* Включаем стрелки */
+        opacity: 1; /* Делаем их видимыми */
+        margin: 0; /* Убираем отступы */
+    }
+
+    /* Улучшение читаемости шага */
+    #service-duration,
+    #service-price {
+        font-size: 16px; /* Увеличим шрифт для удобства */
+        padding: 10px; /* Увеличим внутренние отступы */
+        background-color: #f9f9f9; /* Лёгкий фон для выделения */
+    }
+    
     .reset-btn:hover {
         background-color: #e60000;
     }
@@ -960,6 +984,16 @@
         }
         .time-slots {
             grid-template-columns: repeat(3, 1fr); /* 3 колонки при ширине от 400px */
+        }
+
+        .input-item input {
+            font-size: 12px;
+            padding: 6px;
+        }
+    
+        .reset-btn {
+            padding: 4px 8px;
+            font-size: 10px;
         }
 
 
@@ -1028,6 +1062,20 @@
         .sort-options select,
         .sort-options button {
             width: 100%;
+        }
+
+        .input-item input {
+            font-size: 14px; /* Уменьшаем шрифт на маленьких экранах */
+            padding: 8px; /* Уменьшаем отступы */
+        }
+    
+        .input-item label {
+            font-size: 12px; /* Уменьшаем размер текста метки */
+        }
+    
+        .reset-btn {
+            padding: 5px 10px; /* Уменьшаем кнопку "Обнулить" */
+            font-size: 12px;
         }
 
     }
