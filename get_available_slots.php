@@ -59,7 +59,12 @@ try {
     error_log("Возможные слоты: " . implode(', ', $possible_starts));
 
     // Проверка занятости
-    $stmt = $pdo->prepare("SELECT date_time, duration FROM Appointments WHERE master_id = ? AND DATE(date_time) = ?");
+    $stmt = $pdo->prepare("
+        SELECT a.date_time, ms.duration
+        FROM Appointments a
+        JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
+        WHERE a.master_id = ? AND DATE(a.date_time) = ?
+    ");
     $stmt->execute([$master_id, $date]);
     $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
