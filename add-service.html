@@ -17,7 +17,7 @@
         <div class="input-group">
             <div class="input-item">
                 <label for="service-name">Название услуги</label>
-                <input type="text" id="service-name" placeholder="Введите название услуги">
+                <input type="text" id="service-name" placeholder="Введите название услуги" required>
                 <button class="reset-btn" onclick="resetField('service-name')">Обнулить</button>
             </div>
             <div class="input-item">
@@ -47,15 +47,41 @@
                 return;
             }
 
+            // Функция для корректировки длительности до ближайшего значения, кратного 15
+            function adjustDurationToStep(value) {
+                const step = 15;
+                const min = 15; // Минимальное значение
+                let num = parseInt(value) || min; // Если не число, берём минимальное
+                num = Math.max(min, num); // Убеждаемся, что не меньше минимального
+                num = Math.round(num / step) * step; // Округляем до ближайшего кратного 15
+                return num;
+            }
+
+            // Привязываем обработчик к полю длительности
+            const durationInput = document.getElementById('service-duration');
+            durationInput.addEventListener('input', function() {
+                const correctedValue = adjustDurationToStep(this.value);
+                if (parseInt(this.value) !== correctedValue) {
+                    this.value = correctedValue;
+                }
+            });
+            durationInput.addEventListener('blur', function() {
+                this.value = adjustDurationToStep(this.value); // Корректируем при выходе из поля
+            });
+
             window.saveService = function() {
                 const serviceName = document.getElementById('service-name').value;
-                const serviceDuration = document.getElementById('service-duration').value;
+                let serviceDuration = document.getElementById('service-duration').value;
                 const servicePrice = document.getElementById('service-price').value;
 
                 if (!serviceName || !serviceDuration || !servicePrice) {
                     alert("Пожалуйста, заполните все поля.");
                     return;
                 }
+
+                // Убеждаемся, что длительность кратна 15 перед отправкой
+                serviceDuration = adjustDurationToStep(serviceDuration);
+                document.getElementById('service-duration').value = serviceDuration;
 
                 fetch('add_service.php', {
                     method: 'POST',
@@ -87,6 +113,9 @@
 
             window.resetField = function(fieldId) {
                 document.getElementById(fieldId).value = '';
+                if (fieldId === 'service-duration') {
+                    document.getElementById('service-duration').value = 15; // Устанавливаем минимальное значение
+                }
             };
         });
     </script>
