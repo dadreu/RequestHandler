@@ -47,41 +47,55 @@
                 return;
             }
 
-            // Функция для корректировки длительности до ближайшего значения, кратного 15
-            function adjustDurationToStep(value) {
-                const step = 15;
-                const min = 15; // Минимальное значение
+            // Функция для корректировки значения до ближайшего кратного step
+            function adjustToStep(value, step, min) {
                 let num = parseInt(value) || min; // Если не число, берём минимальное
                 num = Math.max(min, num); // Убеждаемся, что не меньше минимального
-                num = Math.round(num / step) * step; // Округляем до ближайшего кратного 15
+                num = Math.round(num / step) * step; // Округляем до ближайшего кратного
                 return num;
             }
 
-            // Привязываем обработчик к полю длительности
+            // Корректировка длительности (кратно 15)
             const durationInput = document.getElementById('service-duration');
             durationInput.addEventListener('input', function() {
-                const correctedValue = adjustDurationToStep(this.value);
+                const correctedValue = adjustToStep(this.value, 15, 15);
                 if (parseInt(this.value) !== correctedValue) {
                     this.value = correctedValue;
                 }
             });
             durationInput.addEventListener('blur', function() {
-                this.value = adjustDurationToStep(this.value); // Корректируем при выходе из поля
+                this.value = adjustToStep(this.value, 15, 15);
+            });
+
+            // Корректировка стоимости (кратно 100)
+            const priceInput = document.getElementById('service-price');
+            priceInput.addEventListener('input', function() {
+                const correctedValue = adjustToStep(this.value, 100, 100);
+                if (parseInt(this.value) !== correctedValue) {
+                    this.value = correctedValue;
+                }
+            });
+            priceInput.addEventListener('blur', function() {
+                this.value = adjustToStep(this.value, 100, 100);
             });
 
             window.saveService = function() {
                 const serviceName = document.getElementById('service-name').value;
                 let serviceDuration = document.getElementById('service-duration').value;
-                const servicePrice = document.getElementById('service-price').value;
+                let servicePrice = document.getElementById('service-price').value;
 
                 if (!serviceName || !serviceDuration || !servicePrice) {
                     alert("Пожалуйста, заполните все поля.");
                     return;
                 }
 
-                // Убеждаемся, что длительность кратна 15 перед отправкой
-                serviceDuration = adjustDurationToStep(serviceDuration);
+                // Корректируем значения перед отправкой
+                serviceDuration = adjustToStep(serviceDuration, 15, 15);
+                servicePrice = adjustToStep(servicePrice, 100, 100);
+
+                // Обновляем поля для отображения
                 document.getElementById('service-duration').value = serviceDuration;
+                document.getElementById('service-price').value = servicePrice;
 
                 fetch('add_service.php', {
                     method: 'POST',
@@ -114,7 +128,9 @@
             window.resetField = function(fieldId) {
                 document.getElementById(fieldId).value = '';
                 if (fieldId === 'service-duration') {
-                    document.getElementById('service-duration').value = 15; // Устанавливаем минимальное значение
+                    document.getElementById('service-duration').value = 15;
+                } else if (fieldId === 'service-price') {
+                    document.getElementById('service-price').value = 100;
                 }
             };
         });

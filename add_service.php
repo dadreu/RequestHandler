@@ -2,13 +2,32 @@
 include 'config.php';
 header('Content-Type: application/json');
 
-$master_id = $_POST['master_id'];
-$service_name = $_POST['service_name'];
-$duration = $_POST['duration'];
-$price = $_POST['price'];
+$master_id = $_POST['master_id'] ?? null;
+$service_name = $_POST['service_name'] ?? null;
+$duration = $_POST['duration'] ?? null;
+$price = $_POST['price'] ?? null;
 
 if (empty($master_id) || empty($service_name) || empty($duration) || empty($price)) {
     echo json_encode(['success' => false, 'message' => 'Все поля обязательны для заполнения.']);
+    exit;
+}
+
+// Приведение типов и корректировка значений
+$master_id = intval($master_id);
+$duration = intval($duration);
+$price = intval($price);
+
+// Проверка кратности длительности 15
+if ($duration % 15 !== 0) {
+    $corrected_duration = round($duration / 15) * 15;
+    echo json_encode(['success' => false, 'message' => "Длительность должна быть кратна 15 минутам. Введено: $duration, ожидается: $corrected_duration."]);
+    exit;
+}
+
+// Проверка кратности стоимости 100
+if ($price % 100 !== 0) {
+    $corrected_price = round($price / 100) * 100;
+    echo json_encode(['success' => false, 'message' => "Стоимость должна быть кратна 100 рублям. Введено: $price, ожидается: $corrected_price."]);
     exit;
 }
 
@@ -40,6 +59,6 @@ try {
 
     echo json_encode(['success' => true]);
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Ошибка БД: ' . $e->getMessage()]);
 }
 ?>
