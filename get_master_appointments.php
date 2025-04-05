@@ -17,7 +17,7 @@ if (!empty($_GET['master_id'])) {
 
     try {
         // Проверка существования мастера
-        $stmt = $pdo->prepare("SELECT id_master FROM Masters WHERE id_master = ?");
+        $stmt = $pdo->prepare("SELECT id_masters FROM Masters WHERE id_masters = ?");
         $stmt->execute([$master_id]);
         if (!$stmt->fetch()) {
             $response['message'] = "Мастер с указанным ID не найден.";
@@ -31,7 +31,7 @@ if (!empty($_GET['master_id'])) {
             FROM Appointments a
             JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
             JOIN Services s ON a.service_id = s.id_service
-            JOIN Clients c ON a.client_id = c.id_client
+            JOIN Clients c ON a.client_id = c.id_clients
             WHERE a.master_id = ?
             ORDER BY $sort_field $sort_order
             LIMIT 0, 50

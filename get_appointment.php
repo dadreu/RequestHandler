@@ -11,7 +11,7 @@ if (!empty($_GET['id'])) {
             SELECT a.id_appointment, a.master_id, a.client_id, a.service_id, a.date_time, ms.price, ms.duration, c.full_name AS client_name, c.phone
             FROM Appointments a
             JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
-            JOIN Clients c ON a.client_id = c.id_client
+            JOIN Clients c ON a.client_id = c.id_clients
             WHERE a.id_appointment = ?
         ");
         $stmt->execute([$appointment_id]);

@@ -13,7 +13,7 @@ if (!empty($_GET['client_id'])) {
             FROM Appointments a
             JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
             JOIN Services s ON a.service_id = s.id_service
-            JOIN Masters m ON a.master_id = m.id_master
+            JOIN Masters m ON a.master_id = m.id_masters
             WHERE a.client_id = ?
             ORDER BY a.date_time
             LIMIT 0, 50

@@ -7,7 +7,7 @@ $response = ['available' => false];
 if (!empty($_GET['id'])) {
     $master_id = intval($_GET['id']);
     try {
-        $stmt = $pdo->prepare("SELECT id_master FROM Masters WHERE id_master = ?");
+        $stmt = $pdo->prepare("SELECT id_masters FROM Masters WHERE id_masters = ?");
         $stmt->execute([$master_id]);
         if ($stmt->fetch()) {
             $response['available'] = true;

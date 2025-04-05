@@ -9,7 +9,7 @@ $response = ["masters" => []];
 
 try {
     // Загружаем список мастеров
-    $stmt_masters = $pdo->query("SELECT id_master, full_name FROM Masters");
+    $stmt_masters = $pdo->query("SELECT id_masters, full_name FROM Masters");
     $response["masters"] = $stmt_masters->fetchAll(PDO::FETCH_ASSOC);
 
     // Возвращаем ответ в формате JSON

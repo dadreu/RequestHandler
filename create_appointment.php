@@ -54,7 +54,7 @@ try {
     $pdo->beginTransaction();
 
     // Проверка существования клиента по номеру телефона
-    $stmt_check_client = $pdo->prepare("SELECT id_client, full_name, telegram_id FROM Clients WHERE phone = :phone");
+    $stmt_check_client = $pdo->prepare("SELECT id_clients, full_name, telegram_id FROM Clients WHERE phone = :phone");
     $stmt_check_client->bindParam(':phone', $phone);
     $stmt_check_client->execute();
     $client = $stmt_check_client->fetch(PDO::FETCH_ASSOC);
@@ -67,10 +67,10 @@ try {
         $stmt_insert_client->execute();
         $client_id = $pdo->lastInsertId();
     } else {
-        $client_id = $client['id_client'];
+        $client_id = $client['id_clients'];
         // Обновление ФИО, если оно отсутствует или отличается
         if ($client['full_name'] === null || $client['full_name'] !== $fio) {
-            $stmt_update_client = $pdo->prepare("UPDATE Clients SET full_name = :fio WHERE id_client = :client_id");
+            $stmt_update_client = $pdo->prepare("UPDATE Clients SET full_name = :fio WHERE id_clients = :client_id");
             $stmt_update_client->bindParam(':fio', $fio);
             $stmt_update_client->bindParam(':client_id', $client_id);
             $stmt_update_client->execute();
