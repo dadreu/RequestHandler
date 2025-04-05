@@ -17,9 +17,9 @@ $master_id = intval($master_id);
 $duration = intval($duration);
 $price = intval($price);
 
-// Проверка на положительные значения
-if ($duration < 1 || $price < 1) {
-    echo json_encode(['success' => false, 'message' => 'Длительность и стоимость должны быть положительными числами.']);
+// Проверка на неотрицательные значения
+if ($duration < 0 || $price < 0) {
+    echo json_encode(['success' => false, 'message' => 'Длительность и стоимость должны быть неотрицательными числами.']);
     exit;
 }
 
@@ -29,11 +29,26 @@ if ($corrected_duration < 15) {
     $corrected_duration = 15; // Минимальное значение
 }
 
-// Корректировка стоимости вверх до ближайшего значения, кратного 100
-$corrected_price = ceil($price / 100) * 100;
-if ($corrected_price < 100) {
-    $corrected_price = 100; // Минимальное значение
+// Корректировка стоимости вверх до ближайшего значения, кратного 5 или заканчивающегося на 9
+function adjustPrice($price) {
+    $price = intval($price);
+    if ($price < 5) {
+        return 5; // Минимальное значение
+    }
+
+    $mod10 = $price % 10; // Последняя цифра
+    $base = floor($price / 10) * 10; // Округляем вниз до десятков
+
+    if ($mod10 < 5) {
+        return $base + 5; // Округляем до 5
+    } elseif ($mod10 < 9) {
+        return $base + 9; // Округляем до 9
+    } else {
+        return $base + 10; // Округляем до следующего кратного 10
+    }
 }
+
+$corrected_price = adjustPrice($price);
 
 try {
     // Проверяем, существует ли услуга
