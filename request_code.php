@@ -32,17 +32,25 @@ if (isset($_POST['phone']) && isset($_POST['telegram_id'])) {
     $client = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($client) {
+        // Приведение типов: преобразуем telegram_id из базы в строку для сравнения
+        $db_telegram_id = (string)$client['telegram_id'];
         if ($client['telegram_id'] === null) {
             $stmt_update = $pdo->prepare("UPDATE Clients SET telegram_id = :telegram_id WHERE id_clients = :client_id");
             $stmt_update->execute(['telegram_id' => $telegram_id, 'client_id' => $client['id_clients']]);
             $client_id = $client['id_clients'];
-        } elseif ($client['telegram_id'] === $telegram_id) {
+        } elseif ($db_telegram_id === $telegram_id) {
             $client_id = $client['id_clients'];
         } else {
             $response['message'] = 'Номер телефона не связан с этим Telegram аккаунтом';
+            $response['debug'] = [
+                'phone' => $phone,
+                'telegram_id_sent' => $telegram_id,
+                'telegram_id_in_db' => $client['telegram_id']
+            ];
             echo json_encode($response);
             exit;
         }
+    }
     } else {
         $stmt = $pdo->prepare("INSERT INTO Clients (phone, telegram_id) VALUES (:phone, :telegram_id)");
         $stmt->execute(['phone' => $phone, 'telegram_id' => $telegram_id]);
