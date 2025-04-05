@@ -57,12 +57,12 @@
                             const serviceItemDiv = document.createElement('div');
                             serviceItemDiv.classList.add('service-item');
 
-                            servicesAvailability[service.id] = service.is_available;
+                            servicesAvailability[service.id_service] = service.is_available;
 
                             serviceItemDiv.innerHTML = `
                                 <span class="service-name">${service.name}</span>
                                 <label class="switch">
-                                    <input type="checkbox" ${service.is_available ? 'checked' : ''} onchange="toggleServiceAvailability(${service.id}, this)">
+                                    <input type="checkbox" ${service.is_available ? 'checked' : ''} onchange="toggleServiceAvailability(${service.id_service}, this)">
                                     <span class="slider round"></span>
                                 </label>
                             `;
