@@ -22,12 +22,12 @@
             </div>
             <div class="input-item">
                 <label for="service-duration">Длительность (мин.)</label>
-                <input type="number" id="service-duration" placeholder="Введите длительность" step="15" min="15" required>
+                <input type="number" id="service-duration" placeholder="Введите длительность" step="15" min="1" required>
                 <button class="reset-btn" onclick="resetField('service-duration')">Обнулить</button>
             </div>
             <div class="input-item">
                 <label for="service-price">Стоимость (₽)</label>
-                <input type="number" id="service-price" placeholder="Введите стоимость" step="100" min="100" required>
+                <input type="number" id="service-price" placeholder="Введите стоимость" step="100" min="1" required>
                 <button class="reset-btn" onclick="resetField('service-price')">Обнулить</button>
             </div>
         </div>
@@ -47,55 +47,23 @@
                 return;
             }
 
-            // Функция для корректировки значения до ближайшего кратного step
-            function adjustToStep(value, step, min) {
-                let num = parseInt(value) || min; // Если не число, берём минимальное
-                num = Math.max(min, num); // Убеждаемся, что не меньше минимального
-                num = Math.round(num / step) * step; // Округляем до ближайшего кратного
-                return num;
-            }
-
-            // Корректировка длительности (кратно 15)
-            const durationInput = document.getElementById('service-duration');
-            durationInput.addEventListener('input', function() {
-                const correctedValue = adjustToStep(this.value, 15, 15);
-                if (parseInt(this.value) !== correctedValue) {
-                    this.value = correctedValue;
-                }
-            });
-            durationInput.addEventListener('blur', function() {
-                this.value = adjustToStep(this.value, 15, 15);
-            });
-
-            // Корректировка стоимости (кратно 100)
-            const priceInput = document.getElementById('service-price');
-            priceInput.addEventListener('input', function() {
-                const correctedValue = adjustToStep(this.value, 100, 100);
-                if (parseInt(this.value) !== correctedValue) {
-                    this.value = correctedValue;
-                }
-            });
-            priceInput.addEventListener('blur', function() {
-                this.value = adjustToStep(this.value, 100, 100);
-            });
-
             window.saveService = function() {
                 const serviceName = document.getElementById('service-name').value;
-                let serviceDuration = document.getElementById('service-duration').value;
-                let servicePrice = document.getElementById('service-price').value;
+                const serviceDuration = document.getElementById('service-duration').value;
+                const servicePrice = document.getElementById('service-price').value;
 
                 if (!serviceName || !serviceDuration || !servicePrice) {
                     alert("Пожалуйста, заполните все поля.");
                     return;
                 }
 
-                // Корректируем значения перед отправкой
-                serviceDuration = adjustToStep(serviceDuration, 15, 15);
-                servicePrice = adjustToStep(servicePrice, 100, 100);
-
-                // Обновляем поля для отображения
-                document.getElementById('service-duration').value = serviceDuration;
-                document.getElementById('service-price').value = servicePrice;
+                // Проверка на положительное целое число
+                const durationNum = parseInt(serviceDuration);
+                const priceNum = parseInt(servicePrice);
+                if (isNaN(durationNum) || durationNum < 1 || isNaN(priceNum) || priceNum < 1) {
+                    alert("Длительность и стоимость должны быть положительными целыми числами.");
+                    return;
+                }
 
                 fetch('add_service.php', {
                     method: 'POST',

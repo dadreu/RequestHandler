@@ -913,22 +913,6 @@
         border-radius: 5px;
         align-self: flex-end;
     }
-    
-    /* Улучшение отображения полей ввода на мобильных устройствах */
-    .input-item input[type="number"] {
-        -webkit-appearance: none; /* Убираем стандартные стрелки на iOS */
-        -moz-appearance: textfield; /* Убираем стандартные стрелки на Firefox */
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    /* Стили для стрелок управления шагом */
-    .input-item input[type="number"]::-webkit-inner-spin-button,
-    .input-item input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: inner-spin-button; /* Включаем стрелки */
-        opacity: 1; /* Делаем их видимыми */
-        margin: 0; /* Убираем отступы */
-    }
 
     /* Улучшение читаемости шага */
     #service-duration,

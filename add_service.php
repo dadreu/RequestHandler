@@ -12,23 +12,27 @@ if (empty($master_id) || empty($service_name) || empty($duration) || empty($pric
     exit;
 }
 
-// Приведение типов и корректировка значений
+// Приведение типов
 $master_id = intval($master_id);
 $duration = intval($duration);
 $price = intval($price);
 
-// Проверка кратности длительности 15
-if ($duration % 15 !== 0) {
-    $corrected_duration = round($duration / 15) * 15;
-    echo json_encode(['success' => false, 'message' => "Длительность должна быть кратна 15 минутам. Введено: $duration, ожидается: $corrected_duration."]);
+// Проверка на положительные значения
+if ($duration < 1 || $price < 1) {
+    echo json_encode(['success' => false, 'message' => 'Длительность и стоимость должны быть положительными числами.']);
     exit;
 }
 
-// Проверка кратности стоимости 100
-if ($price % 100 !== 0) {
-    $corrected_price = round($price / 100) * 100;
-    echo json_encode(['success' => false, 'message' => "Стоимость должна быть кратна 100 рублям. Введено: $price, ожидается: $corrected_price."]);
-    exit;
+// Корректировка длительности вверх до ближайшего значения, кратного 15
+$corrected_duration = ceil($duration / 15) * 15;
+if ($corrected_duration < 15) {
+    $corrected_duration = 15; // Минимальное значение
+}
+
+// Корректировка стоимости вверх до ближайшего значения, кратного 100
+$corrected_price = ceil($price / 100) * 100;
+if ($corrected_price < 100) {
+    $corrected_price = 100; // Минимальное значение
 }
 
 try {
@@ -48,13 +52,13 @@ try {
         $service_id = $pdo->lastInsertId();
     }
 
-    // Привязываем услугу к мастеру
+    // Привязываем услугу к мастеру с округлёнными значениями
     $stmt = $pdo->prepare("INSERT INTO MasterServices (master_id, service_id, price, duration, is_available) 
                            VALUES (:master_id, :service_id, :price, :duration, 1)");
     $stmt->bindParam(':master_id', $master_id);
     $stmt->bindParam(':service_id', $service_id);
-    $stmt->bindParam(':price', $price);
-    $stmt->bindParam(':duration', $duration);
+    $stmt->bindParam(':price', $corrected_price);
+    $stmt->bindParam(':duration', $corrected_duration);
     $stmt->execute();
 
     echo json_encode(['success' => true]);
