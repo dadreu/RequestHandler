@@ -19,7 +19,7 @@ if (!isset($_POST['phone']) || !isset($_POST['password'])) {
     $password = $_POST['password'];
 
     // Подготовленный запрос к таблице Masters
-    $stmt = $pdo->prepare("SELECT id, password FROM Masters WHERE phone = :phone");
+    $stmt = $pdo->prepare("SELECT id_master, password FROM Masters WHERE phone = :phone");
     $stmt->execute(['phone' => $phone]);
     $master = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -30,7 +30,7 @@ if (!isset($_POST['phone']) || !isset($_POST['password'])) {
     // Сравнение пароля напрямую
     elseif ($master['password'] === $password) {
         $response['success'] = true;
-        $response['master_id'] = $master['id'];
+        $response['master_id'] = $master['id_master'];
     } else {
         $response['message'] = 'Неверный пароль';
     }

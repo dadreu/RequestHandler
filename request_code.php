@@ -27,17 +27,17 @@ if (isset($_POST['phone']) && isset($_POST['telegram_id'])) {
     }
 
     // Проверка в таблице Clients
-    $stmt = $pdo->prepare("SELECT id, telegram_id FROM Clients WHERE phone = :phone");
+    $stmt = $pdo->prepare("SELECT id_client, telegram_id FROM Clients WHERE phone = :phone");
     $stmt->execute(['phone' => $phone]);
     $client = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($client) {
         if ($client['telegram_id'] === null) {
-            $stmt_update = $pdo->prepare("UPDATE Clients SET telegram_id = :telegram_id WHERE id = :client_id");
-            $stmt_update->execute(['telegram_id' => $telegram_id, 'client_id' => $client['id']]);
-            $client_id = $client['id'];
+            $stmt_update = $pdo->prepare("UPDATE Clients SET telegram_id = :telegram_id WHERE id_client = :client_id");
+            $stmt_update->execute(['telegram_id' => $telegram_id, 'client_id' => $client['id_client']]);
+            $client_id = $client['id_client'];
         } elseif ($client['telegram_id'] === $telegram_id) {
-            $client_id = $client['id'];
+            $client_id = $client['id_client'];
         } else {
             $response['message'] = 'Номер телефона не связан с этим Telegram аккаунтом';
             echo json_encode($response);

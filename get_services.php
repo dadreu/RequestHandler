@@ -5,7 +5,7 @@ header('Content-Type: application/json; charset=UTF-8');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$response = ["Services " => []];
+$response = ["services" => []]; // Исправлено "Services " на "services"
 
 try {
     // Проверяем, передан ли параметр master_id
@@ -14,14 +14,14 @@ try {
 
         // Загружаем услуги для выбранного мастера
         $stmt_services = $pdo->prepare("
-            SELECT s.id, s.name 
+            SELECT s.id_service, s.name 
             FROM Services s
-            JOIN MasterServices ms ON s.id = ms.service_id
+            JOIN MasterServices ms ON s.id_service = ms.service_id
             WHERE ms.master_id = ? 
             AND ms.is_available = 1
             LIMIT 50
         ");
-        $stmt_services->execute([$masterId]); // передаем параметр как массив
+        $stmt_services->execute([$masterId]);
         $response["services"] = $stmt_services->fetchAll(PDO::FETCH_ASSOC);
     } else {
         // Если master_id не передан, возвращаем ошибку

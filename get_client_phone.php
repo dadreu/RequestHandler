@@ -10,7 +10,7 @@ if (empty($client_id)) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT phone FROM Clients WHERE id = :client_id");
+    $stmt = $pdo->prepare("SELECT phone FROM Clients WHERE id_client = :client_id");
     $stmt->bindParam(':client_id', $client_id);
     $stmt->execute();
     $client = $stmt->fetch(PDO::FETCH_ASSOC);

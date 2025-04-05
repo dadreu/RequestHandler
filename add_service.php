@@ -52,16 +52,16 @@ $corrected_price = adjustPrice($price);
 
 try {
     // Проверяем, существует ли услуга
-    $stmt = $pdo->prepare("SELECT id FROM Services WHERE name = :name");
+    $stmt = $pdo->prepare("SELECT id_service FROM Services WHERE name = :name");
     $stmt->bindParam(':name', $service_name);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($result) {
-        $service_id = $result['id'];
+        $service_id = $result['id_service'];
     } else {
-        // Создаём новую услугу
-        $stmt = $pdo->prepare("INSERT INTO Services (name, description) VALUES (:name, '')");
+        // Создаём новую услугу без описания
+        $stmt = $pdo->prepare("INSERT INTO Services (name) VALUES (:name)");
         $stmt->bindParam(':name', $service_name);
         $stmt->execute();
         $service_id = $pdo->lastInsertId();

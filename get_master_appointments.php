@@ -17,7 +17,7 @@ if (!empty($_GET['master_id'])) {
 
     try {
         // Проверка существования мастера
-        $stmt = $pdo->prepare("SELECT id FROM Masters WHERE id = ?");
+        $stmt = $pdo->prepare("SELECT id_master FROM Masters WHERE id_master = ?");
         $stmt->execute([$master_id]);
         if (!$stmt->fetch()) {
             $response['message'] = "Мастер с указанным ID не найден.";
@@ -27,11 +27,11 @@ if (!empty($_GET['master_id'])) {
 
         // Запрос записей мастера
         $stmt = $pdo->prepare("
-            SELECT a.id, a.date_time, ms.price, ms.duration, c.full_name AS client_name, c.phone, s.name AS service_name
+            SELECT a.id_appointment, a.date_time, ms.price, ms.duration, c.full_name AS client_name, c.phone, s.name AS service_name
             FROM Appointments a
             JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
-            JOIN Services s ON a.service_id = s.id
-            JOIN Clients c ON a.client_id = c.id
+            JOIN Services s ON a.service_id = s.id_service
+            JOIN Clients c ON a.client_id = c.id_client
             WHERE a.master_id = ?
             ORDER BY $sort_field $sort_order
             LIMIT 0, 50

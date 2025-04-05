@@ -12,8 +12,8 @@ if (!empty($_GET['client_id'])) {
             SELECT a.date_time, ms.price, ms.duration, s.name AS service_name, m.phone AS master_phone
             FROM Appointments a
             JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
-            JOIN Services s ON a.service_id = s.id
-            JOIN Masters m ON a.master_id = m.id
+            JOIN Services s ON a.service_id = s.id_service
+            JOIN Masters m ON a.master_id = m.id_master
             WHERE a.client_id = ?
             ORDER BY a.date_time
             LIMIT 0, 50

@@ -20,13 +20,13 @@ if (isset($_POST['phone']) && isset($_POST['code'])) {
         $now = new DateTime();
         $interval = $now->diff($created_at);
         if ($interval->i < 5) { // Код действителен 5 минут
-            $stmt = $pdo->prepare("SELECT id FROM Clients WHERE phone = :phone");
+            $stmt = $pdo->prepare("SELECT id_client FROM Clients WHERE phone = :phone");
             $stmt->execute(['phone' => $phone]);
             $client = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($client) {
                 $response['success'] = true;
-                $response['client_id'] = $client['id'];
+                $response['client_id'] = $client['id_client'];
             }
         } else {
             $response['message'] = 'Код устарел';

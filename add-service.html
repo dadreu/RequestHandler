@@ -22,12 +22,12 @@
             </div>
             <div class="input-item">
                 <label for="service-duration">Длительность (мин.)</label>
-                <input type="number" id="service-duration" placeholder="Введите длительность" step="15" required>
+                <input type="number" id="service-duration" placeholder="Введите длительность" step="15" min="0" required>
                 <button class="reset-btn" onclick="resetField('service-duration')">Обнулить</button>
             </div>
             <div class="input-item">
                 <label for="service-price">Стоимость (₽)</label>
-                <input type="number" id="service-price" placeholder="Введите стоимость" step="100" required>
+                <input type="number" id="service-price" placeholder="Введите стоимость" step="100" min="0" required>
                 <button class="reset-btn" onclick="resetField('service-price')">Обнулить</button>
             </div>
         </div>
