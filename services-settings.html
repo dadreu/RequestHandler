@@ -98,16 +98,17 @@
             })
             .then(response => response.json())
             .then(data => {
+                console.log('Ответ от toggle_service_availability.php:', data);
                 if (data.success) {
                     alert("Настройки успешно сохранены.");
                     window.location.href = `masterReq.html?master_id=${masterId}`;
                 } else {
-                    alert("Ошибка при сохранении настроек.");
+                    alert("Ошибка при сохранении настроек: " + (data.message || "Неизвестная ошибка"));
                 }
             })
             .catch(error => {
                 console.error('Ошибка при сохранении изменений:', error);
-                alert('Ошибка при сохранении изменений. Попробуйте снова.');
+                alert('Ошибка при сохранении изменений: ' + error.message);
             });
         }
 
