@@ -60,8 +60,8 @@ try {
     if ($result) {
         $service_id = $result['id_service'];
     } else {
-        // Создаём новую услугу
-        $stmt = $pdo->prepare("INSERT INTO Services (name, description) VALUES (:name, '')");
+        // Создаём новую услугу без описания
+        $stmt = $pdo->prepare("INSERT INTO Services (name) VALUES (:name)");
         $stmt->bindParam(':name', $service_name);
         $stmt->execute();
         $service_id = $pdo->lastInsertId();
