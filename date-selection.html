@@ -60,6 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const originalMasterId = urlParams.get('original_master_id');
     const clientId = urlParams.get('client_id');
     const role = urlParams.get('role');
+    const appointmentId = urlParams.get('appointment_id') || ''; // Добавлен параметр appointment_id
+    const action = urlParams.get('action') || 'create'; // Добавлен параметр action (create или update)
 
     // Проверка наличия всех обязательных параметров
     if (!selectedMasterId || !serviceId || !fio || !phone || !originalMasterId || !role) {
@@ -72,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const DAYS_OF_WEEK = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     const now = new Date();
     const permTime = new Date(now.getTime() + (5 * 60 * 60 * 1000)); // Пермское время (UTC+5)
-    const minDate = new Date(permTime.getFullYear(), permTime.getMonth(), 1); // Минимальная дата — начало текущего месяца
+    const minDate = new Date(permTime.getFullYear(), permTime.getMonth(), 1); // Начало текущего месяца
     let currentDate = new Date(minDate); // Текущий отображаемый месяц
     let selectedDay = null;
     let selectedTime = null;
@@ -86,9 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmButtonContainer = document.getElementById('confirm-button-container');
     const backButton = document.querySelector('.back-button');
 
-    // Функция возврата на предыдущую страницу
+    // Функция возврата на предыдущую страницу с сохранением параметров
     const goBack = () => {
-        const redirectUrl = `appointment.html?master_id=${originalMasterId}&selected_master_id=${selectedMasterId}&service_id=${serviceId}&fio=${fio}&phone=${phone}&role=${role}`;
+        const redirectUrl = `appointment.html?master_id=${originalMasterId}&selected_master_id=${selectedMasterId}&service_id=${serviceId}&fio=${fio}&phone=${phone}&role=${role}&appointment_id=${appointmentId}&action=${action}`;
         window.location.href = redirectUrl;
     };
     backButton.addEventListener('click', goBack);
@@ -99,37 +101,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
 
-        // Отображение текущего месяца и года
         currentMonthElement.textContent = new Intl.DateTimeFormat('ru-RU', {
             year: 'numeric',
             month: 'long'
         }).format(currentDate);
 
-        // Блокировка кнопки "Предыдущий месяц", если это минимальный месяц
         prevMonthButton.disabled = (year === minDate.getFullYear() && month === minDate.getMonth());
 
         const firstDay = new Date(year, month, 1);
         const startDay = (firstDay.getDay() + 6) % 7; // ПН=0, ВС=6
         const totalDays = new Date(year, month + 1, 0).getDate();
 
-        // Пустые ячейки до начала месяца
         for (let i = 0; i < startDay; i++) {
             const emptyDay = document.createElement('div');
             emptyDay.classList.add('calendar-day', 'empty');
             calendarBody.appendChild(emptyDay);
         }
 
-        // Дни месяца
         for (let date = 1; date <= totalDays; date++) {
             const day = document.createElement('div');
             day.classList.add('calendar-day');
             day.textContent = date;
 
-            const currentDay = new Date(Date.UTC(year, month, date)); // Устанавливаем дату в UTC
-            const isPast = currentDay < permTime.setHours(0, 0, 0, 0); // Сравнение с началом текущего дня в Пермском времени
+            const currentDay = new Date(Date.UTC(year, month, date));
+            const isPast = currentDay < permTime.setHours(0, 0, 0, 0);
 
             if (isPast && year === permTime.getFullYear() && month === permTime.getMonth()) {
-                day.classList.add('disabled'); // Блокируем только прошедшие дни текущего месяца
+                day.classList.add('disabled');
             } else {
                 day.addEventListener('click', () => {
                     if (selectedDay) selectedDay.classList.remove('selected');
@@ -140,11 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateConfirmButtonState();
                 });
             }
-
             calendarBody.appendChild(day);
         }
 
-        // Пустые ячейки после конца месяца
         const totalCells = startDay + totalDays;
         const remainingCells = (7 - (totalCells % 7)) % 7;
         for (let i = 0; i < remainingCells; i++) {
@@ -156,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Получение доступных временных слотов
     const fetchAvailableSlots = (date) => {
-        const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD
+        const formattedDate = date.toISOString().split('T')[0];
         fetch(`get_available_slots.php?master_id=${selectedMasterId}&service_id=${serviceId}&date=${formattedDate}`)
             .then(response => response.json())
             .then(data => {
@@ -203,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         button.disabled = !(selectedDay && selectedTime);
     };
 
-    // Создание записи
+    // Создание или обновление записи
     const confirmAppointment = (date, time) => {
         const year = date.getUTCFullYear();
         const month = String(date.getUTCMonth() + 1).padStart(2, '0');
@@ -211,14 +207,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const formattedDate = `${year}-${month}-${day}`;
         const formattedTime = time;
 
-        fetch('create_appointment.php', {
+        // Выбор URL в зависимости от действия
+        const url = action === 'update' && appointmentId ? 'update_appointment.php' : 'create_appointment.php';
+
+        fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
+                appointment_id: appointmentId || '', // Передача appointment_id
                 master_id: selectedMasterId,
                 service_id: serviceId,
                 fio: decodeURIComponent(fio),
-                phone: phone,
+                phone: decodeURIComponent(phone),
                 date: formattedDate,
                 time: formattedTime
             })
@@ -226,18 +226,18 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Запись успешно создана!');
+                alert(action === 'update' ? 'Запись успешно обновлена!' : 'Запись успешно создана!');
                 if (role === 'master') {
                     window.location.href = `masterReq.html?master_id=${originalMasterId}`;
                 } else if (role === 'client') {
                     window.location.href = `clientReq.html?client_id=${clientId}`;
                 }
             } else {
-                alert(`Ошибка при создании записи: ${data.message || 'Неизвестная ошибка'}`);
+                alert(`Ошибка: ${data.message || 'Неизвестная ошибка'}`);
             }
         })
         .catch(error => {
-            console.error('Ошибка при создании записи:', error);
+            console.error('Ошибка:', error);
             alert('Произошла ошибка при отправке данных. Пожалуйста, попробуйте снова.');
         });
     };
