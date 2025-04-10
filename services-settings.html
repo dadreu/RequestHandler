@@ -48,7 +48,7 @@
 
         // Функция для загрузки всех услуг
         function loadServices() {
-            fetch('get_services.php') // Используем общий список услуг
+            fetch('https://requesthandler-dadreu.amvera.io/get_services.php') // Используем общий список услуг
                 .then(response => response.json())
                 .then(data => {
                     const serviceGroup = document.getElementById('service-group');
@@ -88,7 +88,7 @@
         // Функция для удаления услуги
         function deleteService(serviceId) {
             if (confirm('Вы уверены, что хотите удалить эту услугу?')) {
-                fetch('delete_service.php', {
+                fetch('https://requesthandler-dadreu.amvera.io/delete_service.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ id: serviceId })
@@ -115,7 +115,7 @@
                 available: servicesAvailability[serviceId] ? 1 : 0
             }));
 
-            fetch('toggle_service_availability.php', {
+            fetch('https://requesthandler-dadreu.amvera.io/toggle_service_availability.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedServices)
