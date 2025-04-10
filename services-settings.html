@@ -18,9 +18,9 @@
     <!-- Основной контент с серым фоном -->
     <div class="content" style="background-color: #f1f1f1;">
         <!-- Подпись над блоком услуг -->
-        <p class="select-services">Список услуг</p>
+        <p class="select-services">Выберите услуги</p>
 
-        <!-- Список услуг с тумблерами и кнопкой удаления -->
+        <!-- Список услуг с тумблерами -->
         <div id="service-group" class="service-group">
             <!-- Сюда будут динамически добавляться услуги -->
         </div>
@@ -41,37 +41,35 @@
         let servicesAvailability = {};
 
         if (masterId) {
-            loadServices();
+            loadServices(masterId);
         } else {
             alert("ID мастера не найден.");
         }
 
-        // Функция для загрузки всех услуг
-        function loadServices() {
-            fetch('https://requesthandler-dadreu.amvera.io/get_services.php') // Используем общий список услуг
+        // Функция для загрузки услуг
+        function loadServices(masterId) {
+            fetch(`https://requesthandler-dadreu.amvera.io/get_services_by_master.php?master_id=${masterId}`)
                 .then(response => response.json())
                 .then(data => {
                     const serviceGroup = document.getElementById('service-group');
-                    serviceGroup.innerHTML = '';
-                    if (Array.isArray(data)) {
-                        data.forEach(service => {
+                    if (data.success) {
+                        data.services.forEach(service => {
                             const serviceItemDiv = document.createElement('div');
                             serviceItemDiv.classList.add('service-item');
 
-                            servicesAvailability[service.id] = service.is_available === '1';
+                            servicesAvailability[service.id_service] = service.is_available;
 
                             serviceItemDiv.innerHTML = `
-                                <span class="service-name">${service.name} (${service.price} ₽, ${service.duration} мин)</span>
+                                <span class="service-name">${service.name}</span>
                                 <label class="switch">
-                                    <input type="checkbox" ${service.is_available === '1' ? 'checked' : ''} onchange="toggleServiceAvailability(${service.id}, this)">
+                                    <input type="checkbox" ${service.is_available ? 'checked' : ''} onchange="toggleServiceAvailability(${service.id_service}, this)">
                                     <span class="slider round"></span>
                                 </label>
-                                <button class="delete-btn" onclick="deleteService(${service.id})">Удалить</button>
                             `;
                             serviceGroup.appendChild(serviceItemDiv);
                         });
                     } else {
-                        serviceGroup.innerHTML = `<p>Услуги не найдены.</p>`;
+                        serviceGroup.innerHTML = `<p>${data.message || "Услуги не найдены."}</p>`;
                     }
                 })
                 .catch(error => {
@@ -85,32 +83,10 @@
             servicesAvailability[serviceId] = checkbox.checked;
         }
 
-        // Функция для удаления услуги
-        function deleteService(serviceId) {
-            if (confirm('Вы уверены, что хотите удалить эту услугу?')) {
-                fetch('https://requesthandler-dadreu.amvera.io/delete_service.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: serviceId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Услуга удалена');
-                        loadServices(); // Перезагружаем список
-                    } else {
-                        alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
-                    }
-                })
-                .catch(error => {
-                    alert('Ошибка при удалении: ' + error);
-                });
-            }
-        }
-
         // Функция для сохранения изменений
         function saveChanges() {
             const updatedServices = Object.keys(servicesAvailability).map(serviceId => ({
+                master_id: masterId,
                 service_id: serviceId,
                 available: servicesAvailability[serviceId] ? 1 : 0
             }));
@@ -122,15 +98,17 @@
             })
             .then(response => response.json())
             .then(data => {
+                console.log('Ответ от toggle_service_availability.php:', data);
                 if (data.success) {
                     alert("Настройки успешно сохранены.");
+                    window.location.href = `masterReq.html?master_id=${masterId}`;
                 } else {
-                    alert("Ошибка при сохранении: " + (data.message || "Неизвестная ошибка"));
+                    alert("Ошибка при сохранении настроек: " + (data.message || "Неизвестная ошибка"));
                 }
             })
             .catch(error => {
                 console.error('Ошибка при сохранении изменений:', error);
-                alert('Ошибка при сохранении: ' + error.message);
+                alert('Ошибка при сохранении изменений: ' + error.message);
             });
         }
 

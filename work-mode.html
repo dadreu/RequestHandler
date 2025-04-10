@@ -91,7 +91,7 @@
         }
 
         function loadSchedule(masterId) {
-            fetch(`https://requesthandler-dadreu.amvera.io/load_schedule.php?master_id=${masterId}`)
+            fetch(`load_schedule.php?master_id=${masterId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.schedule) {
@@ -135,7 +135,7 @@
                 });
             });
 
-            fetch("https://requesthandler-dadreu.amvera.io/save_schedule.php", {
+            fetch("save_schedule.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ master_id: masterId, schedule: scheduleData })

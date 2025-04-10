@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Получение доступных временных слотов
     const fetchAvailableSlots = (date) => {
         const formattedDate = date.toISOString().split('T')[0];
-        fetch(`https://requesthandler-dadreu.amvera.io/get_available_slots.php?master_id=${selectedMasterId}&service_id=${serviceId}&date=${formattedDate}`)
+        fetch(`get_available_slots.php?master_id=${selectedMasterId}&service_id=${serviceId}&date=${formattedDate}`)
             .then(response => response.json())
             .then(data => {
                 if (data.available_slots) {
