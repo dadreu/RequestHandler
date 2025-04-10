@@ -1258,9 +1258,9 @@ body {
 
     .service-item .delete-button {
         width: auto;
-        min-width: 80px;
+        min-width: 40px;
         font-size: 8px;
-        padding: 4px 7px;
+        padding: 4px 5px;
         margin-left: 0; /* Убираем левый отступ в колонке */
         margin-top: 10px; /* Добавляем верхний отступ для разделения */
     }
