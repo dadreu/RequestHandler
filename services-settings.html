@@ -13,7 +13,7 @@
         <h1>Настройка услуг</h1>
         <div></div>
     </header>
-    <div class="content" style="background-color: #f1f1f1;">
+    <div class="content">
         <p class="select-services">Выберите услуги</p>
         <div id="service-group" class="service-group"></div>
         <div class="buttons-container">
@@ -48,10 +48,12 @@
 
                             serviceItemDiv.innerHTML = `
                                 <span class="service-name">${service.name} (${service.price} ₽, ${service.duration} мин)</span>
-                                <label class="switch">
-                                    <input type="checkbox" ${service.is_available ? 'checked' : ''} onchange="toggleServiceAvailability(${service.id_service}, this)">
-                                    <span class="slider round"></span>
-                                </label>
+                                <div class="switch-container">
+                                    <label class="switch">
+                                        <input type="checkbox" ${service.is_available ? 'checked' : ''} onchange="toggleServiceAvailability(${service.id_service}, this)">
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
                                 <button class="delete-button" onclick="deleteService(${service.id_service})">Удалить</button>
                             `;
                             serviceGroup.appendChild(serviceItemDiv);

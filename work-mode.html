@@ -49,7 +49,7 @@
                 const dayId = `day-${index}`;
                 scheduleContainer.innerHTML += `
                     <div class="day">
-                        <label>${day}</label>
+                        <label class="day-label">${day}</label>
                         <div class="time-column">
                             <div class="time">
                                 <select id="${dayId}-start" class="hour"></select> :
@@ -60,11 +60,13 @@
                                 <select id="${dayId}-end-minutes" class="minute"></select>
                             </div>
                         </div>
-                        <label class="switch">
-                            <input type="checkbox" id="${dayId}-day-off" onchange="toggleDayOff(${index})">
-                            <span class="slider round"></span>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" id="${dayId}-day-off" onchange="toggleDayOff(${index})">
+                                <span class="slider round"></span>
+                            </label>
                             <span class="day-off-label">Выходной</span>
-                        </label>
+                        </div>
                     </div>
                 `;
             });
