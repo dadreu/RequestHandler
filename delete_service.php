@@ -4,7 +4,6 @@ header('Content-Type: application/json');
 
 $response = ['success' => false];
 
-// Получаем данные из тела запроса
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (!empty($data['id']) && !empty($data['master_id'])) {
@@ -12,7 +11,7 @@ if (!empty($data['id']) && !empty($data['master_id'])) {
     $master_id = intval($data['master_id']);
 
     try {
-        // Проверяем, имеет ли мастер доступ к услуге (существует ли запись в MasterServices)
+        // Проверяем, имеет ли мастер доступ к услуге
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM MasterServices WHERE service_id = ? AND master_id = ?");
         $stmt->execute([$service_id, $master_id]);
         if ($stmt->fetchColumn() == 0) {
