@@ -1079,19 +1079,19 @@ body {
         flex-direction: column;
         align-items: flex-start;
         padding: 10px;
-        gap: 15px; /* Увеличенный базовый отступ для узких экранов */
+        gap: 20px; /* Увеличенный базовый отступ для узких экранов */
     }
 
     .service-name {
         font-size: 14px;
         width: 100%;
-        margin-bottom: 15px; /* Увеличенный отступ снизу для текста записи */
+        margin-bottom: 20px; /* Увеличенный отступ снизу для текста записи */
     }
 
     .service-item .switch-container {
         width: 100%;
         justify-content: flex-start;
-        margin-bottom: 15px; /* Увеличенный отступ снизу для переключателя */
+        margin-bottom: 20px; /* Увеличенный отступ снизу для переключателя */
     }
 
     .service-item .switch {
@@ -1111,9 +1111,10 @@ body {
     }
 
     .service-item .delete-button {
-        width: 100%;
-        font-size: 11px;
-        padding: 5px 8px;
+        width: auto; /* Кнопка подстраивается под содержимое */
+        min-width: 80px; /* Минимальная ширина для читаемости */
+        font-size: 7px; /* Уменьшенный шрифт (11px / 1.5) */
+        padding: 3px 5px; /* Уменьшенные отступы (5px 8px / 1.5) */
     }
 
     .save-button,
@@ -1228,25 +1229,26 @@ body {
         flex-direction: column;
         align-items: flex-start;
         padding: 12px;
-        gap: 15px; /* Увеличенный базовый отступ для узких экранов */
+        gap: 20px; /* Увеличенный базовый отступ для узких экранов */
     }
 
     .service-name {
         font-size: 15px;
         width: 100%;
-        margin-bottom: 15px; /* Увеличенный отступ снизу для текста записи */
+        margin-bottom: 20px; /* Увеличенный отступ снизу для текста записи */
     }
 
     .service-item .switch-container {
         width: 100%;
         justify-content: flex-start;
-        margin-bottom: 15px; /* Увеличенный отступ снизу для переключателя */
+        margin-bottom: 20px; /* Увеличенный отступ снизу для переключателя */
     }
 
     .service-item .delete-button {
-        width: 100%;
-        font-size: 12px;
-        padding: 6px 10px;
+        width: auto; /* Кнопка подстраивается под содержимое */
+        min-width: 80px; /* Минимальная ширина для читаемости */
+        font-size: 8px; /* Уменьшенный шрифт (12px / 1.5) */
+        padding: 4px 7px; /* Уменьшенные отступы (6px 10px / 1.5) */
     }
 }
 
