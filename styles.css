@@ -783,7 +783,7 @@ body {
 .service-group {
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Увеличенный отступ между элементами .service-item */
+    gap: 15px;
 }
 
 .service-item {
@@ -793,7 +793,7 @@ body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
-    gap: 20px; /* Увеличенный отступ между внутренними элементами (название, переключатель, кнопка) */
+    gap: 20px;
 }
 
 .service-name {
@@ -856,12 +856,12 @@ body {
     background-color: #dc3545;
     color: white;
     border: none;
-    padding: 6px 10px; /* Уменьшенные отступы для компактности */
+    padding: 6px 10px;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 12px; /* Уменьшенный шрифт */
+    font-size: 12px;
     transition: background-color 0.3s ease;
-    white-space: nowrap; /* Предотвращаем перенос текста */
+    white-space: nowrap;
 }
 
 .service-item .delete-button:hover {
@@ -1079,17 +1079,19 @@ body {
         flex-direction: column;
         align-items: flex-start;
         padding: 10px;
-        gap: 15px; /* Уменьшенный отступ для узких экранов */
+        gap: 10px; /* Уменьшенный базовый отступ для узких экранов */
     }
 
     .service-name {
         font-size: 14px;
         width: 100%;
+        margin-bottom: 10px; /* Добавляем отступ снизу для текста записи */
     }
 
     .service-item .switch-container {
         width: 100%;
         justify-content: flex-start;
+        margin-bottom: 10px; /* Добавляем отступ снизу для переключателя */
     }
 
     .service-item .switch {
@@ -1110,8 +1112,8 @@ body {
 
     .service-item .delete-button {
         width: 100%;
-        font-size: 11px; /* Ещё меньший шрифт */
-        padding: 5px 8px; /* Ещё компактнее */
+        font-size: 11px;
+        padding: 5px 8px;
     }
 
     .save-button,
@@ -1226,23 +1228,25 @@ body {
         flex-direction: column;
         align-items: flex-start;
         padding: 12px;
-        gap: 15px; /* Уменьшенный отступ для узких экранов */
+        gap: 10px; /* Уменьшенный базовый отступ для узких экранов */
     }
 
     .service-name {
         font-size: 15px;
         width: 100%;
+        margin-bottom: 10px; /* Добавляем отступ снизу для текста записи */
     }
 
     .service-item .switch-container {
         width: 100%;
         justify-content: flex-start;
+        margin-bottom: 10px; /* Добавляем отступ снизу для переключателя */
     }
 
     .service-item .delete-button {
         width: 100%;
         font-size: 12px;
-        padding: 6px 10px; /* Компактнее */
+        padding: 6px 10px;
     }
 }
 
