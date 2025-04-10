@@ -60,6 +60,11 @@
                                 <select id="${dayId}-end-minutes" class="minute"></select>
                             </div>
                         </div>
+                        <label class="switch">
+                            <input type="checkbox" id="${dayId}-day-off" onchange="toggleDayOff(${index})">
+                            <span class="slider round"></span>
+                            <span class="day-off-label">Выходной</span>
+                        </label>
                     </div>
                 `;
             });
@@ -90,6 +95,29 @@
             });
         }
 
+        function toggleDayOff(index) {
+            const dayId = `day-${index}`;
+            const isDayOff = document.getElementById(`${dayId}-day-off`).checked;
+            const startHourSelect = document.getElementById(`${dayId}-start`);
+            const startMinuteSelect = document.getElementById(`${dayId}-start-minutes`);
+            const endHourSelect = document.getElementById(`${dayId}-end`);
+            const endMinuteSelect = document.getElementById(`${dayId}-end-minutes`);
+
+            // Отключаем выбор времени, если день выходной
+            startHourSelect.disabled = isDayOff;
+            startMinuteSelect.disabled = isDayOff;
+            endHourSelect.disabled = isDayOff;
+            endMinuteSelect.disabled = isDayOff;
+
+            if (isDayOff) {
+                // Устанавливаем время по умолчанию (например, 00:00-00:00)
+                startHourSelect.value = 0;
+                startMinuteSelect.value = 0;
+                endHourSelect.value = 0;
+                endMinuteSelect.value = 0;
+            }
+        }
+
         function loadSchedule(masterId) {
             fetch(`load_schedule.php?master_id=${masterId}`)
                 .then(response => response.json())
@@ -98,10 +126,14 @@
                         data.schedule.forEach(item => {
                             const dayIndex = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].indexOf(item.day_of_week);
                             if (dayIndex !== -1) {
-                                document.getElementById(`day-${dayIndex}-start`).value = parseInt(item.start_time.split(':')[0]);
-                                document.getElementById(`day-${dayIndex}-start-minutes`).value = parseInt(item.start_time.split(':')[1]);
-                                document.getElementById(`day-${dayIndex}-end`).value = parseInt(item.end_time.split(':')[0]);
-                                document.getElementById(`day-${dayIndex}-end-minutes`).value = parseInt(item.end_time.split(':')[1]);
+                                const dayId = `day-${dayIndex}`;
+                                document.getElementById(`${dayId}-start`).value = parseInt(item.start_time.split(':')[0]);
+                                document.getElementById(`${dayId}-start-minutes`).value = parseInt(item.start_time.split(':')[1]);
+                                document.getElementById(`${dayId}-end`).value = parseInt(item.end_time.split(':')[0]);
+                                document.getElementById(`${dayId}-end-minutes`).value = parseInt(item.end_time.split(':')[1]);
+                                const isDayOff = item.is_day_off == 1;
+                                document.getElementById(`${dayId}-day-off`).checked = isDayOff;
+                                toggleDayOff(dayIndex); // Обновляем состояние полей времени
                             }
                         });
                     }
@@ -122,16 +154,20 @@
             const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
             days.forEach((day, index) => {
-                const startHour = document.getElementById(`day-${index}-start`).value.padStart(2, '0');
-                const startMinute = document.getElementById(`day-${index}-start-minutes`).value.padStart(2, '0');
-                const endHour = document.getElementById(`day-${index}-end`).value.padStart(2, '0');
-                const endMinute = document.getElementById(`day-${index}-end-minutes`).value.padStart(2, '0');
-                const startTime = `${startHour}:${startMinute}:00`;
-                const endTime = `${endHour}:${endMinute}:00`;
+                const dayId = `day-${index}`;
+                const isDayOff = document.getElementById(`${dayId}-day-off`).checked;
+                const startHour = document.getElementById(`${dayId}-start`).value.padStart(2, '0');
+                const startMinute = document.getElementById(`${dayId}-start-minutes`).value.padStart(2, '0');
+                const endHour = document.getElementById(`${dayId}-end`).value.padStart(2, '0');
+                const endMinute = document.getElementById(`${dayId}-end-minutes`).value.padStart(2, '0');
+                const startTime = isDayOff ? '00:00:00' : `${startHour}:${startMinute}:00`;
+                const endTime = isDayOff ? '00:00:00' : `${endHour}:${endMinute}:00`;
+
                 scheduleData.push({
                     day_of_week: day,
                     start_time: startTime,
-                    end_time: endTime
+                    end_time: endTime,
+                    is_day_off: isDayOff ? 1 : 0
                 });
             });
 

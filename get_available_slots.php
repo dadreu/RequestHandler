@@ -30,13 +30,20 @@ try {
     error_log("Дата: $date, Индекс дня: $dayIndex, День недели: $dayOfWeek");
 
     // Получение расписания
-    $stmt = $pdo->prepare("SELECT start_time, end_time FROM MasterSchedule WHERE master_id = ? AND day_of_week = ?");
+    $stmt = $pdo->prepare("SELECT start_time, end_time, is_day_off FROM MasterSchedule WHERE master_id = ? AND day_of_week = ?");
     $stmt->execute([$master_id, $dayOfWeek]);
     $schedule = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$schedule) {
         error_log("Расписание не найдено для master_id: $master_id, day_of_week: $dayOfWeek");
         echo json_encode(['available_slots' => [], 'error' => "Расписание не найдено для $dayOfWeek"]);
+        exit;
+    }
+
+    // Проверяем, является ли день выходным
+    if ($schedule['is_day_off'] == 1) {
+        error_log("День $dayOfWeek является выходным для мастера $master_id");
+        echo json_encode(['available_slots' => [], 'error' => "Этот день является выходным"]);
         exit;
     }
 

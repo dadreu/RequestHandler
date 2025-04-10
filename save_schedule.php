@@ -2,10 +2,8 @@
 include 'config.php';
 header('Content-Type: application/json');
 
-// Получаем данные из тела запроса (JSON)
 $data = json_decode(file_get_contents('php://input'), true);
 
-// Проверяем master_id: сначала из GET, затем из JSON
 $master_id = isset($_GET['master_id']) ? (int)$_GET['master_id'] : (isset($data['master_id']) ? (int)$data['master_id'] : 0);
 $schedule = isset($data['schedule']) ? $data['schedule'] : null;
 
@@ -16,10 +14,12 @@ if ($master_id > 0 && !empty($schedule)) {
         $stmt->execute(['master_id' => $master_id]);
 
         // Сохраняем новое расписание
-        $stmt = $pdo->prepare("INSERT INTO MasterSchedule (master_id, day_of_week, start_time, end_time) VALUES (:master_id, :day_of_week, :start_time, :end_time)");
+        $stmt = $pdo->prepare(
+            "INSERT INTO MasterSchedule (master_id, day_of_week, start_time, end_time, is_day_off) 
+            VALUES (:master_id, :day_of_week, :start_time, :end_time, :is_day_off)"
+        );
 
         foreach ($schedule as $item) {
-            // Валидация дня недели
             $valid_days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
             if (!in_array($item['day_of_week'], $valid_days)) {
                 throw new Exception("Недопустимый день недели: " . $item['day_of_week']);
@@ -29,7 +29,8 @@ if ($master_id > 0 && !empty($schedule)) {
                 'master_id' => $master_id,
                 'day_of_week' => $item['day_of_week'],
                 'start_time' => $item['start_time'],
-                'end_time' => $item['end_time']
+                'end_time' => $item['end_time'],
+                'is_day_off' => $item['is_day_off']
             ]);
         }
 
