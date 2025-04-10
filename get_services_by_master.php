@@ -7,7 +7,7 @@ try {
     $master_id = $_GET['master_id'];
 
     // Получаем список услуг с доступностью для мастера
-    $query = "SELECT s.id_service, s.name, ms.is_available 
+    $query = "SELECT s.id_service, s.name, s.price, s.duration, ms.is_available 
               FROM Services s
               JOIN MasterServices ms ON s.id_service = ms.service_id
               WHERE ms.master_id = ?";

@@ -38,7 +38,7 @@
                 .then(response => response.json())
                 .then(data => {
                     const serviceGroup = document.getElementById('service-group');
-                    serviceGroup.innerHTML = ''; // Очищаем перед загрузкой
+                    serviceGroup.innerHTML = '';
                     if (data.success) {
                         data.services.forEach(service => {
                             const serviceItemDiv = document.createElement('div');
@@ -47,12 +47,12 @@
                             servicesAvailability[service.id_service] = service.is_available;
 
                             serviceItemDiv.innerHTML = `
-                                <span class="service-name">${service.name}</span>
+                                <span class="service-name">${service.name} (${service.price} ₽, ${service.duration} мин)</span>
                                 <label class="switch">
                                     <input type="checkbox" ${service.is_available ? 'checked' : ''} onchange="toggleServiceAvailability(${service.id_service}, this)">
                                     <span class="slider round"></span>
                                 </label>
-                                <button class="delete-btn" onclick="deleteService(${service.id_service})">Удалить</button>
+                                <button class="delete-button" onclick="deleteService(${service.id_service})">Удалить</button>
                             `;
                             serviceGroup.appendChild(serviceItemDiv);
                         });
@@ -75,13 +75,13 @@
                 fetch('https://requesthandler-dadreu.amvera.io/delete_service.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: serviceId })
+                    body: JSON.stringify({ id: serviceId, master_id: masterId }) // Передаем master_id
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert('Услуга удалена');
-                        loadServices(masterId); // Перезагружаем список услуг
+                        loadServices(masterId);
                     } else {
                         alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
                     }
