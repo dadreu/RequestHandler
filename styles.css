@@ -793,18 +793,21 @@ body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 25px; /* Увеличенный горизонтальный отступ между элементами */
+    margin-bottom: 20px; /* Добавлен вертикальный отступ между элементами */
 }
 
 .service-name {
     font-size: 16px;
     color: #333;
     flex: 1;
+    margin-right: 15px; /* Отступ справа для разделения от переключателя */
 }
 
 .service-item .switch-container {
     display: flex;
     align-items: center;
+    margin-right: 15px; /* Отступ справа для разделения от кнопки */
 }
 
 .service-item .switch {
@@ -862,6 +865,7 @@ body {
     font-size: 12px;
     transition: background-color 0.3s ease;
     white-space: nowrap;
+    margin-left: 10px; /* Отступ слева для разделения от переключателя */
 }
 
 .service-item .delete-button:hover {
@@ -1079,19 +1083,22 @@ body {
         flex-direction: column;
         align-items: flex-start;
         padding: 10px;
-        gap: 20px; /* Увеличенный базовый отступ для узких экранов */
+        gap: 15px; /* Уменьшенный, но достаточный отступ для маленьких экранов */
+        margin-bottom: 15px; /* Уменьшенный вертикальный отступ */
     }
 
     .service-name {
         font-size: 14px;
         width: 100%;
-        margin-bottom: 20px; /* Увеличенный отступ снизу для текста записи */
+        margin-bottom: 15px; /* Отступ снизу для текста в вертикальной компоновке */
+        margin-right: 0; /* Убираем правый отступ в колонке */
     }
 
     .service-item .switch-container {
         width: 100%;
         justify-content: flex-start;
-        margin-bottom: 20px; /* Увеличенный отступ снизу для переключателя */
+        margin-bottom: 15px; /* Отступ снизу для переключателя */
+        margin-right: 0; /* Убираем правый отступ в колонке */
     }
 
     .service-item .switch {
@@ -1111,10 +1118,12 @@ body {
     }
 
     .service-item .delete-button {
-        width: auto; /* Кнопка подстраивается под содержимое */
-        min-width: 80px; /* Минимальная ширина для читаемости */
-        font-size: 7px; /* Уменьшенный шрифт (11px / 1.5) */
-        padding: 3px 5px; /* Уменьшенные отступы (5px 8px / 1.5) */
+        width: auto;
+        min-width: 80px;
+        font-size: 7px;
+        padding: 3px 5px;
+        margin-left: 0; /* Убираем левый отступ в колонке */
+        margin-top: 10px; /* Добавляем верхний отступ для разделения */
     }
 
     .save-button,
@@ -1229,26 +1238,31 @@ body {
         flex-direction: column;
         align-items: flex-start;
         padding: 12px;
-        gap: 20px; /* Увеличенный базовый отступ для узких экранов */
+        gap: 20px; /* Разумный отступ для средних экранов */
+        margin-bottom: 20px; /* Сохранение вертикального отступа */
     }
 
     .service-name {
         font-size: 15px;
         width: 100%;
-        margin-bottom: 20px; /* Увеличенный отступ снизу для текста записи */
+        margin-bottom: 20px; /* Отступ снизу для текста */
+        margin-right: 0; /* Убираем правый отступ в колонке */
     }
 
     .service-item .switch-container {
         width: 100%;
         justify-content: flex-start;
-        margin-bottom: 20px; /* Увеличенный отступ снизу для переключателя */
+        margin-bottom: 20px; /* Отступ снизу для переключателя */
+        margin-right: 0; /* Убираем правый отступ в колонке */
     }
 
     .service-item .delete-button {
-        width: auto; /* Кнопка подстраивается под содержимое */
-        min-width: 80px; /* Минимальная ширина для читаемости */
-        font-size: 8px; /* Уменьшенный шрифт (12px / 1.5) */
-        padding: 4px 7px; /* Уменьшенные отступы (6px 10px / 1.5) */
+        width: auto;
+        min-width: 80px;
+        font-size: 8px;
+        padding: 4px 7px;
+        margin-left: 0; /* Убираем левый отступ в колонке */
+        margin-top: 10px; /* Добавляем верхний отступ для разделения */
     }
 }
 
