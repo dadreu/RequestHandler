@@ -709,6 +709,7 @@
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap; /* Позволяет элементам переноситься на новую строку при уменьшении ширины */
+        gap: 10px; /* Отступ между элементами */
     }
 
 
@@ -720,6 +721,7 @@
         display: flex;
         align-items: center;
         white-space: nowrap;
+        flex-shrink: 0; /* Не сжимается */
     }
 
     .work-schedule input {
@@ -753,6 +755,8 @@
         display: flex;
         flex-direction: column; /* Элементы time будут располагаться друг под другом */
         gap: 5px; /* Отступ между time */
+        flex: 1; /* Занимает доступное пространство */
+        min-width: 150px; /* Минимальная ширина */
     }
 
     .work-schedule .time select {
@@ -1048,8 +1052,11 @@
         }
 
         .time-column {
-            align-items: flex-start;
-        }ф
+            min-width: 100%; /* Полная ширина */
+            flex-direction: row; /* Время в строку */
+            flex-wrap: wrap; /* Перенос, если не помещается */
+            gap: 10px;
+        }
 
         .save-btn {
             width: 100%;
@@ -1119,6 +1126,28 @@
             font-size: 12px;
         }
 
+        .work-schedule .day {
+            flex-direction: column; /* Вертикальное расположение */
+            align-items: flex-start;
+            padding: 10px; /* Уменьшаем отступы */
+        }
+
+        .work-schedule label {
+            font-size: 14px; /* Уменьшаем шрифт */
+            margin-bottom: 5px;
+        }
+
+        .work-schedule .time {
+            flex: 1; /* Занимает доступное пространство */
+            min-width: 120px; /* Минимальная ширина */
+        }
+    
+        .work-schedule .time select {
+            font-size: 11px; /* Уменьшаем шрифт */
+            min-width: 55px; /* Уменьшаем ширину */
+        }
+
+        
     }
     @media (min-width: 600px) {
         .content{
