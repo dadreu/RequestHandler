@@ -639,6 +639,29 @@
         box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
     }
 
+    .appointments-container {
+        margin-top: 20px;
+    }
+
+    .appointment-group {
+        margin-bottom: 30px;
+    }
+    
+    .appointment-group h2 {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+    }
+
+    .appointments-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
     /* Кнопки снизу страницы */
 
 

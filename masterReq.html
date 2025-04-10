@@ -29,9 +29,18 @@
             </select>
             <button onclick="loadAppointments()">Применить</button>
         </div>
+
         <div id="appointments-container" class="appointments-container">
-            <!-- Здесь будут отображаться записи -->
+            <div class="appointment-group">
+                <h2>Предстоящие</h2>
+                <div id="upcoming-appointments" class="appointments-list"></div>
+            </div>
+            <div class="appointment-group">
+                <h2>Выполненные</h2>
+                <div id="completed-appointments" class="appointments-list"></div>
+            </div>
         </div>
+
         <div class="buttons-container">
             <button class="record-button" onclick="goToAppointment()">Записать</button>
             <button onclick="goToWorkMode()">Режим работы</button>
@@ -49,51 +58,81 @@
             fetch(`https://requesthandler-dadreu.amvera.io/get_master_appointments.php?master_id=${masterId}&sort_field=${sortField}&sort_order=${sortOrder}`)
                 .then(response => response.json())
                 .then(data => {
-                    const container = document.getElementById('appointments-container');
+                    const upcomingContainer = document.getElementById('upcoming-appointments');
+                    const completedContainer = document.getElementById('completed-appointments');
+                    upcomingContainer.innerHTML = '';
+                    completedContainer.innerHTML = '';
+
                     if (data.success) {
-                        container.innerHTML = '';
-                        data.appointments.forEach(appointment => {
-                            const appointmentDiv = document.createElement('div');
-                            appointmentDiv.classList.add('record');
-                            appointmentDiv.innerHTML = `
-                                <div class="record-text">
-                                    <span class="record-time">${appointment.date_time}</span>
-                                    <span class="record-client">${appointment.client_name}</span>
-                                    <span class="record-phone">${appointment.phone}</span>
-                                    <span class="record-service">${appointment.service_name}</span>
-                                    <span class="record-price">${appointment.price} ₽</span>
-                                </div>
-                                <div class="record-buttons">
-                                    <button class="edit-button" data-id="${appointment.id_appointment}">Изменить</button>
-                                    <button class="delete-button" data-id="${appointment.id_appointment}">Удалить</button>
-                                </div>
-                            `;
-                            container.appendChild(appointmentDiv);
-                        });
-
-                        document.querySelectorAll('.delete-button').forEach(button => {
-                            button.addEventListener('click', function() {
-                                const appointmentId = this.getAttribute('data-id');
-                                if (confirm('Вы уверены, что хотите удалить эту запись?')) {
-                                    deleteAppointment(appointmentId);
-                                }
+                        // Предстоящие записи
+                        if (data.upcoming && data.upcoming.length > 0) {
+                            data.upcoming.forEach(appointment => {
+                                const appointmentDiv = createAppointmentElement(appointment);
+                                upcomingContainer.appendChild(appointmentDiv);
                             });
-                        });
+                        } else {
+                            upcomingContainer.innerHTML = '<p>Предстоящие записи отсутствуют.</p>';
+                        }
 
-                        document.querySelectorAll('.edit-button').forEach(button => {
-                            button.addEventListener('click', function() {
-                                const appointmentId = this.getAttribute('data-id');
-                                editAppointment(appointmentId);
+                        // Выполненные записи
+                        if (data.completed && data.completed.length > 0) {
+                            data.completed.forEach(appointment => {
+                                const appointmentDiv = createAppointmentElement(appointment);
+                                completedContainer.appendChild(appointmentDiv);
                             });
-                        });
+                        } else {
+                            completedContainer.innerHTML = '<p>Выполненные записи отсутствуют.</p>';
+                        }
+
+                        // Добавляем обработчики событий для кнопок
+                        addEventListeners();
                     } else {
-                        container.innerHTML = `<p>${data.message || "Записи отсутствуют."}</p>`;
+                        upcomingContainer.innerHTML = `<p>${data.message || "Записи отсутствуют."}</p>`;
+                        completedContainer.innerHTML = '';
                     }
                 })
                 .catch(error => {
                     console.error('Ошибка при загрузке записей:', error);
-                    container.innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
+                    document.getElementById('upcoming-appointments').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
+                    document.getElementById('completed-appointments').innerHTML = '';
                 });
+        }
+
+        function createAppointmentElement(appointment) {
+            const appointmentDiv = document.createElement('div');
+            appointmentDiv.classList.add('record');
+            appointmentDiv.innerHTML = `
+                <div class="record-text">
+                    <span class="record-time">${appointment.date_time}</span>
+                    <span class="record-client">${appointment.client_name}</span>
+                    <span class="record-phone">${appointment.phone}</span>
+                    <span class="record-service">${appointment.service_name}</span>
+                    <span class="record-price">${appointment.price} ₽</span>
+                </div>
+                <div class="record-buttons">
+                    <button class="edit-button" data-id="${appointment.id_appointment}">Изменить</button>
+                    <button class="delete-button" data-id="${appointment.id_appointment}">Удалить</button>
+                </div>
+            `;
+            return appointmentDiv;
+        }
+
+        function addEventListeners() {
+            document.querySelectorAll('.delete-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = this.getAttribute('data-id');
+                    if (confirm('Вы уверены, что хотите удалить эту запись?')) {
+                        deleteAppointment(appointmentId);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.edit-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = this.getAttribute('data-id');
+                    editAppointment(appointmentId);
+                });
+            });
         }
 
         function deleteAppointment(appointmentId) {

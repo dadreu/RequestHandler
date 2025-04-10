@@ -25,6 +25,12 @@ if (!empty($_GET['master_id'])) {
             exit;
         }
 
+        // Текущее пермское время (UTC+5)
+        $permTime = new DateTime('now', new DateTimeZone('UTC'));
+        $permTime->modify('+5 hours'); // Пермское время
+        $currentTime = $permTime->format('Y-m-d H:i:s');
+        $todayStart = $permTime->format('Y-m-d 00:00:00');
+
         // Запрос записей мастера
         $stmt = $pdo->prepare("
             SELECT a.id_appointment, a.date_time, ms.price, ms.duration, c.full_name AS client_name, c.phone, s.name AS service_name
@@ -39,9 +45,21 @@ if (!empty($_GET['master_id'])) {
         $stmt->execute([$master_id]);
         $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($appointments) {
+        // Разделяем записи на предстоящие и выполненные
+        $upcoming = [];
+        $completed = [];
+
+        foreach ($appointments as $appointment) {
+            if ($appointment['date_time'] >= $currentTime) {
+                $upcoming[] = $appointment; // Предстоящие (позже текущего времени)
+            } else {
+                $completed[] = $appointment; // Выполненные (до текущего времени, включая сегодня)
+            }
+        }
+        if ($upcoming || $completed) {
             $response['success'] = true;
-            $response['appointments'] = $appointments;
+            $response['upcoming'] = $upcoming;
+            $response['completed'] = $completed;
         } else {
             $response['message'] = "Записи отсутствуют.";
         }
