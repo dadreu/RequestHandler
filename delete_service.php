@@ -24,7 +24,7 @@ if (!empty($data['id'])) {
         $stmt->execute([$service_id]);
 
         // Удаляем услугу из Services
-        $stmt = $pdo->prepare("DELETE FROM Services WHERE id = ?");
+        $stmt = $pdo->prepare("DELETE FROM Services WHERE id_service = ?");
         $stmt->execute([$service_id]);
 
         if ($stmt->rowCount() > 0) {

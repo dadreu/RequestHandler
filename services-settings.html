@@ -8,24 +8,14 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <!-- Верхний белый хедер с кнопкой возврата -->
     <header class="top-bar">
         <button class="back-button" onclick="window.location.href='masterReq.html?master_id=' + masterId">Назад</button>
         <h1>Настройка услуг</h1>
-        <div></div> <!-- Пространство для выравнивания -->
+        <div></div>
     </header>
-
-    <!-- Основной контент с серым фоном -->
     <div class="content" style="background-color: #f1f1f1;">
-        <!-- Подпись над блоком услуг -->
         <p class="select-services">Выберите услуги</p>
-
-        <!-- Список услуг с тумблерами -->
-        <div id="service-group" class="service-group">
-            <!-- Сюда будут динамически добавляться услуги -->
-        </div>
-
-        <!-- Кнопки для сохранения и добавления услуги -->
+        <div id="service-group" class="service-group"></div>
         <div class="buttons-container">
             <button class="save-button" onclick="saveChanges()">Сохранить</button>
             <button class="add-service-button" onclick="goToAddService()">Добавить услугу</button>
@@ -33,11 +23,8 @@
     </div>
 
     <script>
-        // Получаем masterId из параметров URL
         const urlParams = new URLSearchParams(window.location.search);
         const masterId = urlParams.get('master_id');
-        
-        // Объект для хранения состояния доступности услуг
         let servicesAvailability = {};
 
         if (masterId) {
@@ -46,12 +33,12 @@
             alert("ID мастера не найден.");
         }
 
-        // Функция для загрузки услуг
         function loadServices(masterId) {
             fetch(`https://requesthandler-dadreu.amvera.io/get_services_by_master.php?master_id=${masterId}`)
                 .then(response => response.json())
                 .then(data => {
                     const serviceGroup = document.getElementById('service-group');
+                    serviceGroup.innerHTML = ''; // Очищаем перед загрузкой
                     if (data.success) {
                         data.services.forEach(service => {
                             const serviceItemDiv = document.createElement('div');
@@ -65,6 +52,7 @@
                                     <input type="checkbox" ${service.is_available ? 'checked' : ''} onchange="toggleServiceAvailability(${service.id_service}, this)">
                                     <span class="slider round"></span>
                                 </label>
+                                <button class="delete-btn" onclick="deleteService(${service.id_service})">Удалить</button>
                             `;
                             serviceGroup.appendChild(serviceItemDiv);
                         });
@@ -78,12 +66,33 @@
                 });
         }
 
-        // Функция для изменения состояния доступности услуги
         function toggleServiceAvailability(serviceId, checkbox) {
             servicesAvailability[serviceId] = checkbox.checked;
         }
 
-        // Функция для сохранения изменений
+        function deleteService(serviceId) {
+            if (confirm('Вы уверены, что хотите удалить эту услугу?')) {
+                fetch('https://requesthandler-dadreu.amvera.io/delete_service.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: serviceId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Услуга удалена');
+                        loadServices(masterId); // Перезагружаем список услуг
+                    } else {
+                        alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка при удалении услуги:', error);
+                    alert('Ошибка при удалении: ' + error);
+                });
+            }
+        }
+
         function saveChanges() {
             const updatedServices = Object.keys(servicesAvailability).map(serviceId => ({
                 master_id: masterId,
@@ -112,7 +121,6 @@
             });
         }
 
-        // Функция для перехода на страницу добавления услуги
         function goToAddService() {
             if (masterId) {
                 window.location.href = `add-service.html?master_id=${masterId}`;
