@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const loadMasters = async (defaultMasterId = '') => {
         try {
-            const response = await fetch('https://https://gpjj.ru/get_masters.php');
+            const response = await fetch('https://https://requesthandler-dadreu.amvera.io/get_masters.php');
             const data = await response.json();
             if (data.error) throw new Error(data.error);
             masterSelect.innerHTML = '';
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         try {
-            const response = await fetch(`https://https://gpjj.ru/get_services.php?master_id=${masterId}`);
+            const response = await fetch(`https://https://requesthandler-dadreu.amvera.io/get_services.php?master_id=${masterId}`);
             const data = await response.json();
             console.log('Ответ от get_services.php:', data);
             if (data.error) throw new Error(data.error);
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const checkAvailability = async () => {
         if (!appointmentId) return;
         try {
-            const masterResponse = await fetch(`https://https://gpjj.ru/check_master.php?id=${selectedMasterId}`);
+            const masterResponse = await fetch(`https://https://requesthandler-dadreu.amvera.io/check_master.php?id=${selectedMasterId}`);
             const masterData = await masterResponse.json();
             if (!masterData.available) {
                 alert('Выбранный мастер больше не доступен. Выберите другого мастера.');
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            const serviceResponse = await fetch(`https://https://gpjj.ru/check_service.php?master_id=${selectedMasterId}&service_id=${serviceId}`);
+            const serviceResponse = await fetch(`https://https://requesthandler-dadreu.amvera.io/check_service.php?master_id=${selectedMasterId}&service_id=${serviceId}`);
             const serviceData = await serviceResponse.json();
             if (!serviceData.available) {
                 alert('Выбранная услуга больше не доступна у этого мастера. Выберите другую услугу.');
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else if (role === 'client') {
         phoneSection.style.display = 'none';
         try {
-            const response = await fetch(`https://https://gpjj.ru/get_client_phone.php?client_id=${clientId}`);
+            const response = await fetch(`https://https://requesthandler-dadreu.amvera.io/get_client_phone.php?client_id=${clientId}`);
             const data = await response.json();
             if (data.phone) clientPhone = data.phone;
             else throw new Error('Телефон клиента не найден');
