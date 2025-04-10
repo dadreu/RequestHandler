@@ -538,6 +538,7 @@
         font-size: 14px;
         width: 100px; /* Фиксированная ширина для одинакового размера */
         text-align: center;
+        flex-shrink: 0; /* Не сжимается */
     }
     
     .delete-button {
@@ -552,14 +553,6 @@
         background-color: #c82333;
     }
     
-    .edit-button:hover {
-        background-color: #0056b3; /* Темнее при наведении */
-    }
-
-
-.delete-button:hover {
-    background-color: #c82333; /* Темнее при наведении */
-}
 
     .sort-options {
         background-color: #fff;
@@ -814,10 +807,14 @@
         justify-content: space-between;
         align-items: center;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        flex-wrap: wrap; /* Позволяем элементам переноситься */
+        gap: 10px; /* Отступ между элементами */
     }
 
     .service-name {
         font-size: 16px;
+        flex: 1; /* Занимает доступное пространство */
+        min-width: 200px; /* Минимальная ширина для читаемости */
     }
 
     .switch {
@@ -825,6 +822,7 @@
         display: inline-block;
         width: 60px;
         height: 34px;
+        flex-shrink: 0; /* Не сжимается */
     }
 
     .unavailable {
@@ -887,6 +885,7 @@
         cursor: pointer;
         font-size: 16px;
         border-radius: 5px;
+        width: 100%; /* Полная ширина */
     }
 
     .save-button:hover, .add-service-button:hover {
@@ -1017,6 +1016,33 @@
     }
     @media (max-width: 650px) {
 
+        .service-item {
+            flex-direction: column; /* Вертикальное расположение */
+            align-items: flex-start; /* Выравнивание по левому краю */
+        }
+
+        .service-name {
+            font-size: 14px; /* Уменьшаем шрифт */
+            min-width: 100%; /* Полная ширина */
+        }
+    
+        .switch {
+            width: 50px; /* Уменьшаем переключатель */
+            height: 28px;
+        }
+    
+        .switch .slider:before {
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+        }
+    
+        input:checked + .slider:before {
+            transform: translateX(22px); /* Корректируем смещение */
+        }
+    
+
         .day label {
             margin-bottom: 5px; /* Отступ для label */
         }
@@ -1038,7 +1064,10 @@
         .record-text {
             width: 100%;
         }
-
+        .save-button, .add-service-button {
+            font-size: 14px; /* Уменьшаем шрифт */
+            padding: 12px;
+        }
         .record-buttons {
             width: 100%;
             align-items: flex-end;
@@ -1046,12 +1075,17 @@
             margin-left: 0;
         }
 
-
         .edit-button,
         .delete-button {
             width: 100%; /* Кнопки на всю ширину */
+            padding: 10px;
+            font-size: 14px;    
+        
         }
-    
+        .buttons-container {
+            flex-direction: column; /* Уже вертикально, но подтверждаем */
+        }
+
         .record-time,
         .record-client,
         .record-service,
