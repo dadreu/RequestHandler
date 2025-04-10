@@ -46,7 +46,7 @@
         function loadAppointments() {
             const sortField = document.getElementById('sort_field').value;
             const sortOrder = document.getElementById('sort_order').value;
-            fetch(`https://requesthandler-dadreu.amvera.io/get_master_appointments.php?master_id=${masterId}&sort_field=${sortField}&sort_order=${sortOrder}`)
+            fetch(`https://gpjj.ru/get_master_appointments.php?master_id=${masterId}&sort_field=${sortField}&sort_order=${sortOrder}`)
                 .then(response => response.json())
                 .then(data => {
                     const container = document.getElementById('appointments-container');
@@ -97,7 +97,7 @@
         }
 
         function deleteAppointment(appointmentId) {
-            fetch(`https://requesthandler-dadreu.amvera.io/delete_appointment.php`, {
+            fetch(`https://gpjj.ru/delete_appointment.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -120,7 +120,7 @@
         }
 
         function editAppointment(appointmentId) {
-            fetch(`https://requesthandler-dadreu.amvera.io/get_appointment.php?id=${appointmentId}`)
+            fetch(`https://gpjj.ru/get_appointment.php?id=${appointmentId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

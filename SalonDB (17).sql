@@ -2,7 +2,7 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Хост: amvera-dadreu-run-salondb
+-- Хост: gpjj.ru
 -- Время создания: Апр 05 2025 г., 22:26
 -- Версия сервера: 8.1.0
 -- Версия PHP: 8.2.27
