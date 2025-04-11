@@ -16,7 +16,6 @@
     <div class="content">
         <div class="login-form">
             <h2>Авторизация</h2>
-            <!-- Блок для входа мастеров -->
             <div id="master-login-step">
                 <div class="form-input-group">
                     <label for="master_phone">Номер телефона</label>
@@ -30,7 +29,6 @@
                     <button id="master-login-button" class="confirm-button">Войти</button>
                 </div>
             </div>
-            <!-- Блок для ввода номера телефона клиентов -->
             <div id="phone-step" style="display: none;">
                 <div class="form-input-group">
                     <label for="phone">Номер телефона</label>
@@ -40,7 +38,6 @@
                     <button id="request-code" class="confirm-button">Получить код</button>
                 </div>
             </div>
-            <!-- Блок для ввода кода подтверждения -->
             <div id="code-step" style="display: none;">
                 <div class="form-input-group">
                     <label for="code">Код подтверждения</label>
@@ -53,15 +50,33 @@
                     <button id="resend-code" class="confirm-button">Отправить код повторно</button>
                 </div>
             </div>
-            <!-- Сообщение об ошибке -->
             <div id="error-message" class="error-message" style="display: none;"></div>
-            <!-- Кнопка переключения режима -->
             <button id="switch-auth" class="back-button">Войти как клиент</button>
         </div>
     </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        let csrfToken;
+
+        // Получение CSRF-токена
+        fetch('https://requesthandler-dadreu.amvera.io/get_csrf_token.php', {
+            method: 'GET',
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.csrf_token) {
+                csrfToken = data.csrf_token;
+            } else {
+                throw new Error('Не удалось получить CSRF-токен');
+            }
+        })
+        .catch(error => {
+            document.getElementById('error-message').textContent = error.message;
+            document.getElementById('error-message').style.display = 'block';
+        });
+
         const masterLoginStep = document.getElementById('master-login-step');
         const phoneStep = document.getElementById('phone-step');
         const codeStep = document.getElementById('code-step');
@@ -80,7 +95,6 @@
         const telegramId = (user && user.id) ? user.id : null;
         let isMasterMode = true;
 
-        // Переключение режима авторизации
         function toggleAuthMode() {
             if (isMasterMode) {
                 masterLoginStep.style.display = 'none';
@@ -98,7 +112,6 @@
 
         switchAuthButton.addEventListener('click', toggleAuthMode);
 
-        // Функция нормализации номера телефона
         function normalizePhone(phone) {
             phone = phone.replace(/[^0-9]/g, '');
             if (phone.length === 10) {
@@ -109,13 +122,11 @@
             return phone;
         }
 
-        // Проверка российского номера телефона
         function validateRussianPhone(phone) {
             const regex = /^(\+7|8|7)?[\s\-]?\(?(\d{3})\)?[\s\-]?(\d{3})[\s\-]?(\d{2})[\s\-]?(\d{2})$/;
             return regex.test(phone);
         }
 
-        // Вход мастеров
         masterLoginButton.addEventListener('click', function() {
             let phone = masterPhoneInput.value;
             const password = masterPasswordInput.value;
@@ -125,7 +136,7 @@
                 return;
             }
             if (!validateRussianPhone(phone)) {
-                errorMessage.textContent = 'Неверный формат номера (пример: +7 (XXX) XXX-XX-XX)';
+                errorMessage.textContent = 'Неверный формат номера';
                 errorMessage.style.display = 'block';
                 return;
             }
@@ -133,7 +144,8 @@
             fetch(serverUrl + 'master_login.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}`
+                credentials: 'include',
+                body: `phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}&csrf_token=${csrfToken}`
             })
             .then(response => response.json())
             .then(data => {
@@ -150,7 +162,6 @@
             });
         });
 
-        // Функция запроса кода
         function requestCode() {
             let phone = phoneInput.value;
             if (!phone) {
@@ -159,7 +170,7 @@
                 return;
             }
             if (!validateRussianPhone(phone)) {
-                errorMessage.textContent = 'Неверный формат номера (пример: +7 (XXX) XXX-XX-XX)';
+                errorMessage.textContent = 'Неверный формат номера';
                 errorMessage.style.display = 'block';
                 return;
             }
@@ -172,7 +183,8 @@
             fetch(serverUrl + 'request_code.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `phone=${encodeURIComponent(phone)}&telegram_id=${telegramId}`
+                credentials: 'include',
+                body: `phone=${encodeURIComponent(phone)}&telegram_id=${telegramId}&csrf_token=${csrfToken}`
             })
             .then(response => response.json())
             .then(data => {
@@ -191,13 +203,9 @@
             });
         }
 
-        // Запрос кода для клиентов
         requestCodeButton.addEventListener('click', requestCode);
-
-        // Повторная отправка кода
         resendCodeButton.addEventListener('click', requestCode);
 
-        // Проверка кода для клиентов
         verifyCodeButton.addEventListener('click', function() {
             let phone = phoneInput.value;
             const code = codeInput.value;
@@ -210,7 +218,8 @@
             fetch(serverUrl + 'verify_code.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `phone=${encodeURIComponent(phone)}&code=${encodeURIComponent(code)}`
+                credentials: 'include',
+                body: `phone=${encodeURIComponent(phone)}&code=${encodeURIComponent(code)}&csrf_token=${csrfToken}`
             })
             .then(response => response.json())
             .then(data => {

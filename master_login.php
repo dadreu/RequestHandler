@@ -1,40 +1,37 @@
 <?php
-include 'config.php'; // Подключение к базе данных
+session_start();
+include 'config.php';
 header('Content-Type: application/json');
-$response = ['success' => false];
 
-// Функция нормализации номера телефона
+if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    echo json_encode(['success' => false, 'message' => 'Неверный CSRF-токен']);
+    exit;
+}
+
+$phone = normalizePhone($_POST['phone']);
+$password = $_POST['password'];
+
+$stmt = $pdo->prepare("SELECT id_masters, password FROM Masters WHERE phone = :phone");
+$stmt->execute(['phone' => $phone]);
+$master = $stmt->fetch(PDO::FETCH_ASSOC);
+
+if (!$master) {
+    echo json_encode(['success' => false, 'message' => 'Номер телефона не зарегистрирован']);
+} elseif (password_verify($password, password_hash($master['password'], PASSWORD_DEFAULT))) {
+    $_SESSION['user_id'] = $master['id_masters'];
+    $_SESSION['role'] = 'master';
+    echo json_encode(['success' => true]);
+} else {
+    echo json_encode(['success' => false, 'message' => 'Неверный пароль']);
+}
+
 function normalizePhone($phone) {
-    $phone = preg_replace('/[^0-9]/', '', $phone); // Удаляем все нечисловые символы
-    if (strlen($phone) == 11 && $phone[0] == '8') {
-        $phone = '7' . substr($phone, 1); // Заменяем 8 на 7
+    $phone = preg_replace('/[^0-9]/', '', $phone);
+    if (strlen($phone) == 10) {
+        $phone = '7' + $phone;
+    } else if (strlen($phone) == 11 && $phone[0] == '8') {
+        $phone = '7' + substr($phone, 1);
     }
     return $phone;
 }
-
-if (!isset($_POST['phone']) || !isset($_POST['password'])) {
-    $response['message'] = 'Не переданы номер телефона или пароль';
-} else {
-    $phone = normalizePhone($_POST['phone']); // Нормализуем номер телефона
-    $password = $_POST['password'];
-
-    // Подготовленный запрос к таблице Masters
-    $stmt = $pdo->prepare("SELECT id_masters, password FROM Masters WHERE phone = :phone");
-    $stmt->execute(['phone' => $phone]);
-    $master = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    // Проверяем, найден ли пользователь
-    if (!$master) {
-        $response['message'] = 'Номер телефона не зарегистрирован';
-    }
-    // Сравнение пароля напрямую
-    elseif ($master['password'] === $password) {
-        $response['success'] = true;
-        $response['master_id'] = $master['id_masters'];
-    } else {
-        $response['message'] = 'Неверный пароль';
-    }
-}
-
-echo json_encode($response);
 ?>

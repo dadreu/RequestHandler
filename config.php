@@ -1,9 +1,14 @@
 <?php
-$host = 'amvera-dadreu-run-salondb';  // Внутреннее доменное имя базы данных
-$port = '3306';  // Стандартный порт MySQL
-$dbname = 'SalonDB';  // Имя базы данных из переменной окружения
-$username = getenv('MYSQL_USER');  // Имя пользователя из переменной окружения
-$password = getenv('MYSQL_PASSWORD');  // Пароль из переменной окружения
+session_start();
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
+$host = 'amvera-dadreu-run-salondb';
+$port = '3306';
+$dbname = 'SalonDB';
+$username = getenv('MYSQL_USER');
+$password = getenv('MYSQL_PASSWORD');
 
 try {
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8", $username, $password);

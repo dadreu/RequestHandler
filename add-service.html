@@ -38,14 +38,26 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const masterId = urlParams.get('master_id');
+            let csrfToken;
 
-            if (!masterId) {
-                alert("ID мастера не указан.");
-                window.history.back();
-                return;
-            }
+            // Получение CSRF-токена
+            fetch('https://requesthandler-dadreu.amvera.io/get_csrf_token.php', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.csrf_token) {
+                    csrfToken = data.csrf_token;
+                } else {
+                    alert('Ошибка: не удалось получить CSRF-токен');
+                    window.location.href = 'login.html';
+                }
+            })
+            .catch(error => {
+                alert('Ошибка подключения: ' + error);
+                window.location.href = 'login.html';
+            });
 
             window.saveService = function() {
                 const serviceName = document.getElementById('service-name').value;
@@ -57,7 +69,6 @@
                     return;
                 }
 
-                // Проверка на неотрицательное целое число
                 const durationNum = parseInt(serviceDuration);
                 const priceNum = parseInt(servicePrice);
                 if (isNaN(durationNum) || durationNum < 0 || isNaN(priceNum) || priceNum < 0) {
@@ -65,21 +76,22 @@
                     return;
                 }
 
-                fetch('add_service.php', {
+                fetch('https://requesthandler-dadreu.amvera.io/add_service.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    credentials: 'include',
                     body: new URLSearchParams({
-                        master_id: masterId,
                         service_name: serviceName,
                         duration: serviceDuration,
-                        price: servicePrice
+                        price: servicePrice,
+                        csrf_token: csrfToken
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert('Услуга успешно добавлена!');
-                        window.location.href = `services-settings.html?master_id=${masterId}`;
+                        window.location.href = 'services-settings.html';
                     } else {
                         alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
                     }
@@ -90,11 +102,11 @@
             };
 
             window.goBack = function() {
-                window.location.href = `services-settings.html?master_id=${masterId}`;
+                window.location.href = 'services-settings.html';
             };
 
             window.resetField = function(fieldId) {
-                document.getElementById(fieldId).value = 0;
+                document.getElementById(fieldId).value = '';
             };
         });
     </script>

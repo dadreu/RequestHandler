@@ -9,9 +9,8 @@
 </head>
 <body>
     <header class="top-bar">
-        <button class="back-button" onclick="window.location.href='masterReq.html?master_id=' + masterId">Назад</button>
+        <button class="back-button" onclick="window.location.href='masterReq.html'">Назад</button>
         <h1>Настройка услуг</h1>
-        <div></div>
     </header>
     <div class="content">
         <p class="select-services">Выберите услуги</p>
@@ -23,49 +22,65 @@
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const masterId = urlParams.get('master_id');
         let servicesAvailability = {};
+        let csrfToken;
 
-        if (masterId) {
-            loadServices(masterId);
-        } else {
-            alert("ID мастера не найден.");
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('https://requesthandler-dadreu.amvera.io/get_csrf_token.php', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.csrf_token) {
+                    csrfToken = data.csrf_token;
+                    loadServices();
+                } else {
+                    alert('Ошибка: не удалось получить CSRF-токен');
+                    window.location.href = 'login.html';
+                }
+            })
+            .catch(error => {
+                alert('Ошибка подключения: ' + error);
+                window.location.href = 'login.html';
+            });
+        });
 
-        function loadServices(masterId) {
-            fetch(`https://requesthandler-dadreu.amvera.io/get_services_by_master.php?master_id=${masterId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const serviceGroup = document.getElementById('service-group');
-                    serviceGroup.innerHTML = '';
-                    if (data.success) {
-                        data.services.forEach(service => {
-                            const serviceItemDiv = document.createElement('div');
-                            serviceItemDiv.classList.add('service-item');
+        function loadServices() {
+            fetch('https://requesthandler-dadreu.amvera.io/get_services_by_master.php', {
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                const serviceGroup = document.getElementById('service-group');
+                serviceGroup.innerHTML = '';
+                if (data.success) {
+                    data.services.forEach(service => {
+                        const serviceItemDiv = document.createElement('div');
+                        serviceItemDiv.classList.add('service-item');
 
-                            servicesAvailability[service.id_service] = service.is_available;
+                        servicesAvailability[service.id_service] = service.is_available;
 
-                            serviceItemDiv.innerHTML = `
-                                <span class="service-name">${service.name} (${service.price} ₽, ${service.duration} мин)</span>
-                                <div class="switch-container">
-                                    <label class="switch">
-                                        <input type="checkbox" ${service.is_available ? 'checked' : ''} onchange="toggleServiceAvailability(${service.id_service}, this)">
-                                        <span class="slider round"></span>
-                                    </label>
-                                </div>
-                                <button class="delete-button" onclick="deleteService(${service.id_service})">Удалить</button>
-                            `;
-                            serviceGroup.appendChild(serviceItemDiv);
-                        });
-                    } else {
-                        serviceGroup.innerHTML = `<p>${data.message || "Услуги не найдены."}</p>`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка при загрузке услуг:', error);
-                    document.getElementById('service-group').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
-                });
+                        serviceItemDiv.innerHTML = `
+                            <span class="service-name">${service.name} (${service.price} ₽, ${service.duration} мин)</span>
+                            <div class="switch-container">
+                                <label class="switch">
+                                    <input type="checkbox" ${service.is_available ? 'checked' : ''} onchange="toggleServiceAvailability(${service.id_service}, this)">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <button class="delete-button" onclick="deleteService(${service.id_service})">Удалить</button>
+                        `;
+                        serviceGroup.appendChild(serviceItemDiv);
+                    });
+                } else {
+                    serviceGroup.innerHTML = `<p>${data.message || "Услуги не найдены."}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке услуг:', error);
+                document.getElementById('service-group').innerHTML = '<p>Ошибка подключения.</p>';
+            });
         }
 
         function toggleServiceAvailability(serviceId, checkbox) {
@@ -77,13 +92,14 @@
                 fetch('https://requesthandler-dadreu.amvera.io/delete_service.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: serviceId, master_id: masterId })
+                    credentials: 'include',
+                    body: JSON.stringify({ id: serviceId, csrf_token: csrfToken })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         alert('Услуга удалена');
-                        loadServices(masterId);
+                        loadServices();
                     } else {
                         alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
                     }
@@ -97,38 +113,32 @@
 
         function saveChanges() {
             const updatedServices = Object.keys(servicesAvailability).map(serviceId => ({
-                master_id: masterId,
                 service_id: serviceId,
                 available: servicesAvailability[serviceId] ? 1 : 0
             }));
-
             fetch('https://requesthandler-dadreu.amvera.io/toggle_service_availability.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedServices)
+                credentials: 'include',
+                body: JSON.stringify({ services: updatedServices, csrf_token: csrfToken })
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Ответ от toggle_service_availability.php:', data);
                 if (data.success) {
                     alert("Настройки успешно сохранены.");
-                    window.location.href = `masterReq.html?master_id=${masterId}`;
+                    window.location.href = 'masterReq.html';
                 } else {
-                    alert("Ошибка при сохранении настроек: " + (data.message || "Неизвестная ошибка"));
+                    alert("Ошибка при сохранении: " + (data.message || "Неизвестная ошибка"));
                 }
             })
             .catch(error => {
-                console.error('Ошибка при сохранении изменений:', error);
-                alert('Ошибка при сохранении изменений: ' + error.message);
+                console.error('Ошибка при сохранении:', error);
+                alert('Ошибка при сохранении: ' + error.message);
             });
         }
 
         function goToAddService() {
-            if (masterId) {
-                window.location.href = `add-service.html?master_id=${masterId}`;
-            } else {
-                alert("ID мастера не указан.");
-            }
+            window.location.href = 'add-service.html';
         }
     </script>
 </body>

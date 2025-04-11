@@ -44,58 +44,76 @@
         <div class="buttons-container">
             <button class="record-button" onclick="goToAppointment()">Записать</button>
             <button class="record-button" onclick="goToWorkMode()">Режим работы</button>
-            <button class="record-button" id="servicesSettingsButton" onclick="window.location.href='services-settings.html?master_id=' + masterId">Настройка услуг</button>
+            <button class="record-button" onclick="window.location.href='services-settings.html'">Настройка услуг</button>
         </div>
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const masterId = urlParams.get('master_id');
+        let csrfToken;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('https://requesthandler-dadreu.amvera.io/get_csrf_token.php', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.csrf_token) {
+                    csrfToken = data.csrf_token;
+                    loadAppointments();
+                } else {
+                    alert('Ошибка: не удалось получить CSRF-токен');
+                    window.location.href = 'login.html';
+                }
+            })
+            .catch(error => {
+                alert('Ошибка подключения: ' + error);
+                window.location.href = 'login.html';
+            });
+        });
 
         function loadAppointments() {
             const sortField = document.getElementById('sort_field').value;
             const sortOrder = document.getElementById('sort_order').value;
-            fetch(`https://requesthandler-dadreu.amvera.io/get_master_appointments.php?master_id=${masterId}&sort_field=${sortField}&sort_order=${sortOrder}`)
-                .then(response => response.json())
-                .then(data => {
-                    const upcomingContainer = document.getElementById('upcoming-appointments');
-                    const completedContainer = document.getElementById('completed-appointments');
-                    upcomingContainer.innerHTML = '';
-                    completedContainer.innerHTML = '';
+            fetch(`https://requesthandler-dadreu.amvera.io/get_master_appointments.php?sort_field=${sortField}&sort_order=${sortOrder}`, {
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                const upcomingContainer = document.getElementById('upcoming-appointments');
+                const completedContainer = document.getElementById('completed-appointments');
+                upcomingContainer.innerHTML = '';
+                completedContainer.innerHTML = '';
 
-                    if (data.success) {
-                        // Предстоящие записи
-                        if (data.upcoming && data.upcoming.length > 0) {
-                            data.upcoming.forEach(appointment => {
-                                const appointmentDiv = createAppointmentElement(appointment);
-                                upcomingContainer.appendChild(appointmentDiv);
-                            });
-                        } else {
-                            upcomingContainer.innerHTML = '<p>Предстоящие записи отсутствуют.</p>';
-                        }
-
-                        // Выполненные записи
-                        if (data.completed && data.completed.length > 0) {
-                            data.completed.forEach(appointment => {
-                                const appointmentDiv = createAppointmentElement(appointment);
-                                completedContainer.appendChild(appointmentDiv);
-                            });
-                        } else {
-                            completedContainer.innerHTML = '<p>Выполненные записи отсутствуют.</p>';
-                        }
-
-                        // Добавляем обработчики событий для кнопок
-                        addEventListeners();
+                if (data.success) {
+                    if (data.upcoming && data.upcoming.length > 0) {
+                        data.upcoming.forEach(appointment => {
+                            const appointmentDiv = createAppointmentElement(appointment);
+                            upcomingContainer.appendChild(appointmentDiv);
+                        });
                     } else {
-                        upcomingContainer.innerHTML = `<p>${data.message || "Записи отсутствуют."}</p>`;
-                        completedContainer.innerHTML = '';
+                        upcomingContainer.innerHTML = '<p>Предстоящие записи отсутствуют.</p>';
                     }
-                })
-                .catch(error => {
-                    console.error('Ошибка при загрузке записей:', error);
-                    document.getElementById('upcoming-appointments').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
-                    document.getElementById('completed-appointments').innerHTML = '';
-                });
+
+                    if (data.completed && data.completed.length > 0) {
+                        data.completed.forEach(appointment => {
+                            const appointmentDiv = createAppointmentElement(appointment);
+                            completedContainer.appendChild(appointmentDiv);
+                        });
+                    } else {
+                        completedContainer.innerHTML = '<p>Выполненные записи отсутствуют.</p>';
+                    }
+
+                    addEventListeners();
+                } else {
+                    upcomingContainer.innerHTML = `<p>${data.message || "Записи отсутствуют."}</p>`;
+                    completedContainer.innerHTML = '';
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке записей:', error);
+                document.getElementById('upcoming-appointments').innerHTML = '<p>Ошибка подключения.</p>';
+            });
         }
 
         function createAppointmentElement(appointment) {
@@ -136,12 +154,11 @@
         }
 
         function deleteAppointment(appointmentId) {
-            fetch(`https://requesthandler-dadreu.amvera.io/delete_appointment.php`, {
+            fetch('https://requesthandler-dadreu.amvera.io/delete_appointment.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ id: appointmentId })
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ id: appointmentId, csrf_token: csrfToken })
             })
             .then(response => response.json())
             .then(data => {
@@ -159,39 +176,31 @@
         }
 
         function editAppointment(appointmentId) {
-            fetch(`https://requesthandler-dadreu.amvera.io/get_appointment.php?id=${appointmentId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const a = data.appointment;
-                        window.location.href = `appointment.html?appointment_id=${appointmentId}&master_id=${a.master_id}&client_id=${a.client_id}&service_id=${a.service_id}&date_time=${encodeURIComponent(a.date_time)}&fio=${encodeURIComponent(a.client_name)}&phone=${encodeURIComponent(a.phone)}&role=master&action=update`;
-                    } else {
-                        alert('Ошибка: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    alert('Произошла ошибка при получении данных');
-                });
+            fetch(`https://requesthandler-dadreu.amvera.io/get_appointment.php?id=${appointmentId}`, {
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const a = data.appointment;
+                    window.location.href = `appointment.html?appointment_id=${appointmentId}&master_id=${a.master_id}&client_id=${a.client_id}&service_id=${a.service_id}&date_time=${encodeURIComponent(a.date_time)}&fio=${encodeURIComponent(a.client_name)}&phone=${encodeURIComponent(a.phone)}&role=master&action=update`;
+                } else {
+                    alert('Ошибка: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при получении данных');
+            });
         }
 
         function goToAppointment() {
-            if (masterId) {
-                window.location.href = `appointment.html?master_id=${masterId}&role=master`;
-            } else {
-                alert("Ошибка: ID мастера не указан.");
-            }
+            window.location.href = 'appointment.html?role=master';
         }
 
         function goToWorkMode() {
-            if (masterId) {
-                window.location.href = `work-mode.html?master_id=${masterId}`;
-            } else {
-                alert("Ошибка: ID мастера не указан.");
-            }
+            window.location.href = 'work-mode.html';
         }
-
-        window.onload = loadAppointments;
     </script>
 </body>
 </html>
