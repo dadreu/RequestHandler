@@ -783,7 +783,7 @@ body {
 .service-group {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 15px; /* Увеличенный отступ между элементами .service-item */
 }
 
 .service-item {
@@ -793,21 +793,18 @@ body {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
-    gap: 25px;
-    margin-bottom: 20px;
+    gap: 20px; /* Увеличенный отступ между внутренними элементами (название, переключатель, кнопка) */
 }
 
 .service-name {
     font-size: 16px;
     color: #333;
     flex: 1;
-    margin-right: 15px;
 }
 
 .service-item .switch-container {
     display: flex;
     align-items: center;
-    margin-right: 15px;
 }
 
 .service-item .switch {
@@ -859,13 +856,12 @@ body {
     background-color: #dc3545;
     color: white;
     border: none;
-    padding: 6px 10px;
+    padding: 6px 10px; /* Уменьшенные отступы для компактности */
     border-radius: 5px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 12px; /* Уменьшенный шрифт */
     transition: background-color 0.3s ease;
-    white-space: nowrap;
-    margin-left: 10px;
+    white-space: nowrap; /* Предотвращаем перенос текста */
 }
 
 .service-item .delete-button:hover {
@@ -1080,41 +1076,28 @@ body {
     }
 
     .service-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
         padding: 10px;
-        gap: 5%;
-        margin-bottom: 15px;
-    }
-
-    .service-name,
-    .switch-container,
-    .delete-button {
-        flex: 0 0 30%;
-        box-sizing: border-box;
+        gap: 15px; /* Уменьшенный отступ для узких экранов */
     }
 
     .service-name {
         font-size: 14px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        margin-right: 0;
+        width: 100%;
     }
 
-    .switch-container {
-        display: flex;
-        justify-content: center;
-        margin-right: 0;
+    .service-item .switch-container {
+        width: 100%;
+        justify-content: flex-start;
     }
 
-    .switch {
+    .service-item .switch {
         width: 45px;
         height: 26px;
     }
 
-    .slider:before {
+    .service-item .slider:before {
         height: 18px;
         width: 18px;
         left: 4px;
@@ -1125,12 +1108,10 @@ body {
         transform: translateX(19px);
     }
 
-    .delete-button {
-        display: flex;
-        justify-content: flex-end;
-        padding: 3px 5px;
-        font-size: 7px;
-        margin-left: 0;
+    .service-item .delete-button {
+        width: 100%;
+        font-size: 11px; /* Ещё меньший шрифт */
+        padding: 5px 8px; /* Ещё компактнее */
     }
 
     .save-button,
@@ -1169,7 +1150,7 @@ body {
 
     .edit-button,
     .delete-button {
-        width: 100px;
+        width: 100%;
     }
 
     .record-time,
@@ -1242,41 +1223,26 @@ body {
 
     /* services-settings.html */
     .service-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
         padding: 12px;
-        gap: 5%;
-        margin-bottom: 20px;
-    }
-
-    .service-name,
-    .switch-container,
-    .delete-button {
-        flex: 0 0 30%;
-        box-sizing: border-box;
+        gap: 15px; /* Уменьшенный отступ для узких экранов */
     }
 
     .service-name {
         font-size: 15px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        margin-right: 0;
+        width: 100%;
     }
 
-    .switch-container {
-        display: flex;
-        justify-content: center;
-        margin-right: 0;
+    .service-item .switch-container {
+        width: 100%;
+        justify-content: flex-start;
     }
 
-    .delete-button {
-        display: flex;
-        justify-content: flex-end;
-        padding: 4px 5px;
-        font-size: 8px;
-        margin-left: 0;
+    .service-item .delete-button {
+        width: 100%;
+        font-size: 12px;
+        padding: 6px 10px; /* Компактнее */
     }
 }
 
