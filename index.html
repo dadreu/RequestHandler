@@ -64,16 +64,22 @@
             method: 'GET',
             credentials: 'include'
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Сервер вернул ошибку: ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.csrf_token) {
                 csrfToken = data.csrf_token;
             } else {
-                throw new Error('Не удалось получить CSRF-токен');
+                throw new Error('CSRF-токен не получен');
             }
         })
         .catch(error => {
-            document.getElementById('error-message').textContent = error.message;
+            console.error('Ошибка:', error);
+            document.getElementById('error-message').textContent = 'Ошибка: ' + error.message;
             document.getElementById('error-message').style.display = 'block';
         });
 
