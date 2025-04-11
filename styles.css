@@ -1089,7 +1089,7 @@ body {
 
     .service-name {
         font-size: 14px;
-        width: 100%;
+        width: 35%;
         margin-bottom: 15px; /* Отступ снизу для текста в вертикальной компоновке */
         margin-right: 0; /* Убираем правый отступ в колонке */
     }
@@ -1118,7 +1118,7 @@ body {
     }
 
     .service-item .delete-button {
-        width: auto;
+        width: 33%;
         min-width: 80px;
         font-size: 7px;
         padding: 3px 5px;
@@ -1162,7 +1162,7 @@ body {
 
     .edit-button,
     .delete-button {
-        width: 100%;
+        width: 33%;
     }
 
     .record-time,
@@ -1244,7 +1244,7 @@ body {
 
     .service-name {
         font-size: 15px;
-        width: 100%;
+        width: 35%;
         margin-bottom: 20px; /* Отступ снизу для текста */
         margin-right: 0; /* Убираем правый отступ в колонке */
     }
