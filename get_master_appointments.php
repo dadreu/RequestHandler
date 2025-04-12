@@ -1,21 +1,31 @@
 <?php
+// Запускаем сессию только если она ещё не активна
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 include 'config.php';
 header('Content-Type: application/json; charset=UTF-8');
 
+// Настройка логирования ошибок
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', '/var/www/html/error.log');
+
 $response = ['success' => false];
 
-if (!empty($_GET['master_id'])) {
-    $master_id = intval($_GET['master_id']);
-    $sort_field = $_GET['sort_field'] ?? 'date_time';
-    $sort_order = $_GET['sort_order'] ?? 'ASC';
+try {
+    if (!empty($_GET['master_id'])) {
+        $master_id = intval($_GET['master_id']);
+        $sort_field = $_GET['sort_field'] ?? 'date_time';
+        $sort_order = $_GET['sort_order'] ?? 'ASC';
 
-    // Допустимые поля для сортировки
-    $allowed_fields = ['date_time', 'client_name', 'phone', 'service_name', 'price', 'duration'];
-    $allowed_orders = ['ASC', 'DESC'];
-    $sort_field = in_array($sort_field, $allowed_fields) ? $sort_field : 'date_time';
-    $sort_order = in_array($sort_order, $allowed_orders) ? $sort_order : 'ASC';
+        // Допустимые поля для сортировки
+        $allowed_fields = ['date_time', 'client_name', 'phone', 'service_name', 'price', 'duration'];
+        $allowed_orders = ['ASC', 'DESC'];
+        $sort_field = in_array($sort_field, $allowed_fields) ? $sort_field : 'date_time';
+        $sort_order = in_array($sort_order, $allowed_orders) ? $sort_order : 'ASC';
 
-    try {
         // Проверка существования мастера
         $stmt = $pdo->prepare("SELECT id_masters FROM Masters WHERE id_masters = ?");
         $stmt->execute([$master_id]);
@@ -27,7 +37,7 @@ if (!empty($_GET['master_id'])) {
 
         // Текущее пермское время (UTC+5)
         $permTime = new DateTime('now', new DateTimeZone('UTC'));
-        $permTime->modify('+5 hours'); // Пермское время
+        $permTime->modify('+5 hours');
         $currentTime = $permTime->format('Y-m-d H:i:s');
         $todayStart = $permTime->format('Y-m-d 00:00:00');
 
@@ -51,11 +61,12 @@ if (!empty($_GET['master_id'])) {
 
         foreach ($appointments as $appointment) {
             if ($appointment['date_time'] >= $currentTime) {
-                $upcoming[] = $appointment; // Предстоящие (позже текущего времени)
+                $upcoming[] = $appointment;
             } else {
-                $completed[] = $appointment; // Выполненные (до текущего времени, включая сегодня)
+                $completed[] = $appointment;
             }
         }
+
         if ($upcoming || $completed) {
             $response['success'] = true;
             $response['upcoming'] = $upcoming;
@@ -63,11 +74,12 @@ if (!empty($_GET['master_id'])) {
         } else {
             $response['message'] = "Записи отсутствуют.";
         }
-    } catch (Exception $e) {
-        $response['message'] = "Ошибка БД: " . $e->getMessage();
+    } else {
+        $response['message'] = "ID мастера не указан.";
     }
-} else {
-    $response['message'] = "ID мастера не указан.";
+} catch (Exception $e) {
+    error_log('Ошибка в get_master_appointments.php: ' . $e->getMessage());
+    $response['message'] = "Ошибка сервера.";
 }
 
 echo json_encode($response);
