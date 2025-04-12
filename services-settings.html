@@ -23,44 +23,59 @@
 
     <script>
         let servicesAvailability = {};
-        let csrfToken;
+let csrfToken;
 
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('https://requesthandler-dadreu.amvera.io/get_csrf_token.php', {
-                method: 'GET',
-                credentials: 'include'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.csrf_token) {
-                    csrfToken = data.csrf_token;
-                    loadServices();
-                } else {
-                    alert('Ошибка: не удалось получить CSRF-токен');
-                    window.location.href = 'login.html';
-                }
-            })
-            .catch(error => {
-                alert('Ошибка подключения: ' + error);
-                window.location.href = 'login.html';
-            });
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    // Извлекаем master_id из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const masterId = urlParams.get('master_id');
 
-        function loadServices() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const masterId = urlParams.get('master_id');
-        if (!masterId) {
-            document.getElementById('service-group').innerHTML = '<p>Ошибка: ID мастера не указан.</p>';
-            return;
+    if (!masterId) {
+        alert('Ошибка: ID мастера не указан.');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    fetch('https://requesthandler-dadreu.amvera.io/get_csrf_token.php', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Сервер вернул ошибку: ' + response.status);
         }
-        fetch(`https://requesthandler-dadreu.amvera.io/get_services_by_master.php?master_id=${masterId}`, {
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
-            const serviceGroup = document.getElementById('service-group');
-            serviceGroup.innerHTML = '';
-            if (data.success) {
+        return response.json();
+    })
+    .then(data => {
+        if (data.csrf_token) {
+            csrfToken = data.csrf_token;
+            loadServices(masterId);
+        } else {
+            alert('Ошибка: не удалось получить CSRF-токен');
+            window.location.href = 'login.html';
+        }
+    })
+    .catch(error => {
+        alert('Ошибка подключения: ' + error);
+        window.location.href = 'login.html';
+    });
+});
+
+function loadServices(masterId) {
+    fetch(`https://requesthandler-dadreu.amvera.io/get_services_by_master.php?master_id=${masterId}`, {
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Сервер вернул ошибку: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        const serviceGroup = document.getElementById('service-group');
+        serviceGroup.innerHTML = '';
+        if (data.success) {
+            if (data.services && data.services.length > 0) {
                 data.services.forEach(service => {
                     const serviceItemDiv = document.createElement('div');
                     serviceItemDiv.classList.add('service-item');
@@ -80,71 +95,78 @@
                     serviceGroup.appendChild(serviceItemDiv);
                 });
             } else {
-                serviceGroup.innerHTML = `<p>${data.message || "Услуги не найдены."}</p>`;
+                serviceGroup.innerHTML = '<p>Услуги не найдены.</p>';
+            }
+        } else {
+            serviceGroup.innerHTML = `<p>${data.message || "Ошибка загрузки услуг."}</p>`;
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка при загрузке услуг:', error);
+        document.getElementById('service-group').innerHTML = '<p>Ошибка подключения: ' + error.message + '</p>';
+    });
+}
+
+function toggleServiceAvailability(serviceId, checkbox) {
+    servicesAvailability[serviceId] = checkbox.checked;
+}
+
+function deleteService(serviceId) {
+    if (confirm('Вы уверены, что хотите удалить эту услугу?')) {
+        fetch('https://requesthandler-dadreu.amvera.io/delete_service.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ id: serviceId, csrf_token: csrfToken })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Услуга удалена');
+                loadServices(new URLSearchParams(window.location.search).get('master_id'));
+            } else {
+                alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
             }
         })
         .catch(error => {
-            console.error('Ошибка при загрузке услуг:', error);
-            document.getElementById('service-group').innerHTML = '<p>Ошибка подключения.</p>';
+            console.error('Ошибка при удалении услуги:', error);
+            alert('Ошибка при удалении: ' + error);
         });
     }
-        function toggleServiceAvailability(serviceId, checkbox) {
-            servicesAvailability[serviceId] = checkbox.checked;
-        }
+}
 
-        function deleteService(serviceId) {
-            if (confirm('Вы уверены, что хотите удалить эту услугу?')) {
-                fetch('https://requesthandler-dadreu.amvera.io/delete_service.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ id: serviceId, csrf_token: csrfToken })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Услуга удалена');
-                        loadServices();
-                    } else {
-                        alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка при удалении услуги:', error);
-                    alert('Ошибка при удалении: ' + error);
-                });
-            }
+function saveChanges() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const masterId = urlParams.get('master_id');
+    const updatedServices = Object.keys(servicesAvailability).map(serviceId => ({
+        service_id: serviceId,
+        available: servicesAvailability[serviceId] ? 1 : 0
+    }));
+    fetch('https://requesthandler-dadreu.amvera.io/toggle_service_availability.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ services: updatedServices, master_id: masterId, csrf_token: csrfToken })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Настройки успешно сохранены.");
+            window.location.href = `masterReq.html?master_id=${masterId}`;
+        } else {
+            alert("Ошибка при сохранении: " + (data.message || "Неизвестная ошибка"));
         }
+    })
+    .catch(error => {
+        console.error('Ошибка при сохранении:', error);
+        alert('Ошибка при сохранении: ' + error.message);
+    });
+}
 
-        function saveChanges() {
-            const updatedServices = Object.keys(servicesAvailability).map(serviceId => ({
-                service_id: serviceId,
-                available: servicesAvailability[serviceId] ? 1 : 0
-            }));
-            fetch('https://requesthandler-dadreu.amvera.io/toggle_service_availability.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ services: updatedServices, csrf_token: csrfToken })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Настройки успешно сохранены.");
-                    window.location.href = 'masterReq.html';
-                } else {
-                    alert("Ошибка при сохранении: " + (data.message || "Неизвестная ошибка"));
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при сохранении:', error);
-                alert('Ошибка при сохранении: ' + error.message);
-            });
-        }
-
-        function goToAddService() {
-            window.location.href = 'add-service.html';
-        }
+function goToAddService() {
+    const masterId = new URLSearchParams(window.location.search).get('master_id');
+    window.location.href = `add-service.html?master_id=${masterId}`;
+}
     </script>
 </body>
 </html>

@@ -218,6 +218,10 @@ function goToWorkMode() {
     const masterId = new URLSearchParams(window.location.search).get('master_id');
     window.location.href = `work-mode.html?master_id=${masterId}`;
 }
+function goToServicesSettings() {
+    const masterId = new URLSearchParams(window.location.search).get('master_id');
+    window.location.href = `services-settings.html?master_id=${masterId}`;
+}
 </script>
 </body>
 </html>
