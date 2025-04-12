@@ -1,53 +1,48 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
+session_start();
 include 'config.php';
 header('Content-Type: application/json');
 
-if (!empty($_GET['master_id'])) {
-    $master_id = $_GET['master_id'];
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'master') {
+    echo json_encode(['success' => false, 'message' => 'Требуется авторизация мастера']);
+    exit;
+}
 
-    try {
-        // Проверяем, есть ли расписание для мастера
-        $stmt = $pdo->prepare("SELECT day_of_week, start_time, end_time, is_day_off FROM MasterSchedule WHERE master_id = :master_id");
-        $stmt->execute(['master_id' => $master_id]);
-        $schedule = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$master_id = $_SESSION['user_id'];
 
-        // Если расписание отсутствует, создаем его по умолчанию
-        if (empty($schedule)) {
-            $days_of_week = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-            $start_time = '09:00:00';
-            $end_time = '18:00:00';
-            $is_day_off = 0;
+try {
+    $stmt = $pdo->prepare("SELECT day_of_week, start_time, end_time, is_day_off FROM MasterSchedule WHERE master_id = ?");
+    $stmt->execute([$master_id]);
+    $schedule = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $stmt = $pdo->prepare(
-                "INSERT INTO MasterSchedule (master_id, day_of_week, start_time, end_time, is_day_off)
-                VALUES (:master_id, :day_of_week, :start_time, :end_time, :is_day_off)"
-            );
+    if (empty($schedule)) {
+        $days_of_week = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+        $start_time = '09:00:00';
+        $end_time = '18:00:00';
+        $is_day_off = 0;
 
-            foreach ($days_of_week as $day) {
-                $stmt->execute([
-                    'master_id' => $master_id,
-                    'day_of_week' => $day,
-                    'start_time' => $start_time,
-                    'end_time' => $end_time,
-                    'is_day_off' => $is_day_off
-                ]);
-            }
+        $stmt = $pdo->prepare(
+            "INSERT INTO MasterSchedule (master_id, day_of_week, start_time, end_time, is_day_off)
+            VALUES (:master_id, :day_of_week, :start_time, :end_time, :is_day_off)"
+        );
 
-            // Повторно загружаем расписание после вставки
-            $stmt = $pdo->prepare("SELECT day_of_week, start_time, end_time, is_day_off FROM MasterSchedule WHERE master_id = :master_id");
-            $stmt->execute(['master_id' => $master_id]);
-            $schedule = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($days_of_week as $day) {
+            $stmt->execute([
+                'master_id' => $master_id,
+                'day_of_week' => $day,
+                'start_time' => $start_time,
+                'end_time' => $end_time,
+                'is_day_off' => $is_day_off
+            ]);
         }
 
-        echo json_encode(['success' => true, 'schedule' => $schedule]);
-
-    } catch (PDOException $e) {
-        echo json_encode(["error" => "Ошибка запроса: " . $e->getMessage()]);
+        $stmt = $pdo->prepare("SELECT day_of_week, start_time, end_time, is_day_off FROM MasterSchedule WHERE master_id = ?");
+        $stmt->execute([$master_id]);
+        $schedule = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-} else {
-    echo json_encode(['error' => "Не указан master_id"]);
+
+    echo json_encode(['success' => true, 'schedule' => $schedule]);
+} catch (PDOException $e) {
+    echo json_encode(["error" => "Ошибка запроса: " . $e->getMessage()]);
 }
 ?>

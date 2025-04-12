@@ -1,5 +1,4 @@
 <?php
-// Запускаем сессию только если она ещё не активна
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -7,19 +6,16 @@ if (session_status() === PHP_SESSION_NONE) {
 include 'config.php';
 header('Content-Type: application/json');
 
-// Настройка логирования ошибок
-ini_set('display_errors', 0); // Отключаем вывод ошибок в ответ
-ini_set('log_errors', 1); // Включаем логирование
-ini_set('error_log', '/var/www/html/error.log'); // Укажите путь к файлу логов
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', '/var/www/html/error.log');
 
 try {
-    // Проверка CSRF-токена
-    if (!isset($_POST['csrf_token']) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+    if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         echo json_encode(['success' => false, 'message' => 'Неверный CSRF-токен']);
         exit;
     }
 
-    // Проверка входных данных
     if (!isset($_POST['phone']) || !isset($_POST['password'])) {
         echo json_encode(['success' => false, 'message' => 'Не указан номер телефона или пароль']);
         exit;

@@ -1,12 +1,10 @@
 <?php
-// Запускаем сессию только если она ещё не активна
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 header('Content-Type: application/json');
 
-// Настройка логирования ошибок
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', '/var/www/html/error.log');

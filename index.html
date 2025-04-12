@@ -64,12 +64,7 @@
             method: 'GET',
             credentials: 'include'
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Сервер вернул ошибку: ' + response.status);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.csrf_token) {
                 csrfToken = data.csrf_token;
@@ -78,7 +73,6 @@
             }
         })
         .catch(error => {
-            console.error('Ошибка:', error);
             document.getElementById('error-message').textContent = 'Ошибка: ' + error.message;
             document.getElementById('error-message').style.display = 'block';
         });
@@ -96,11 +90,9 @@
         const masterPasswordInput = document.getElementById('master_password');
         const phoneInput = document.getElementById('phone');
         const codeInput = document.getElementById('code');
-        const serverUrl = 'https://requesthandler-dadreu.amvera.io/';
-        const user = Telegram.WebApp.initDataUnsafe.user;
-        const telegramId = (user && user.id) ? user.id : null;
         let isMasterMode = true;
 
+        // Переключение режима авторизации
         function toggleAuthMode() {
             if (isMasterMode) {
                 masterLoginStep.style.display = 'none';
@@ -118,6 +110,7 @@
 
         switchAuthButton.addEventListener('click', toggleAuthMode);
 
+        // Нормализация номера телефона
         function normalizePhone(phone) {
             phone = phone.replace(/[^0-9]/g, '');
             if (phone.length === 10) {
@@ -128,11 +121,13 @@
             return phone;
         }
 
+        // Валидация номера телефона
         function validateRussianPhone(phone) {
             const regex = /^(\+7|8|7)?[\s\-]?\(?(\d{3})\)?[\s\-]?(\d{3})[\s\-]?(\d{2})[\s\-]?(\d{2})$/;
             return regex.test(phone);
         }
 
+        // Авторизация мастера
         masterLoginButton.addEventListener('click', function() {
             let phone = masterPhoneInput.value;
             const password = masterPasswordInput.value;
@@ -147,7 +142,7 @@
                 return;
             }
             phone = normalizePhone(phone);
-            fetch(serverUrl + 'master_login.php', {
+            fetch('https://requesthandler-dadreu.amvera.io/master_login.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 credentials: 'include',
@@ -156,7 +151,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = `masterReq.html?master_id=${data.master_id}`;
+                    window.location.href = 'masterReq.html';
                 } else {
                     errorMessage.textContent = data.message || 'Неверный номер телефона или пароль';
                     errorMessage.style.display = 'block';
@@ -168,6 +163,10 @@
             });
         });
 
+        const user = Telegram.WebApp.initDataUnsafe.user;
+        const telegramId = user && user.id ? user.id : null;
+
+        // Запрос кода для клиента
         function requestCode() {
             let phone = phoneInput.value;
             if (!phone) {
@@ -186,7 +185,7 @@
                 errorMessage.style.display = 'block';
                 return;
             }
-            fetch(serverUrl + 'request_code.php', {
+            fetch('https://requesthandler-dadreu.amvera.io/request_code.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 credentials: 'include',
@@ -212,6 +211,7 @@
         requestCodeButton.addEventListener('click', requestCode);
         resendCodeButton.addEventListener('click', requestCode);
 
+        // Проверка кода
         verifyCodeButton.addEventListener('click', function() {
             let phone = phoneInput.value;
             const code = codeInput.value;
@@ -221,7 +221,7 @@
                 return;
             }
             phone = normalizePhone(phone);
-            fetch(serverUrl + 'verify_code.php', {
+            fetch('https://requesthandler-dadreu.amvera.io/verify_code.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 credentials: 'include',
@@ -230,7 +230,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = `clientReq.html?client_id=${data.client_id}`;
+                    window.location.href = 'clientReq.html';
                 } else {
                     errorMessage.textContent = data.message || 'Неверный код';
                     errorMessage.style.display = 'block';

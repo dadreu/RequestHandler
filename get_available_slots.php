@@ -2,8 +2,8 @@
 include 'config.php';
 header('Content-Type: application/json; charset=UTF-8');
 
-$master_id = isset($_GET['master_id']) ? (int)$_GET['master_id'] : 0;
-$service_id = isset($_GET['service_id']) ? (int)$_GET['service_id'] : 0;
+$master_id = isset($_GET['master_id']) ? intval($_GET['master_id']) : 0;
+$service_id = isset($_GET['service_id']) ? intval($_GET['service_id']) : 0;
 $date = isset($_GET['date']) ? $_GET['date'] : '';
 
 if (!$master_id || !$service_id || !$date) {
@@ -12,7 +12,6 @@ if (!$master_id || !$service_id || !$date) {
 }
 
 try {
-    // Длительность услуги
     $stmt = $pdo->prepare("SELECT duration FROM MasterServices WHERE master_id = ? AND service_id = ?");
     $stmt->execute([$master_id, $service_id]);
     $service = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -23,13 +22,11 @@ try {
     $duration = $service['duration'];
     error_log("Длительность услуги: $duration минут");
 
-    // День недели
     $dayIndex = date('w', strtotime($date));
     $daysOfWeek = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     $dayOfWeek = $daysOfWeek[$dayIndex];
     error_log("Дата: $date, Индекс дня: $dayIndex, День недели: $dayOfWeek");
 
-    // Получение расписания
     $stmt = $pdo->prepare("SELECT start_time, end_time, is_day_off FROM MasterSchedule WHERE master_id = ? AND day_of_week = ?");
     $stmt->execute([$master_id, $dayOfWeek]);
     $schedule = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -40,7 +37,6 @@ try {
         exit;
     }
 
-    // Проверяем, является ли день выходным
     if ($schedule['is_day_off'] == 1) {
         error_log("День $dayOfWeek является выходным для мастера $master_id");
         echo json_encode(['available_slots' => [], 'error' => "Этот день является выходным"]);
@@ -51,7 +47,6 @@ try {
     $end_time = $schedule['end_time'];
     error_log("Расписание для $dayOfWeek: start_time = $start_time, end_time = $end_time");
 
-    // Генерация слотов
     $start_dt = DateTime::createFromFormat('H:i:s', $start_time);
     $end_dt = DateTime::createFromFormat('H:i:s', $end_time);
     $latest_start_dt = clone $end_dt;
@@ -65,7 +60,6 @@ try {
     }
     error_log("Возможные слоты: " . implode(', ', $possible_starts));
 
-    // Проверка занятости
     $stmt = $pdo->prepare("
         SELECT a.date_time, ms.duration
         FROM Appointments a
@@ -106,7 +100,6 @@ try {
 
     error_log("Доступные слоты: " . implode(', ', $available_slots));
     echo json_encode(['available_slots' => $available_slots]);
-
 } catch (PDOException $e) {
     error_log("Ошибка PDO: " . $e->getMessage());
     echo json_encode(['error' => 'Ошибка базы данных: ' . $e->getMessage()]);

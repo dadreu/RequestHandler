@@ -15,10 +15,11 @@ if (!isset($data['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $data['
 }
 
 $appointment_id = intval($data['id']);
+$master_id = $_SESSION['user_id'];
 
 try {
     $stmt = $pdo->prepare("DELETE FROM Appointments WHERE id_appointment = ? AND master_id = ?");
-    $stmt->execute([$appointment_id, $_SESSION['user_id']]);
+    $stmt->execute([$appointment_id, $master_id]);
     if ($stmt->rowCount() > 0) {
         $stmt_log = $pdo->prepare("INSERT INTO Logs (user_id, role, action, timestamp) VALUES (?, ?, ?, NOW())");
         $stmt_log->execute([$_SESSION['user_id'], $_SESSION['role'], "Удалил запись с ID $appointment_id"]);

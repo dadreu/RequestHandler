@@ -22,34 +22,20 @@
     </div>
 
     <script>
-        let servicesAvailability = {};
+let servicesAvailability = {};
 let csrfToken;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Извлекаем master_id из URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const masterId = urlParams.get('master_id');
-
-    if (!masterId) {
-        alert('Ошибка: ID мастера не указан.');
-        window.location.href = 'login.html';
-        return;
-    }
-
+    // Получение CSRF-токена
     fetch('https://requesthandler-dadreu.amvera.io/get_csrf_token.php', {
         method: 'GET',
         credentials: 'include'
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Сервер вернул ошибку: ' + response.status);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.csrf_token) {
             csrfToken = data.csrf_token;
-            loadServices(masterId);
+            loadServices();
         } else {
             alert('Ошибка: не удалось получить CSRF-токен');
             window.location.href = 'login.html';
@@ -61,16 +47,12 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-function loadServices(masterId) {
-    fetch(`https://requesthandler-dadreu.amvera.io/get_services_by_master.php?master_id=${masterId}`, {
+// Загрузка услуг
+function loadServices() {
+    fetch('https://requesthandler-dadreu.amvera.io/get_services_by_master.php', {
         credentials: 'include'
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Сервер вернул ошибку: ' + response.status);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         const serviceGroup = document.getElementById('service-group');
         serviceGroup.innerHTML = '';
@@ -107,10 +89,12 @@ function loadServices(masterId) {
     });
 }
 
+// Переключение доступности услуги
 function toggleServiceAvailability(serviceId, checkbox) {
     servicesAvailability[serviceId] = checkbox.checked;
 }
 
+// Удаление услуги
 function deleteService(serviceId) {
     if (confirm('Вы уверены, что хотите удалить эту услугу?')) {
         fetch('https://requesthandler-dadreu.amvera.io/delete_service.php', {
@@ -123,7 +107,7 @@ function deleteService(serviceId) {
         .then(data => {
             if (data.success) {
                 alert('Услуга удалена');
-                loadServices(new URLSearchParams(window.location.search).get('master_id'));
+                loadServices();
             } else {
                 alert('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
             }
@@ -135,9 +119,8 @@ function deleteService(serviceId) {
     }
 }
 
+// Сохранение изменений
 function saveChanges() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const masterId = urlParams.get('master_id');
     const updatedServices = Object.keys(servicesAvailability).map(serviceId => ({
         service_id: serviceId,
         available: servicesAvailability[serviceId] ? 1 : 0
@@ -146,13 +129,13 @@ function saveChanges() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ services: updatedServices, master_id: masterId, csrf_token: csrfToken })
+        body: JSON.stringify({ services: updatedServices, csrf_token: csrfToken })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
             alert("Настройки успешно сохранены.");
-            window.location.href = `masterReq.html?master_id=${masterId}`;
+            window.location.href = 'masterReq.html';
         } else {
             alert("Ошибка при сохранении: " + (data.message || "Неизвестная ошибка"));
         }
@@ -163,9 +146,9 @@ function saveChanges() {
     });
 }
 
+// Переход к добавлению услуги
 function goToAddService() {
-    const masterId = new URLSearchParams(window.location.search).get('master_id');
-    window.location.href = `add-service.html?master_id=${masterId}`;
+    window.location.href = 'add-service.html';
 }
     </script>
 </body>

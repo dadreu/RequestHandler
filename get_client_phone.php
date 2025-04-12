@@ -1,26 +1,26 @@
 <?php
+session_start();
 include 'config.php';
 header('Content-Type: application/json');
 
-$client_id = $_GET['client_id'];
-
-if (empty($client_id)) {
-    echo json_encode(['error' => 'Client ID is required']);
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'client') {
+    echo json_encode(['success' => false, 'message' => 'Требуется авторизация клиента']);
     exit;
 }
 
+$client_id = $_SESSION['user_id'];
+
 try {
-    $stmt = $pdo->prepare("SELECT phone FROM Clients WHERE id_clients = :client_id");
-    $stmt->bindParam(':client_id', $client_id);
-    $stmt->execute();
+    $stmt = $pdo->prepare("SELECT phone FROM Clients WHERE id_clients = ?");
+    $stmt->execute([$client_id]);
     $client = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($client) {
-        echo json_encode(['phone' => $client['phone']]);
+        echo json_encode(['success' => true, 'phone' => $client['phone']]);
     } else {
-        echo json_encode(['error' => 'Client not found']);
+        echo json_encode(['success' => false, 'message' => 'Клиент не найден']);
     }
 } catch (Exception $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>

@@ -22,21 +22,16 @@
     </div>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const clientId = urlParams.get('client_id');
-
         function loadClientRecords() {
-            if (!clientId) {
-                alert("Не найден client_id");
-                return;
-            }
-
-            fetch(`https://requesthandler-dadreu.amvera.io/get_client_appointments.php?client_id=${clientId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const recordsContainer = document.getElementById('my-records');
-                    if (data.success) {
-                        recordsContainer.innerHTML = '<h2>Мои записи</h2>';
+            fetch('https://requesthandler-dadreu.amvera.io/get_client_appointments.php', {
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                const recordsContainer = document.getElementById('my-records');
+                if (data.success) {
+                    recordsContainer.innerHTML = '<h2>Мои записи</h2>';
+                    if (data.appointments && data.appointments.length > 0) {
                         data.appointments.forEach(appointment => {
                             const recordDiv = document.createElement('div');
                             recordDiv.classList.add('record');
@@ -49,21 +44,20 @@
                             recordsContainer.appendChild(recordDiv);
                         });
                     } else {
-                        recordsContainer.innerHTML = `<p>${data.message || "У вас нет записей."}</p>`;
+                        recordsContainer.innerHTML += '<p>У вас нет записей.</p>';
                     }
-                })
-                .catch(error => {
-                    console.error('Ошибка при загрузке записей:', error);
-                    document.getElementById('my-records').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
-                });
+                } else {
+                    recordsContainer.innerHTML = `<p>${data.message || "Ошибка загрузки записей."}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при загрузке записей:', error);
+                document.getElementById('my-records').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
+            });
         }
 
         function goToAppointment() {
-            if (clientId) {
-                window.location.href = `appointment.html?client_id=${clientId}&role=client`;
-            } else {
-                alert("Client ID не найден");
-            }
+            window.location.href = 'appointment.html?role=client';
         }
 
         window.onload = loadClientRecords;

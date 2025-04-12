@@ -15,179 +15,172 @@
 
     <div class="content">
         <p class="change-time">Настройте время работы</p>
-
         <div class="work-schedule" id="schedule">
             <!-- Дни недели добавятся через JS -->
         </div>
-
         <button class="save-btn" onclick="saveSchedule()">Сохранить</button>
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const masterId = urlParams.get("master_id");
+document.addEventListener("DOMContentLoaded", function () {
+    populateSchedule();
+    loadSchedule();
+});
 
-            if (masterId) {
-                loadSchedule(masterId);
-            } else {
-                alert("Не указан master_id.");
-            }
+// Назад
+function goBack() {
+    window.location.href = 'masterReq.html';
+}
 
-            populateSchedule();
-        });
+// Создание расписания
+function populateSchedule() {
+    const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+    const scheduleContainer = document.getElementById("schedule");
 
-        function goBack() {
-            window.history.back();
-        }
-
-        function populateSchedule() {
-            const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-            const scheduleContainer = document.getElementById("schedule");
-
-            days.forEach((day, index) => {
-                const dayId = `day-${index}`;
-                scheduleContainer.innerHTML += `
-                    <div class="day">
-                        <label class="day-label">${day}</label>
-                        <div class="time-column">
-                            <div class="time">
-                                <select id="${dayId}-start" class="hour"></select> :
-                                <select id="${dayId}-start-minutes" class="minute"></select>
-                            </div>
-                            <div class="time">
-                                <select id="${dayId}-end" class="hour"></select> :
-                                <select id="${dayId}-end-minutes" class="minute"></select>
-                            </div>
-                        </div>
-                        <div class="switch-container">
-                            <label class="switch">
-                                <input type="checkbox" id="${dayId}-day-off" onchange="toggleDayOff(${index})">
-                                <span class="slider round"></span>
-                            </label>
-                            <span class="day-off-label">Выходной</span>
-                        </div>
+    days.forEach((day, index) => {
+        const dayId = `day-${index}`;
+        scheduleContainer.innerHTML += `
+            <div class="day">
+                <label class="day-label">${day}</label>
+                <div class="time-column">
+                    <div class="time">
+                        <select id="${dayId}-start" class="hour"></select> :
+                        <select id="${dayId}-start-minutes" class="minute"></select>
                     </div>
-                `;
-            });
+                    <div class="time">
+                        <select id="${dayId}-end" class="hour"></select> :
+                        <select id="${dayId}-end-minutes" class="minute"></select>
+                    </div>
+                </div>
+                <div class="switch-container">
+                    <label class="switch">
+                        <input type="checkbox" id="${dayId}-day-off" onchange="toggleDayOff(${index})">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="day-off-label">Выходной</span>
+                </div>
+            </div>
+        `;
+    });
 
-            populateTimeSelectors();
-        }
+    populateTimeSelectors();
+}
 
-        function populateTimeSelectors() {
-            const hours = document.querySelectorAll('.hour');
-            const minutes = document.querySelectorAll('.minute');
+// Заполнение селекторов времени
+function populateTimeSelectors() {
+    const hours = document.querySelectorAll('.hour');
+    const minutes = document.querySelectorAll('.minute');
 
-            for (let h = 9; h <= 20; h++) {
-                hours.forEach(hourSelect => {
-                    let option = document.createElement('option');
-                    option.value = h;
-                    option.textContent = h < 10 ? '0' + h : h;
-                    hourSelect.appendChild(option);
-                });
-            }
+    for (let h = 9; h <= 20; h++) {
+        hours.forEach(hourSelect => {
+            let option = document.createElement('option');
+            option.value = h;
+            option.textContent = h < 10 ? '0' + h : h;
+            hourSelect.appendChild(option);
+        });
+    }
 
-            [0, 15, 30, 45].forEach(m => {
-                minutes.forEach(minSelect => {
-                    let option = document.createElement('option');
-                    option.value = m;
-                    option.textContent = m === 0 ? '00' : m;
-                    minSelect.appendChild(option);
-                });
-            });
-        }
+    [0, 15, 30, 45].forEach(m => {
+        minutes.forEach(minSelect => {
+            let option = document.createElement('option');
+            option.value = m;
+            option.textContent = m === 0 ? '00' : m;
+            minSelect.appendChild(option);
+        });
+    });
+}
 
-        function toggleDayOff(index) {
-            const dayId = `day-${index}`;
-            const isDayOff = document.getElementById(`${dayId}-day-off`).checked;
-            const startHourSelect = document.getElementById(`${dayId}-start`);
-            const startMinuteSelect = document.getElementById(`${dayId}-start-minutes`);
-            const endHourSelect = document.getElementById(`${dayId}-end`);
-            const endMinuteSelect = document.getElementById(`${dayId}-end-minutes`);
+// Переключение выходного дня
+function toggleDayOff(index) {
+    const dayId = `day-${index}`;
+    const isDayOff = document.getElementById(`${dayId}-day-off`).checked;
+    const startHourSelect = document.getElementById(`${dayId}-start`);
+    const startMinuteSelect = document.getElementById(`${dayId}-start-minutes`);
+    const endHourSelect = document.getElementById(`${dayId}-end`);
+    const endMinuteSelect = document.getElementById(`${dayId}-end-minutes`);
 
-            // Отключаем выбор времени, если день выходной
-            startHourSelect.disabled = isDayOff;
-            startMinuteSelect.disabled = isDayOff;
-            endHourSelect.disabled = isDayOff;
-            endMinuteSelect.disabled = isDayOff;
+    startHourSelect.disabled = isDayOff;
+    startMinuteSelect.disabled = isDayOff;
+    endHourSelect.disabled = isDayOff;
+    endMinuteSelect.disabled = isDayOff;
 
-            if (isDayOff) {
-                // Устанавливаем время по умолчанию (например, 00:00-00:00)
-                startHourSelect.value = 0;
-                startMinuteSelect.value = 0;
-                endHourSelect.value = 0;
-                endMinuteSelect.value = 0;
-            }
-        }
+    if (isDayOff) {
+        startHourSelect.value = 9;
+        startMinuteSelect.value = 0;
+        endHourSelect.value = 9;
+        endMinuteSelect.value = 0;
+    }
+}
 
-        function loadSchedule(masterId) {
-            fetch(`load_schedule.php?master_id=${masterId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.schedule) {
-                        data.schedule.forEach(item => {
-                            const dayIndex = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].indexOf(item.day_of_week);
-                            if (dayIndex !== -1) {
-                                const dayId = `day-${dayIndex}`;
-                                document.getElementById(`${dayId}-start`).value = parseInt(item.start_time.split(':')[0]);
-                                document.getElementById(`${dayId}-start-minutes`).value = parseInt(item.start_time.split(':')[1]);
-                                document.getElementById(`${dayId}-end`).value = parseInt(item.end_time.split(':')[0]);
-                                document.getElementById(`${dayId}-end-minutes`).value = parseInt(item.end_time.split(':')[1]);
-                                const isDayOff = item.is_day_off == 1;
-                                document.getElementById(`${dayId}-day-off`).checked = isDayOff;
-                                toggleDayOff(dayIndex); // Обновляем состояние полей времени
-                            }
-                        });
-                    }
-                })
-                .catch(error => console.error('Ошибка загрузки данных:', error));
-        }
-
-        function saveSchedule() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const masterId = urlParams.get("master_id");
-
-            if (!masterId) {
-                alert("Не указан ID мастера.");
-                return;
-            }
-
-            let scheduleData = [];
-            const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-
-            days.forEach((day, index) => {
-                const dayId = `day-${index}`;
-                const isDayOff = document.getElementById(`${dayId}-day-off`).checked;
-                const startHour = document.getElementById(`${dayId}-start`).value.padStart(2, '0');
-                const startMinute = document.getElementById(`${dayId}-start-minutes`).value.padStart(2, '0');
-                const endHour = document.getElementById(`${dayId}-end`).value.padStart(2, '0');
-                const endMinute = document.getElementById(`${dayId}-end-minutes`).value.padStart(2, '0');
-                const startTime = isDayOff ? '00:00:00' : `${startHour}:${startMinute}:00`;
-                const endTime = isDayOff ? '00:00:00' : `${endHour}:${endMinute}:00`;
-
-                scheduleData.push({
-                    day_of_week: day,
-                    start_time: startTime,
-                    end_time: endTime,
-                    is_day_off: isDayOff ? 1 : 0
-                });
-            });
-
-            fetch("save_schedule.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ master_id: masterId, schedule: scheduleData })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Расписание сохранено!");
-                } else {
-                    alert("Ошибка сохранения расписания: " + (data.error || "Неизвестная ошибка"));
+// Загрузка расписания
+function loadSchedule() {
+    fetch('https://requesthandler-dadreu.amvera.io/load_schedule.php', {
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.schedule) {
+            data.schedule.forEach(item => {
+                const dayIndex = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].indexOf(item.day_of_week);
+                if (dayIndex !== -1) {
+                    const dayId = `day-${dayIndex}`;
+                    document.getElementById(`${dayId}-start`).value = parseInt(item.start_time.split(':')[0]);
+                    document.getElementById(`${dayId}-start-minutes`).value = parseInt(item.start_time.split(':')[1]);
+                    document.getElementById(`${dayId}-end`).value = parseInt(item.end_time.split(':')[0]);
+                    document.getElementById(`${dayId}-end-minutes`).value = parseInt(item.end_time.split(':')[1]);
+                    const isDayOff = item.is_day_off == 1;
+                    document.getElementById(`${dayId}-day-off`).checked = isDayOff;
+                    toggleDayOff(dayIndex);
                 }
-            })
-            .catch(error => console.error("Ошибка сохранения:", error));
+            });
         }
+    })
+    .catch(error => console.error('Ошибка загрузки данных:', error));
+}
+
+// Сохранение расписания
+function saveSchedule() {
+    let scheduleData = [];
+    const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+
+    days.forEach((day, index) => {
+        const dayId = `day-${index}`;
+        const isDayOff = document.getElementById(`${dayId}-day-off`).checked;
+        const startHour = document.getElementById(`${dayId}-start`).value.padStart(2, '0');
+        const startMinute = document.getElementById(`${dayId}-start-minutes`).value.padStart(2, '0');
+        const endHour = document.getElementById(`${dayId}-end`).value.padStart(2, '0');
+        const endMinute = document.getElementById(`${dayId}-end-minutes`).value.padStart(2, '0');
+        const startTime = isDayOff ? '00:00:00' : `${startHour}:${startMinute}:00`;
+        const endTime = isDayOff ? '00:00:00' : `${endHour}:${endMinute}:00`;
+
+        scheduleData.push({
+            day_of_week: day,
+            start_time: startTime,
+            end_time: endTime,
+            is_day_off: isDayOff ? 1 : 0
+        });
+    });
+
+    fetch('https://requesthandler-dadreu.amvera.io/save_schedule.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ schedule: scheduleData })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Расписание сохранено!');
+            window.location.href = 'masterReq.html';
+        } else {
+            alert('Ошибка сохранения расписания: ' + (data.error || 'Неизвестная ошибка'));
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка сохранения:', error);
+        alert('Ошибка сохранения: ' + error.message);
+    });
+}
     </script>
 </body>
 </html>

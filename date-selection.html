@@ -46,20 +46,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const serviceId = urlParams.get('service_id');
     const fio = urlParams.get('fio');
     const phone = urlParams.get('phone');
-    const originalMasterId = urlParams.get('original_master_id');
-    const clientId = urlParams.get('client_id');
     const role = urlParams.get('role');
     const appointmentId = urlParams.get('appointment_id') || '';
+    const dateTime = urlParams.get('date_time') || '';
     const action = urlParams.get('action') || 'create';
 
     let csrfToken;
 
-    if (!selectedMasterId || !serviceId || !fio || !phone || !originalMasterId || !role) {
+    // Проверка обязательных параметров
+    if (!selectedMasterId || !serviceId || !fio || !phone || !role) {
         alert('Ошибка: не все данные переданы.');
         window.history.back();
         return;
     }
 
+    // Получение CSRF-токена
     fetch('https://requesthandler-dadreu.amvera.io/get_csrf_token.php', {
         method: 'GET',
         credentials: 'include'
@@ -77,9 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'login.html';
     });
 
-    const DAYS_OF_WEEK = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     const now = new Date();
-    const permTime = new Date(now.getTime() + (5 * 60 * 60 * 1000));
+    const permTime = new Date(now.getTime() + (5 * 60 * 60 * 1000)); // Запрет выбора времени ранее чем через 5 часов
     const minDate = new Date(permTime.getFullYear(), permTime.getMonth(), 1);
     let currentDate = new Date(minDate);
     let selectedDay = null;
@@ -93,12 +93,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmButtonContainer = document.getElementById('confirm-button-container');
     const backButton = document.querySelector('.back-button');
 
+    // Настройка кнопки "Назад"
     const goBack = () => {
-        const redirectUrl = `appointment.html?master_id=${originalMasterId}&selected_master_id=${selectedMasterId}&service_id=${serviceId}&fio=${fio}&phone=${phone}&role=${role}&appointment_id=${appointmentId}&action=${action}`;
+        const redirectUrl = `appointment.html?selected_master_id=${selectedMasterId}&service_id=${serviceId}&fio=${fio}&phone=${phone}&role=${role}&appointment_id=${appointmentId}&date_time=${dateTime}&action=${action}`;
         window.location.href = redirectUrl;
     };
     backButton.addEventListener('click', goBack);
 
+    // Отрисовка календаря
     const renderCalendar = () => {
         calendarBody.innerHTML = '';
         const year = currentDate.getFullYear();
@@ -112,15 +114,17 @@ document.addEventListener('DOMContentLoaded', () => {
         prevMonthButton.disabled = (year === minDate.getFullYear() && month === minDate.getMonth());
 
         const firstDay = new Date(year, month, 1);
-        const startDay = (firstDay.getDay() + 6) % 7;
+        const startDay = (firstDay.getDay() + 6) % 7; // Начинаем с понедельника
         const totalDays = new Date(year, month + 1, 0).getDate();
 
+        // Пустые дни до начала месяца
         for (let i = 0; i < startDay; i++) {
             const emptyDay = document.createElement('div');
             emptyDay.classList.add('calendar-day', 'empty');
             calendarBody.appendChild(emptyDay);
         }
 
+        // Дни месяца
         for (let date = 1; date <= totalDays; date++) {
             const day = document.createElement('div');
             day.classList.add('calendar-day');
@@ -144,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             calendarBody.appendChild(day);
         }
 
+        // Пустые дни в конце
         const totalCells = startDay + totalDays;
         const remainingCells = (7 - (totalCells % 7)) % 7;
         for (let i = 0; i < remainingCells; i++) {
@@ -153,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Получение доступных временных слотов
     const fetchAvailableSlots = (date) => {
         const formattedDate = date.toISOString().split('T')[0];
         fetch(`https://requesthandler-dadreu.amvera.io/get_available_slots.php?master_id=${selectedMasterId}&service_id=${serviceId}&date=${formattedDate}`, {
@@ -173,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Заполнение временных слотов
     const populateTimeSlots = (slots) => {
         timeSlotsContainer.innerHTML = '';
         if (slots.length === 0) {
@@ -196,11 +203,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Обновление состояния кнопки подтверждения
     const updateConfirmButtonState = () => {
         const button = confirmButtonContainer.querySelector('.confirm-button');
         button.disabled = !(selectedDay && selectedTime);
     };
 
+    // Подтверждение записи
     const confirmAppointment = (date, time) => {
         const year = date.getUTCFullYear();
         const month = String(date.getUTCMonth() + 1).padStart(2, '0');
@@ -215,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             credentials: 'include',
             body: new URLSearchParams({
-                appointment_id: appointmentId || '',
+                appointment_id: appointmentId,
                 master_id: selectedMasterId,
                 service_id: serviceId,
                 fio: decodeURIComponent(fio),
@@ -229,11 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             if (data.success) {
                 alert(action === 'update' ? 'Запись успешно обновлена!' : 'Запись успешно создана!');
-                if (role === 'master') {
-                    window.location.href = 'masterReq.html';
-                } else if (role === 'client') {
-                    window.location.href = 'clientReq.html';
-                }
+                window.location.href = role === 'master' ? 'masterReq.html' : 'clientReq.html';
             } else {
                 alert(`Ошибка: ${data.message || 'Неизвестная ошибка'}`);
             }
@@ -244,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Обработчик кнопки подтверждения
     const confirmButton = confirmButtonContainer.querySelector('.confirm-button');
     confirmButton.addEventListener('click', () => {
         if (selectedDay && selectedTime) {
@@ -252,11 +258,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentDate.getMonth(),
                 parseInt(selectedDay.textContent)
             ));
-            const formattedTime = selectedTime.textContent;
-            confirmAppointment(selectedDate, formattedTime);
+            confirmAppointment(selectedDate, selectedTime.textContent);
         }
     });
 
+    // Навигация по месяцам
     prevMonthButton.addEventListener('click', () => {
         currentDate.setMonth(currentDate.getMonth() - 1);
         renderCalendar();
@@ -266,6 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCalendar();
     });
 
+    // Инициализация календаря
     renderCalendar();
 });
     </script>
