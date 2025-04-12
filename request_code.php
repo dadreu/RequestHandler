@@ -1,10 +1,18 @@
 <?php
+session_start();
 include 'config.php';
 header('Content-Type: application/json');
 $response = ['success' => false];
 
 try {
-    if (isset($_POST['phone']) && isset($_POST['telegram_id'])) {
+    if (isset($_POST['phone']) && isset($_POST['telegram_id']) && isset($_POST['csrf_token'])) {
+        // Проверка CSRF-токена
+        if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
+            $response['message'] = 'Неверный CSRF-токен';
+            echo json_encode($response);
+            exit;
+        }
+
         $phone = preg_replace('/[^0-9]/', '', $_POST['phone']);
         if (strlen($phone) == 11 && $phone[0] == '8') {
             $phone = '7' . substr($phone, 1);
@@ -20,7 +28,7 @@ try {
             $last_sent_time = new DateTime($last_sent);
             $now = new DateTime();
             $interval = $now->diff($last_sent_time);
-            if ($interval->i < 1) { // Меньше 1 минуты
+            if ($interval->i < 1) {
                 $response['message'] = 'Новый код можно запросить через ' . (60 - $interval->s) . ' секунд';
                 echo json_encode($response);
                 exit;
@@ -33,7 +41,6 @@ try {
         $client = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($client) {
-            // Приведение типов: преобразуем telegram_id из базы в строку для сравнения
             $db_telegram_id = (string)$client['telegram_id'];
             if ($client['telegram_id'] === null) {
                 $stmt_update = $pdo->prepare("UPDATE Clients SET telegram_id = :telegram_id WHERE id_clients = :client_id");
@@ -51,7 +58,7 @@ try {
                 echo json_encode($response);
                 exit;
             }
-        } else { // Исправлено: убрана лишняя скобка и скорректирована структура
+        } else {
             $stmt = $pdo->prepare("INSERT INTO Clients (phone, telegram_id) VALUES (:phone, :telegram_id)");
             $stmt->execute(['phone' => $phone, 'telegram_id' => $telegram_id]);
             $client_id = $pdo->lastInsertId();
@@ -66,7 +73,10 @@ try {
         $botToken = '8168606272:AAFuikWYy8UKjzK3iuyMjRtWHCdS1KKECbE';
         $text = "Ваш код подтверждения: $code";
         $url = "https://api.telegram.org/bot$botToken/sendMessage?chat_id=$telegram_id&text=" . urlencode($text);
-        file_get_contents($url);
+        $result = file_get_contents($url);
+        
+        // Логирование отправки кода
+        error_log("Отправка кода для phone=$phone, telegram_id=$telegram_id, code=$code, результат: $result");
 
         $response['success'] = true;
         $response['client_id'] = $client_id;
@@ -75,6 +85,7 @@ try {
     }
 } catch (Exception $e) {
     $response['message'] = 'Ошибка на сервере: ' . $e->getMessage();
+    error_log("Ошибка в request_code.php: " . $e->getMessage());
 }
 
 echo json_encode($response);

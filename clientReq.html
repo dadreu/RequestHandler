@@ -26,8 +26,14 @@
             fetch('https://requesthandler-dadreu.amvera.io/get_client_appointments.php', {
                 credentials: 'include'
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Ответ от get_client_appointments.php:', data); // Отладка
                 const recordsContainer = document.getElementById('my-records');
                 if (data.success) {
                     recordsContainer.innerHTML = '<h2>Мои записи</h2>';
@@ -47,12 +53,18 @@
                         recordsContainer.innerHTML += '<p>У вас нет записей.</p>';
                     }
                 } else {
+                    console.error('Ошибка сервера:', data.message);
                     recordsContainer.innerHTML = `<p>${data.message || "Ошибка загрузки записей."}</p>`;
+                    if (data.message === 'Требуется авторизация клиента') {
+                        alert('Требуется авторизация. Пожалуйста, войдите снова.');
+                        window.location.href = 'login.html';
+                    }
                 }
             })
             .catch(error => {
                 console.error('Ошибка при загрузке записей:', error);
                 document.getElementById('my-records').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
+                alert('Ошибка подключения: ' + error.message);
             });
         }
 
