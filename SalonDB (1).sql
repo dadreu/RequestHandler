@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Хост: requesthandler-dadreu.amvera.io
--- Время создания: Апр 05 2025 г., 22:26
+-- Хост: amvera-dadreu-run-salondb
+-- Время создания: Апр 11 2025 г., 20:16
 -- Версия сервера: 8.1.0
 -- Версия PHP: 8.2.27
 
@@ -56,7 +56,9 @@ INSERT INTO `Appointments` (`id_appointment`, `master_id`, `client_id`, `service
 (52, 2, 23, 3, '2025-04-02 15:45:00'),
 (53, 1, 23, 1, '2025-04-02 09:45:00'),
 (56, 2, 32, 7, '2025-04-02 14:45:00'),
-(58, 2, 23, 8, '2025-04-05 14:45:00');
+(58, 2, 23, 8, '2025-04-05 14:45:00'),
+(62, 2, 23, 7, '2025-04-10 14:30:00'),
+(63, 2, 23, 7, '2025-04-11 13:30:00');
 
 -- --------------------------------------------------------
 
@@ -108,7 +110,25 @@ CREATE TABLE `ConfirmationCodes` (
 
 INSERT INTO `ConfirmationCodes` (`id_confirmation_code`, `phone`, `telegram_id`, `code`, `created_at`) VALUES
 (64, '79125965744', 806176907, '813262', '2025-04-04 22:08:37'),
-(65, '79125965744', 806176907, '515720', '2025-04-04 22:25:55');
+(65, '79125965744', 806176907, '515720', '2025-04-04 22:25:55'),
+(66, '79125965744', 806176907, '518552', '2025-04-05 23:03:36'),
+(67, '79125965744', 806176907, '618736', '2025-04-06 00:33:57'),
+(68, '79125965744', 806176907, '615783', '2025-04-11 19:28:10'),
+(69, '79125965744', 806176907, '748092', '2025-04-11 19:43:42');
+
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `Logs`
+--
+
+CREATE TABLE `Logs` (
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `action` text NOT NULL,
+  `timestamp` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -128,9 +148,9 @@ CREATE TABLE `Masters` (
 --
 
 INSERT INTO `Masters` (`id_masters`, `full_name`, `phone`, `password`) VALUES
-(1, 'Алексей Сидоров', '791111111111', 'password1'),
-(2, 'Екатерина Морозова', '79222222222', 'password2'),
-(3, 'Дмитрий Орлов', '79333333333', 'password3');
+(1, 'Алексей Сидоров', '791111111111', '$2y$10$p.lga3EoHi5VweYxF0ceDeXVqDrs7cm5owi0XYAD0.WsfmW5q6g2u'),
+(2, 'Екатерина Морозова', '79222222222', '$2y$10$2q5QJ7VTl8o10oEimAXdJ.5t4eiTwDiezKMdOEoTUgFTLT6yQeraa'),
+(3, 'Дмитрий Орлов', '79333333333', '$2y$10$HxBiMHmly.1ZRz1FLX3uqe3L8X2zb0vjDtf/gMgalv8YoIwvjRvoK');
 
 -- --------------------------------------------------------
 
@@ -143,35 +163,36 @@ CREATE TABLE `MasterSchedule` (
   `master_id` int NOT NULL,
   `day_of_week` enum('Вс','Пн','Вт','Ср','Чт','Пт','Сб') NOT NULL,
   `start_time` time NOT NULL,
-  `end_time` time NOT NULL
+  `end_time` time NOT NULL,
+  `is_day_off` tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Дамп данных таблицы `MasterSchedule`
 --
 
-INSERT INTO `MasterSchedule` (`id_master_schedule`, `master_id`, `day_of_week`, `start_time`, `end_time`) VALUES
-(42, 3, 'Пн', '11:00:00', '20:00:00'),
-(43, 3, 'Вт', '12:00:00', '20:00:00'),
-(44, 3, 'Ср', '13:00:00', '20:00:00'),
-(45, 3, 'Чт', '14:00:00', '20:00:00'),
-(46, 3, 'Пт', '15:00:00', '20:00:00'),
-(47, 3, 'Сб', '16:00:00', '20:00:00'),
-(48, 3, 'Вс', '17:00:00', '20:00:00'),
-(203, 1, 'Пн', '09:15:00', '18:00:00'),
-(204, 1, 'Вт', '09:30:00', '18:00:00'),
-(205, 1, 'Ср', '09:45:00', '18:00:00'),
-(206, 1, 'Чт', '09:00:00', '14:00:00'),
-(207, 1, 'Пт', '09:15:00', '18:00:00'),
-(208, 1, 'Сб', '09:30:00', '18:00:00'),
-(209, 1, 'Вс', '20:45:00', '18:00:00'),
-(210, 2, 'Пн', '09:00:00', '18:00:00'),
-(211, 2, 'Вт', '10:00:00', '18:00:00'),
-(212, 2, 'Ср', '11:00:00', '18:00:00'),
-(213, 2, 'Чт', '12:00:00', '18:00:00'),
-(214, 2, 'Пт', '13:00:00', '18:00:00'),
-(215, 2, 'Сб', '13:00:00', '18:00:00'),
-(216, 2, 'Вс', '09:00:00', '11:00:00');
+INSERT INTO `MasterSchedule` (`id_master_schedule`, `master_id`, `day_of_week`, `start_time`, `end_time`, `is_day_off`) VALUES
+(42, 3, 'Пн', '11:00:00', '20:00:00', 0),
+(43, 3, 'Вт', '12:00:00', '20:00:00', 0),
+(44, 3, 'Ср', '13:00:00', '20:00:00', 0),
+(45, 3, 'Чт', '14:00:00', '20:00:00', 0),
+(46, 3, 'Пт', '15:00:00', '20:00:00', 0),
+(47, 3, 'Сб', '16:00:00', '20:00:00', 0),
+(48, 3, 'Вс', '17:00:00', '20:00:00', 0),
+(203, 1, 'Пн', '09:15:00', '18:00:00', 0),
+(204, 1, 'Вт', '09:30:00', '18:00:00', 0),
+(205, 1, 'Ср', '09:45:00', '18:00:00', 0),
+(206, 1, 'Чт', '09:00:00', '14:00:00', 0),
+(207, 1, 'Пт', '09:15:00', '18:00:00', 0),
+(208, 1, 'Сб', '09:30:00', '18:00:00', 0),
+(209, 1, 'Вс', '20:45:00', '18:00:00', 0),
+(238, 2, 'Пн', '09:00:00', '18:00:00', 0),
+(239, 2, 'Вт', '10:00:00', '18:00:00', 0),
+(240, 2, 'Ср', '11:00:00', '18:00:00', 0),
+(241, 2, 'Чт', '12:00:00', '18:00:00', 0),
+(242, 2, 'Пт', '13:00:00', '18:00:00', 0),
+(243, 2, 'Сб', '13:00:00', '18:00:00', 0),
+(244, 2, 'Вс', '09:00:00', '11:00:00', 0);
 
 -- --------------------------------------------------------
 
@@ -257,6 +278,12 @@ ALTER TABLE `ConfirmationCodes`
   ADD KEY `idx_telegram_id` (`telegram_id`);
 
 --
+-- Индексы таблицы `Logs`
+--
+ALTER TABLE `Logs`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Индексы таблицы `Masters`
 --
 ALTER TABLE `Masters`
@@ -295,7 +322,7 @@ ALTER TABLE `Services`
 -- AUTO_INCREMENT для таблицы `Appointments`
 --
 ALTER TABLE `Appointments`
-  MODIFY `id_appointment` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+  MODIFY `id_appointment` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT для таблицы `Clients`
@@ -307,7 +334,13 @@ ALTER TABLE `Clients`
 -- AUTO_INCREMENT для таблицы `ConfirmationCodes`
 --
 ALTER TABLE `ConfirmationCodes`
-  MODIFY `id_confirmation_code` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `id_confirmation_code` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
+
+--
+-- AUTO_INCREMENT для таблицы `Logs`
+--
+ALTER TABLE `Logs`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT для таблицы `Masters`
@@ -319,19 +352,19 @@ ALTER TABLE `Masters`
 -- AUTO_INCREMENT для таблицы `MasterSchedule`
 --
 ALTER TABLE `MasterSchedule`
-  MODIFY `id_master_schedule` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=217;
+  MODIFY `id_master_schedule` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=245;
 
 --
 -- AUTO_INCREMENT для таблицы `MasterServices`
 --
 ALTER TABLE `MasterServices`
-  MODIFY `id_master_service` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id_master_service` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT для таблицы `Services`
 --
 ALTER TABLE `Services`
-  MODIFY `id_service` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id_service` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- Ограничения внешнего ключа сохраненных таблиц
