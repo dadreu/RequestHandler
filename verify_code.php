@@ -18,9 +18,10 @@ try {
 
     $phone = normalizePhone($_POST['phone'] ?? '');
     $code = trim($_POST['code'] ?? '');
+    $telegram_id = $_POST['telegram_id'] ?? '';
 
-    if (!$phone || !$code) {
-        throw new Exception('Введите номер телефона и код');
+    if (!$phone || !$code || !$telegram_id) {
+        throw new Exception('Введите номер телефона, код и Telegram ID');
     }
 
     $stmt = $pdo->prepare(
@@ -29,27 +30,26 @@ try {
          WHERE phone = :phone AND telegram_id = :telegram_id 
          ORDER BY created_at DESC LIMIT 1"
     );
-    $stmt->execute(['phone' => $phone, 'telegram_id' => $_SESSION['telegram_id'] ?? '']);
+    $stmt->execute(['phone' => $phone, 'telegram_id' => $telegram_id]);
     $stored_code = $stmt->fetchColumn();
 
     if ($stored_code !== $code) {
         throw new Exception('Неверный код');
     }
 
-    $stmt = $pdo->prepare("SELECT id_clients FROM Clients WHERE phone = :phone AND salon_id = :salon_id");
-    $stmt->execute(['phone' => $phone, 'salon_id' => $_SESSION['salon_id']]);
+    $stmt = $pdo->prepare("SELECT id_clients FROM Clients WHERE phone = :phone");
+    $stmt->execute(['phone' => $phone]);
     $client_id = $stmt->fetchColumn();
 
     if (!$client_id) {
         $stmt = $pdo->prepare(
-            "INSERT INTO Clients (full_name, phone, telegram_id, salon_id) 
-             VALUES (:full_name, :phone, :telegram_id, :salon_id)"
+            "INSERT INTO Clients (full_name, phone, telegram_id) 
+             VALUES (:full_name, :phone, :telegram_id)"
         );
         $stmt->execute([
             'full_name' => 'Клиент',
             'phone' => $phone,
-            'telegram_id' => $_SESSION['telegram_id'] ?? '',
-            'salon_id' => $_SESSION['salon_id']
+            'telegram_id' => $telegram_id
         ]);
         $client_id = $pdo->lastInsertId();
     }
@@ -57,9 +57,7 @@ try {
     $_SESSION['user_id'] = $client_id;
     $_SESSION['role'] = 'client';
 
-    unset($_SESSION['telegram_id']);
-
-    logAction($pdo, $client_id, 'client', "Клиент авторизовался в салоне {$_SESSION['salon_id']}");
+    logAction($pdo, $client_id, 'client', "Клиент авторизовался");
 
     echo json_encode(['success' => true]);
 } catch (Exception $e) {

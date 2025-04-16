@@ -225,6 +225,7 @@
                         phoneStep.style.display = 'none';
                         codeStep.style.display = 'block';
                         errorMessage.style.display = 'none';
+                        sessionStorage.setItem('telegram_id', telegramId);
                     } else {
                         showError(data.message || 'Не удалось запросить код');
                     }
@@ -241,25 +242,26 @@
             verifyCodeButton.addEventListener('click', function() {
                 let phone = phoneInput.value;
                 const code = codeInput.value;
+                const telegramId = sessionStorage.getItem('telegram_id');
                 if (!code) {
                     showError('Введите код');
                     return;
                 }
-                phone = normalizePhone(phone);
-                const telegramId = webApp?.initDataUnsafe?.user?.id;
                 if (!telegramId) {
                     showError('Ошибка: Telegram ID не найден');
                     return;
                 }
+                phone = normalizePhone(phone);
                 fetch('https://requesthandler-dadreu.amvera.io/verify_code.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     credentials: 'include',
-                    body: `phone=${encodeURIComponent(phone)}&code=${encodeURIComponent(code)}&csrf_token=${csrfToken}`
+                    body: `phone=${encodeURIComponent(phone)}&code=${encodeURIComponent(code)}&telegram_id=${telegramId}&csrf_token=${csrfToken}`
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        sessionStorage.removeItem('telegram_id');
                         window.location.href = 'clientReq.html';
                     } else {
                         showError(data.message || 'Неверный код');
