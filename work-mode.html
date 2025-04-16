@@ -22,9 +22,30 @@
     </div>
 
     <script>
+let csrfToken;
+
 document.addEventListener("DOMContentLoaded", function () {
-    populateSchedule();
-    loadSchedule();
+    // Получение CSRF-токена
+    fetch('https://requesthandler-dadreu.amvera.io/get_csrf_token.php', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.csrf_token) {
+            csrfToken = data.csrf_token;
+            populateSchedule();
+            loadSchedule();
+        } else {
+            alert('Ошибка: не удалось получить CSRF-токен');
+            window.location.href = 'login.html';
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка получения CSRF-токена:', error);
+        alert('Ошибка подключения: ' + error);
+        window.location.href = 'login.html';
+    });
 });
 
 // Назад
@@ -165,7 +186,10 @@ function saveSchedule() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ schedule: scheduleData })
+        body: JSON.stringify({ 
+            schedule: scheduleData,
+            csrf_token: csrfToken 
+        })
     })
     .then(response => response.json())
     .then(data => {
@@ -173,7 +197,7 @@ function saveSchedule() {
             alert('Расписание сохранено!');
             window.location.href = 'masterReq.html';
         } else {
-            alert('Ошибка сохранения расписания: ' + (data.error || 'Неизвестная ошибка'));
+            alert('Ошибка сохранения расписания: ' + (data.message || 'Неизвестная ошибка'));
         }
     })
     .catch(error => {
