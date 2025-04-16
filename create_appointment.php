@@ -18,30 +18,26 @@ $user_id = $_SESSION['user_id'];
 $master_id = ($role === 'master') ? $user_id : ($_POST['master_id'] ?? null);
 $client_id = ($role === 'client') ? $user_id : null;
 $service_id = $_POST['service_id'] ?? null;
-$fio = isset($_POST['fio']) ? urldecode($_POST['fio']) : null; // Декодируем ФИО
+$fio = isset($_POST['fio']) ? urldecode($_POST['fio']) : null;
 $phone = isset($_POST['phone']) ? normalizePhone($_POST['phone']) : null;
 $date = $_POST['date'] ?? null;
-$time = isset($_POST['time']) ? urldecode($_POST['time']) : null; // Декодируем время
+$time = isset($_POST['time']) ? urldecode($_POST['time']) : null;
 
-// Проверка всех обязательных полей
 if (empty($master_id) || empty($service_id) || empty($fio) || empty($phone) || empty($date) || empty($time)) {
     echo json_encode(['success' => false, 'message' => 'Все поля обязательны для заполнения.']);
     exit;
 }
 
-// Проверка формата номера телефона
 if (strlen($phone) !== 11 || $phone[0] !== '7') {
     echo json_encode(['success' => false, 'message' => 'Неверный формат номера телефона.']);
     exit;
 }
 
-// Проверка корректности формата времени
 if (!preg_match('/^\d{2}:\d{2}$/', $time)) {
     echo json_encode(['success' => false, 'message' => 'Неверный формат времени.']);
     exit;
 }
 
-// Проверка корректности формата даты
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
     echo json_encode(['success' => false, 'message' => 'Неверный формат даты.']);
     exit;
@@ -82,7 +78,6 @@ try {
             }
         }
     } elseif ($role === 'client') {
-        // Проверяем, что client_id соответствует сессии
         $stmt_check_client = $pdo->prepare("SELECT id_clients FROM Clients WHERE id_clients = :client_id AND phone = :phone");
         $stmt_check_client->bindParam(':client_id', $client_id);
         $stmt_check_client->bindParam(':phone', $phone);
@@ -93,20 +88,26 @@ try {
         }
     }
 
-    // Проверка доступности услуги
+    // Получение id_master_service
     $stmt_check_service = $pdo->prepare("SELECT id_master_service FROM MasterServices WHERE master_id = ? AND service_id = ? AND is_available = 1");
     $stmt_check_service->execute([$master_id, $service_id]);
-    if (!$stmt_check_service->fetch()) {
+    $master_service = $stmt_check_service->fetch(PDO::FETCH_ASSOC);
+    if (!$master_service) {
         echo json_encode(['success' => false, 'message' => 'Услуга недоступна или не существует.']);
         exit;
     }
+    $id_master_service = $master_service['id_master_service'];
 
     // Проверка пересечения с другими записями
+    $stmt_duration = $pdo->prepare("SELECT duration FROM MasterServices WHERE id_master_service = ?");
+    $stmt_duration->execute([$id_master_service]);
+    $duration = $stmt_duration->fetchColumn();
+
     $stmt_check_overlap = $pdo->prepare("
         SELECT a.id_appointment
         FROM Appointments a
-        JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
-        WHERE a.master_id = :master_id
+        JOIN MasterServices ms ON a.id_master_service = ms.id_master_service
+        WHERE ms.master_id = :master_id
         AND DATE(a.date_time) = :date
         AND (
             (TIME(a.date_time) <= :time AND ADDTIME(TIME(a.date_time), SEC_TO_TIME(ms.duration * 60)) > :time)
@@ -114,10 +115,6 @@ try {
             (TIME(a.date_time) >= :time AND TIME(a.date_time) < ADDTIME(:time, SEC_TO_TIME(:duration * 60)))
         )
     ");
-    $stmt_duration = $pdo->prepare("SELECT duration FROM MasterServices WHERE master_id = ? AND service_id = ?");
-    $stmt_duration->execute([$master_id, $service_id]);
-    $duration = $stmt_duration->fetchColumn();
-
     $stmt_check_overlap->bindParam(':master_id', $master_id);
     $stmt_check_overlap->bindParam(':date', $date);
     $stmt_check_overlap->bindParam(':time', $time);
@@ -129,12 +126,10 @@ try {
         exit;
     }
 
-    $sql = "INSERT INTO Appointments (master_id, client_id, service_id, date_time)
-            VALUES (:master_id, :client_id, :service_id, :date_time)";
+    $sql = "INSERT INTO Appointments (id_master_service, client_id, date_time) VALUES (:id_master_service, :client_id, :date_time)";
     $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':master_id', $master_id);
+    $stmt->bindValue(':id_master_service', $id_master_service);
     $stmt->bindValue(':client_id', $client_id);
-    $stmt->bindValue(':service_id', $service_id);
     $stmt->bindValue(':date_time', "$date $time");
     $stmt->execute();
 

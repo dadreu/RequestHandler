@@ -39,10 +39,10 @@ try {
     $stmt = $pdo->prepare("
         SELECT a.id_appointment, a.date_time, ms.price, ms.duration, c.full_name AS client_name, c.phone, s.name AS service_name
         FROM Appointments a
-        JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
-        JOIN Services s ON a.service_id = s.id_service
+        JOIN MasterServices ms ON a.id_master_service = ms.id_master_service
+        JOIN Services s ON ms.service_id = s.id_service
         JOIN Clients c ON a.client_id = c.id_clients
-        WHERE a.master_id = ?
+        WHERE ms.master_id = ?
         ORDER BY $sort_field $sort_order
         LIMIT 0, 50
     ");

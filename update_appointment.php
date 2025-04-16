@@ -44,7 +44,12 @@ if ($selectedDateTime < $now) {
 try {
     $pdo->beginTransaction();
 
-    $stmt_check = $pdo->prepare("SELECT master_id FROM Appointments WHERE id_appointment = ?");
+    $stmt_check = $pdo->prepare("
+        SELECT ms.master_id
+        FROM Appointments a
+        JOIN MasterServices ms ON a.id_master_service = ms.id_master_service
+        WHERE a.id_appointment = ?
+    ");
     $stmt_check->execute([$appointment_id]);
     if ($stmt_check->fetchColumn() != $master_id) {
         echo json_encode(['success' => false, 'message' => 'Нет прав для изменения этой записи']);
@@ -72,13 +77,20 @@ try {
         }
     }
 
-    $sql = "UPDATE Appointments SET service_id = :service_id, client_id = :client_id, date_time = :date_time WHERE id_appointment = :appointment_id AND master_id = :master_id";
+    $stmt_ms = $pdo->prepare("SELECT id_master_service FROM MasterServices WHERE master_id = ? AND service_id = ?");
+    $stmt_ms->execute([$master_id, $service_id]);
+    $id_master_service = $stmt_ms->fetchColumn();
+    if (!$id_master_service) {
+        echo json_encode(['success' => false, 'message' => 'Услуга не найдена для данного мастера']);
+        exit;
+    }
+
+    $sql = "UPDATE Appointments SET id_master_service = :id_master_service, client_id = :client_id, date_time = :date_time WHERE id_appointment = :appointment_id";
     $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':service_id', $service_id);
+    $stmt->bindValue(':id_master_service', $id_master_service);
     $stmt->bindValue(':client_id', $client_id);
     $stmt->bindValue(':date_time', "$date $time");
     $stmt->bindValue(':appointment_id', $appointment_id);
-    $stmt->bindValue(':master_id', $master_id);
     $stmt->execute();
 
     $stmt_log = $pdo->prepare("INSERT INTO Logs (user_id, role, action, timestamp) VALUES (?, ?, ?, NOW())");

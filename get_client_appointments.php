@@ -14,9 +14,9 @@ try {
     $stmt = $pdo->prepare("
         SELECT a.date_time, ms.price, ms.duration, s.name AS service_name, m.phone AS master_phone
         FROM Appointments a
-        JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
-        JOIN Services s ON a.service_id = s.id_service
-        JOIN Masters m ON a.master_id = m.id_masters
+        JOIN MasterServices ms ON a.id_master_service = ms.id_master_service
+        JOIN Services s ON ms.service_id = s.id_service
+        JOIN Masters m ON ms.master_id = m.id_masters
         WHERE a.client_id = ?
         ORDER BY a.date_time
         LIMIT 0, 50

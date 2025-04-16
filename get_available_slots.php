@@ -12,7 +12,7 @@ if (!$master_id || !$service_id || !$date) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT duration FROM MasterServices WHERE master_id = ? AND service_id = ?");
+    $stmt = $pdo->prepare("SELECT start_time, end_time, is_day_off FROM MasterSchedule WHERE master_id = ? AND day_of_week = ?");
     $stmt->execute([$master_id, $service_id]);
     $service = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$service) {
@@ -63,8 +63,8 @@ try {
     $stmt = $pdo->prepare("
         SELECT a.date_time, ms.duration
         FROM Appointments a
-        JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
-        WHERE a.master_id = ? AND DATE(a.date_time) = ?
+        JOIN MasterServices ms ON a.id_master_service = ms.id_master_service
+        WHERE ms.master_id = ? AND DATE(a.date_time) = ?
     ");
     $stmt->execute([$master_id, $date]);
     $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);

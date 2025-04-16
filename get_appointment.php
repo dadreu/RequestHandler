@@ -18,14 +18,14 @@ if (!empty($_GET['id'])) {
 
     try {
         $sql = "
-            SELECT a.id_appointment, a.master_id, a.client_id, a.service_id, a.date_time, ms.price, ms.duration, c.full_name AS client_name, c.phone
+            SELECT a.id_appointment, ms.master_id, a.client_id, ms.service_id, a.date_time, ms.price, ms.duration, c.full_name AS client_name, c.phone
             FROM Appointments a
-            JOIN MasterServices ms ON a.master_id = ms.master_id AND a.service_id = ms.service_id
+            JOIN MasterServices ms ON a.id_master_service = ms.id_master_service
             JOIN Clients c ON a.client_id = c.id_clients
             WHERE a.id_appointment = ?
         ";
         if ($role === 'master') {
-            $sql .= " AND a.master_id = ?";
+            $sql .= " AND ms.master_id = ?";
         } else {
             $sql .= " AND a.client_id = ?";
         }
