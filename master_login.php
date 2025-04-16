@@ -1,59 +1,45 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
+require_once 'config.php';
 
-include 'config.php';
 header('Content-Type: application/json');
-
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-ini_set('error_log', '/var/www/html/error.log');
 
 try {
     if (!isset($_POST['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-        echo json_encode(['success' => false, 'message' => 'Неверный CSRF-токен']);
-        exit;
+        throw new Exception('Неверный CSRF-токен');
     }
 
-    if (!isset($_POST['phone']) || !isset($_POST['password'])) {
-        echo json_encode(['success' => false, 'message' => 'Не указан номер телефона или пароль']);
-        exit;
+    $phone = normalizePhone($_POST['phone'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+    if (!$phone || !$password) {
+        throw new Exception('Не указан номер телефона или пароль');
     }
 
-    $phone = normalizePhone($_POST['phone']);
-    $password = $_POST['password'];
-
-    $stmt = $pdo->prepare("SELECT id_masters, password FROM Masters WHERE phone = :phone");
+    $stmt = $pdo->prepare(
+        "SELECT id_masters, password, salon_id 
+         FROM Masters 
+         WHERE phone = :phone"
+    );
     $stmt->execute(['phone' => $phone]);
-    $master = $stmt->fetch(PDO::FETCH_ASSOC);
+    $master = $stmt->fetch();
 
-    if (!$master) {
-        echo json_encode(['success' => false, 'message' => 'Номер телефона не зарегистрирован']);
-        exit;
-    }
-
-    if (!password_verify($password, $master['password'])) {
-        echo json_encode(['success' => false, 'message' => 'Неверный пароль']);
-        exit;
+    if (!$master || !password_verify($password, $master['password'])) {
+        throw new Exception('Неверный номер телефона или пароль');
     }
 
     $_SESSION['user_id'] = $master['id_masters'];
     $_SESSION['role'] = 'master';
+    $_SESSION['salon_id'] = $master['salon_id'];
+
     echo json_encode(['success' => true, 'master_id' => $master['id_masters']]);
 } catch (Exception $e) {
-    error_log('Ошибка в master_login.php: ' . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Ошибка сервера']);
-    exit;
+    error_log("Ошибка в master_login.php: " . $e->getMessage());
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 
-function normalizePhone($phone) {
+function normalizePhone(string $phone): string {
     $phone = preg_replace('/[^0-9]/', '', $phone);
-    if (strlen($phone) == 10) {
-        $phone = '7' . $phone;
-    } elseif (strlen($phone) == 11 && $phone[0] == '8') {
-        $phone = '7' . substr($phone, 1);
-    }
-    return $phone;
+    return strlen($phone) === 10 ? '7' . $phone : (strlen($phone) === 11 && $phone[0] === '8' ? '7' . substr($phone, 1) : $phone);
 }
 ?>

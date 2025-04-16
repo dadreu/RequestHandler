@@ -1,116 +1,100 @@
 <?php
-include 'config.php';
+require_once 'config.php';
+
 header('Content-Type: application/json; charset=UTF-8');
 
-$master_id = isset($_GET['master_id']) ? intval($_GET['master_id']) : 0;
-$service_id = isset($_GET['service_id']) ? intval($_GET['service_id']) : 0;
-$date = isset($_GET['date']) ? $_GET['date'] : '';
-
-if (!$master_id || !$service_id || !$date) {
-    echo json_encode(['error' => 'Не указаны необходимые параметры']);
-    exit;
-}
-
+/**
+ * Возвращает доступные временные слоты для записи.
+ */
 try {
-    // Получение id_master_service и duration
-    $stmt = $pdo->prepare("SELECT id_master_service, duration FROM MasterServices WHERE master_id = ? AND service_id = ? AND is_available = 1");
-    $stmt->execute([$master_id, $service_id]);
-    $service = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$service) {
-        error_log("Услуга не найдена для master_id: $master_id, service_id: $service_id");
-        echo json_encode(['error' => 'Услуга не найдена или недоступна']);
-        exit;
+    $master_id = (int)($_GET['master_id'] ?? 0);
+    $service_id = (int)($_GET['service_id'] ?? 0);
+    $date = $_GET['date'] ?? '';
+
+    if (!$master_id || !$service_id || !$date) {
+        throw new Exception('Не указаны необходимые параметры');
     }
-    $id_master_service = $service['id_master_service'];
+
+    // Проверка услуги
+    $stmt = $pdo->prepare(
+        "SELECT id_master_service, duration 
+         FROM MasterServices 
+         WHERE master_id = :master_id AND service_id = :service_id AND is_available = 1"
+    );
+    $stmt->execute(['master_id' => $master_id, 'service_id' => $service_id]);
+    $service = $stmt->fetch();
+
+    if (!$service) {
+        throw new Exception('Услуга не найдена или недоступна');
+    }
+
     $duration = $service['duration'];
-    error_log("Длительность услуги: $duration минут");
 
     // Определение дня недели
-    $dayIndex = date('w', strtotime($date));
-    $daysOfWeek = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    $dayOfWeek = $daysOfWeek[$dayIndex];
-    error_log("Дата: $date, Индекс дня: $dayIndex, День недели: $dayOfWeek");
+    $day_of_week = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][date('w', strtotime($date))];
 
     // Получение расписания
-    $stmt = $pdo->prepare("SELECT start_time, end_time, is_day_off FROM MasterSchedule WHERE master_id = ? AND day_of_week = ?");
-    $stmt->execute([$master_id, $dayOfWeek]);
-    $schedule = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare(
+        "SELECT start_time, end_time, is_day_off 
+         FROM MasterSchedule 
+         WHERE master_id = :master_id AND day_of_week = :day_of_week"
+    );
+    $stmt->execute(['master_id' => $master_id, 'day_of_week' => $day_of_week]);
+    $schedule = $stmt->fetch();
 
-    if (!$schedule) {
-        error_log("Расписание не найдено для master_id: $master_id, day_of_week: $dayOfWeek");
-        echo json_encode(['available_slots' => [], 'error' => "Расписание не найдено для $dayOfWeek"]);
+    if (!$schedule || $schedule['is_day_off']) {
+        echo json_encode(['available_slots' => []]);
         exit;
     }
 
-    if ($schedule['is_day_off'] == 1) {
-        error_log("День $dayOfWeek является выходным для мастера $master_id");
-        echo json_encode(['available_slots' => [], 'error' => "Этот день является выходным"]);
-        exit;
-    }
+    // Генерация слотов
+    $start = DateTime::createFromFormat('H:i:s', $schedule['start_time']);
+    $end = DateTime::createFromFormat('H:i:s', $schedule['end_time']);
+    $end->sub(new DateInterval("PT{$duration}M"));
 
-    $start_time = $schedule['start_time'];
-    $end_time = $schedule['end_time'];
-    error_log("Расписание для $dayOfWeek: start_time = $start_time, end_time = $end_time");
-
-    // Генерация временных слотов
-    $start_dt = DateTime::createFromFormat('H:i:s', $start_time);
-    $end_dt = DateTime::createFromFormat('H:i:s', $end_time);
-    $latest_start_dt = clone $end_dt;
-    $latest_start_dt->sub(new DateInterval('PT' . $duration . 'M'));
-
+    $slots = [];
     $interval = new DateInterval('PT15M');
-    $period = new DatePeriod($start_dt, $interval, $latest_start_dt);
-    $possible_starts = [];
-    foreach ($period as $dt) {
-        $possible_starts[] = $dt->format('H:i');
+    foreach (new DatePeriod($start, $interval, $end) as $dt) {
+        $slots[] = $dt->format('H:i');
     }
-    error_log("Возможные слоты: " . implode(', ', $possible_starts));
 
     // Получение занятых слотов
-    $stmt = $pdo->prepare("
-        SELECT a.date_time, ms.duration
-        FROM Appointments a
-        JOIN MasterServices ms ON a.id_master_service = ms.id_master_service
-        WHERE ms.master_id = ? AND DATE(a.date_time) = ?
-    ");
-    $stmt->execute([$master_id, $date]);
-    $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare(
+        "SELECT a.date_time, ms.duration
+         FROM Appointments a
+         JOIN MasterServices ms ON a.id_master_service = ms.id_master_service
+         WHERE ms.master_id = :master_id AND DATE(a.date_time) = :date"
+    );
+    $stmt->execute(['master_id' => $master_id, 'date' => $date]);
+    $appointments = $stmt->fetchAll();
 
-    $occupied = [];
-    foreach ($appointments as $app) {
-        $app_start = new DateTime($app['date_time']);
-        $app_end = clone $app_start;
-        $app_end->add(new DateInterval('PT' . $app['duration'] . 'M'));
-        $occupied[] = [$app_start->format('H:i'), $app_end->format('H:i')];
-    }
-    error_log("Занятые слоты: " . json_encode($occupied));
+    $occupied = array_map(function ($app) {
+        $start = new DateTime($app['date_time']);
+        $end = clone $start;
+        $end->add(new DateInterval("PT{$app['duration']}M"));
+        return [$start->format('H:i'), $end->format('H:i')];
+    }, $appointments);
 
-    // Определение доступных слотов
-    $available_slots = [];
-    foreach ($possible_starts as $start_time) {
-        $start_dt = DateTime::createFromFormat('H:i', $start_time);
-        $end_dt = clone $start_dt;
-        $end_dt->add(new DateInterval('PT' . $duration . 'M'));
-        $is_available = true;
+    // Фильтрация доступных слотов
+    $available_slots = array_filter($slots, function ($slot) use ($occupied, $duration) {
+        $start = DateTime::createFromFormat('H:i', $slot);
+        $end = clone $start;
+        $end->add(new DateInterval("PT{$duration}M"));
 
         foreach ($occupied as $occ) {
             $occ_start = DateTime::createFromFormat('H:i', $occ[0]);
             $occ_end = DateTime::createFromFormat('H:i', $occ[1]);
-            if ($start_dt < $occ_end && $end_dt > $occ_start) {
-                $is_available = false;
-                break;
+            if ($start < $occ_end && $end > $occ_start) {
+                return false;
             }
         }
+        return true;
+    });
 
-        if ($is_available) {
-            $available_slots[] = $start_time;
-        }
-    }
-
-    error_log("Доступные слоты: " . implode(', ', $available_slots));
-    echo json_encode(['available_slots' => $available_slots]);
-} catch (PDOException $e) {
-    error_log("Ошибка PDO: " . $e->getMessage());
-    echo json_encode(['error' => 'Ошибка базы данных: ' . $e->getMessage()]);
+    echo json_encode(['available_slots' => array_values($available_slots)]);
+} catch (Exception $e) {
+    error_log("Ошибка в get_available_slots.php: " . $e->getMessage());
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>

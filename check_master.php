@@ -1,21 +1,23 @@
 <?php
-include 'config.php';
+require_once 'config.php';
+
 header('Content-Type: application/json');
 
 $response = ['available' => false];
 
-if (!empty($_GET['id'])) {
-    $master_id = intval($_GET['id']);
-    try {
-        $stmt = $pdo->prepare("SELECT id_masters FROM Masters WHERE id_masters = ?");
-        $stmt->execute([$master_id]);
-        if ($stmt->fetch()) {
-            $response['available'] = true;
-        }
-    } catch (Exception $e) {
-        $response['message'] = "Ошибка БД: " . $e->getMessage();
+try {
+    $master_id = $_GET['id'] ?? null;
+    if (!$master_id) {
+        throw new Exception('ID мастера не указан');
     }
-}
 
-echo json_encode($response);
+    $stmt = $pdo->prepare("SELECT id_masters FROM Masters WHERE id_masters = :master_id");
+    $stmt->execute(['master_id' => (int)$master_id]);
+    $response['available'] = (bool)$stmt->fetch();
+
+    echo json_encode($response);
+} catch (Exception $e) {
+    $response['message'] = $e->getMessage();
+    echo json_encode($response);
+}
 ?>

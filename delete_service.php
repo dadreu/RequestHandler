@@ -1,51 +1,56 @@
 <?php
 session_start();
-include 'config.php';
+require_once 'config.php';
+
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'master') {
-    echo json_encode(['success' => false, 'message' => 'Требуется авторизация мастера']);
-    exit;
-}
-
-$data = json_decode(file_get_contents('php://input'), true);
-if (!isset($data['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $data['csrf_token'])) {
-    echo json_encode(['success' => false, 'message' => 'Неверный CSRF-токен']);
-    exit;
-}
-
-$service_id = intval($data['id']);
-$master_id = $_SESSION['user_id'];
-
 try {
-    // Проверка, что услуга принадлежит мастеру
-    $stmt = $pdo->prepare("SELECT id_master_service FROM MasterServices WHERE service_id = ? AND master_id = ?");
-    $stmt->execute([$service_id, $master_id]);
-    $master_service = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$master_service) {
-        echo json_encode(['success' => false, 'message' => 'У вас нет прав для удаления этой услуги']);
-        exit;
+    if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'master') {
+        throw new Exception('Требуется авторизация мастера');
     }
+
+    $data = json_decode(file_get_contents('php://input'), true);
+    if (!isset($data['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $data['csrf_token'])) {
+        throw new Exception('Неверный CSRF-токен');
+    }
+
+    $service_id = (int)($data['id'] ?? 0);
+    $master_id = $_SESSION['user_id'];
+
+    if (!$service_id) {
+        throw new Exception('ID услуги не указан');
+    }
+
+    // Проверка прав на услугу
+    $stmt = $pdo->prepare(
+        "SELECT id_master_service 
+         FROM MasterServices 
+         WHERE service_id = :service_id AND master_id = :master_id"
+    );
+    $stmt->execute(['service_id' => $service_id, 'master_id' => $master_id]);
+    $master_service = $stmt->fetch();
+
+    if (!$master_service) {
+        throw new Exception('У вас нет прав для удаления этой услуги');
+    }
+
     $id_master_service = $master_service['id_master_service'];
 
-    // Проверка, используется ли услуга в записях
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM Appointments WHERE id_master_service = ?");
-    $stmt->execute([$id_master_service]);
+    // Проверка использования услуги в записях
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM Appointments WHERE id_master_service = :id_master_service");
+    $stmt->execute(['id_master_service' => $id_master_service]);
     if ($stmt->fetchColumn() > 0) {
-        echo json_encode(['success' => false, 'message' => 'Нельзя удалить услугу, так как она используется в записях']);
-        exit;
+        throw new Exception('Нельзя удалить услугу, используемую в записях');
     }
 
     // Удаление услуги
-    $stmt = $pdo->prepare("DELETE FROM MasterServices WHERE id_master_service = ?");
-    $stmt->execute([$id_master_service]);
+    $stmt = $pdo->prepare("DELETE FROM MasterServices WHERE id_master_service = :id_master_service");
+    $stmt->execute(['id_master_service' => $id_master_service]);
 
-    // Логирование
-    $stmt_log = $pdo->prepare("INSERT INTO Logs (user_id, role, action, timestamp) VALUES (?, ?, ?, NOW())");
-    $stmt_log->execute([$_SESSION['user_id'], $_SESSION['role'], "Удалил услугу с ID $service_id"]);
+    logAction($pdo, $master_id, 'master', "Удалил услугу с ID $service_id");
 
     echo json_encode(['success' => true]);
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => 'Ошибка БД: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 ?>
