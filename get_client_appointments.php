@@ -8,20 +8,17 @@ header('Content-Type: application/json; charset=UTF-8');
  * Возвращает записи клиента.
  */
 try {
-    // Проверка авторизации
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'client') {
         throw new Exception('Требуется авторизация клиента');
     }
 
-    // Проверка salon_id
     if (!isset($_SESSION['salon_id'])) {
-        throw new Exception('Салон не определён. Пожалуйста, перезапустите приложение');
+        throw new Exception('Салон не определён');
     }
 
     $client_id = (int)$_SESSION['user_id'];
     $salon_id = (int)$_SESSION['salon_id'];
 
-    // Получение записей
     $stmt = $pdo->prepare(
         "SELECT a.id_appointment, a.date_time, ms.price, ms.duration, 
                 s.name AS service_name, m.phone AS master_phone, m.full_name AS master_name
@@ -36,7 +33,6 @@ try {
     $stmt->execute(['client_id' => $client_id, 'salon_id' => $salon_id]);
     $appointments = $stmt->fetchAll();
 
-    // Форматирование дат
     foreach ($appointments as &$app) {
         $app['date_time'] = (new DateTime($app['date_time'], new DateTimeZone('Asia/Yekaterinburg')))
             ->format('Y-m-d H:i');

@@ -8,17 +8,14 @@ header('Content-Type: application/json; charset=UTF-8');
  * Запрашивает код подтверждения и отправляет его в Telegram.
  */
 try {
-    // Проверка входных данных
     if (!isset($_POST['phone']) || !isset($_POST['telegram_id']) || !isset($_POST['csrf_token'])) {
         throw new Exception('Недостаточно данных');
     }
 
-    // Проверка CSRF-токена
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         throw new Exception('Неверный CSRF-токен');
     }
 
-    // Проверка bot_token и salon_id
     if (!isset($_SESSION['bot_token']) || !isset($_SESSION['salon_id'])) {
         throw new Exception('Салон не определён. Пожалуйста, перезапустите приложение');
     }
@@ -48,8 +45,8 @@ try {
     }
 
     // Проверка клиента
-    $stmt = $pdo->prepare("SELECT id_clients, telegram_id FROM Clients WHERE phone = :phone");
-    $stmt->execute(['phone' => $phone]);
+    $stmt = $pdo->prepare("SELECT id_clients, telegram_id FROM Clients WHERE phone = :phone AND salon_id = :salon_id");
+    $stmt->execute(['phone' => $phone, 'salon_id' => $_SESSION['salon_id']]);
     $client = $stmt->fetch();
 
     if ($client) {
@@ -85,7 +82,7 @@ try {
     );
     $stmt->execute(['phone' => $phone, 'telegram_id' => $telegram_id, 'code' => $code]);
 
-    // Отправка кода в Telegram
+    // Отправка кода
     $bot_token = $_SESSION['bot_token'];
     $text = "Ваш код подтверждения: $code";
     $url = "https://api.telegram.org/bot$bot_token/sendMessage?chat_id=$telegram_id&text=" . urlencode($text);
@@ -93,10 +90,10 @@ try {
     $result = json_decode($response, true);
 
     if (!$result['ok']) {
-        throw new Exception('Не удалось отправить код в Telegram: ' . ($result['description'] ?? 'Неизвестная ошибка'));
+        throw new Exception('Не удалось отправить код: ' . ($result['description'] ?? 'Неизвестная ошибка'));
     }
 
-    logAction($pdo, $client_id, 'client', "Запрошен и отправлен код для телефона $phone в салоне {$_SESSION['salon_id']}");
+    logAction($pdo, $client_id, 'client', "Код отправлен для телефона $phone в салоне {$_SESSION['salon_id']}");
 
     echo json_encode(['success' => true, 'client_id' => $client_id]);
 } catch (Exception $e) {
@@ -107,8 +104,6 @@ try {
 
 /**
  * Нормализует номер телефона.
- * @param string $phone Номер телефона
- * @return string Нормализованный номер
  */
 function normalizePhone(string $phone): string {
     $phone = preg_replace('/[^0-9]/', '', $phone);
@@ -117,10 +112,6 @@ function normalizePhone(string $phone): string {
 
 /**
  * Логирует действие.
- * @param PDO $pdo Подключение к базе данных
- * @param int $user_id ID пользователя
- * @param string $role Роль
- * @param string $action Действие
  */
 function logAction(PDO $pdo, int $user_id, string $role, string $action): void {
     $stmt = $pdo->prepare(

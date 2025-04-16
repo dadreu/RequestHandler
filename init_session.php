@@ -8,19 +8,16 @@ header('Content-Type: application/json; charset=UTF-8');
  * Инициализирует сессию, валидирует Telegram initData и сохраняет bot_token.
  */
 try {
-    // Проверка входных данных
     $init_data = $_POST['init_data'] ?? null;
     if (!$init_data) {
         throw new Exception('Не переданы данные инициализации Telegram');
     }
 
-    // Список допустимых токенов ботов
     $valid_bot_tokens = [
         '8168606272:AAFuikWYy8UKjzK3iuyMjRtWHCdS1KKECbE',
         '7922175259:AAFthA1LcUs8Oh5wh01z3eQyr3uBh2F9w8I'
     ];
 
-    // Поиск bot_token
     $bot_token = null;
     foreach ($valid_bot_tokens as $token) {
         if (verifyTelegramInitData($init_data, $token)) {
@@ -33,7 +30,6 @@ try {
         throw new Exception('Недействительные данные инициализации');
     }
 
-    // Поиск salon_id
     $stmt = $pdo->prepare("SELECT salon_id FROM Bots WHERE bot_token = :bot_token");
     $stmt->execute(['bot_token' => $bot_token]);
     $salon_id = $stmt->fetchColumn();
@@ -42,7 +38,6 @@ try {
         throw new Exception('Бот не привязан к салону');
     }
 
-    // Сохранение в сессии
     $_SESSION['bot_token'] = $bot_token;
     $_SESSION['salon_id'] = (int)$salon_id;
 
@@ -63,9 +58,6 @@ try {
 
 /**
  * Проверяет подлинность Telegram initData.
- * @param string $initData Данные инициализации
- * @param string $botToken Токен бота
- * @return bool Подлинность данных
  */
 function verifyTelegramInitData(string $initData, string $botToken): bool {
     parse_str($initData, $data);
@@ -85,10 +77,6 @@ function verifyTelegramInitData(string $initData, string $botToken): bool {
 
 /**
  * Логирует действие.
- * @param PDO $pdo Подключение к базе данных
- * @param int $user_id ID пользователя
- * @param string $role Роль
- * @param string $action Действие
  */
 function logAction(PDO $pdo, int $user_id, string $role, string $action): void {
     $stmt = $pdo->prepare(

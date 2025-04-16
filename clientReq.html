@@ -68,7 +68,7 @@ async function loadClientRecords() {
     } catch (error) {
         console.error('Ошибка при загрузке записей:', error);
         document.getElementById('my-records').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
-        webApp.showAlert('Ошибка подключения: ' + error.message);
+        webApp?.showAlert('Ошибка подключения: ' + error.message);
     }
 }
 

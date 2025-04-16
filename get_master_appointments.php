@@ -8,14 +8,12 @@ header('Content-Type: application/json; charset=UTF-8');
  * Возвращает записи мастера.
  */
 try {
-    // Проверка авторизации
     if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'master') {
         throw new Exception('Требуется авторизация мастера');
     }
 
-    // Проверка salon_id
     if (!isset($_SESSION['salon_id'])) {
-        throw new Exception('Салон не определён. Пожалуйста, перезапустите приложение');
+        throw new Exception('Салон не определён');
     }
 
     $master_id = (int)$_SESSION['user_id'];
@@ -23,12 +21,10 @@ try {
     $sort_field = $_GET['sort_field'] ?? 'date_time';
     $sort_order = $_GET['sort_order'] ?? 'ASC';
 
-    // Валидация сортировки
     $valid_fields = ['date_time', 'client_name', 'phone', 'service_name', 'price'];
     $sort_field = in_array($sort_field, $valid_fields) ? $sort_field : 'date_time';
     $sort_order = strtoupper($sort_order) === 'DESC' ? 'DESC' : 'ASC';
 
-    // Получение записей
     $stmt = $pdo->prepare(
         "SELECT a.id_appointment, a.date_time, c.full_name AS client_name, c.phone, 
                 s.name AS service_name, ms.price

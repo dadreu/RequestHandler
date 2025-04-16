@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Записи мастера</title>
     <link rel="stylesheet" href="/styles.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <header class="top-bar">
@@ -50,14 +49,8 @@
 
     <script>
 let csrfToken;
-const webApp = window.Telegram?.WebApp;
 
 document.addEventListener('DOMContentLoaded', async function() {
-    if (webApp) {
-        webApp.expand();
-        webApp.ready();
-    }
-
     // Получение CSRF-токена
     try {
         const response = await fetch('https://requesthandler-dadreu.amvera.io/get_csrf_token.php', {
@@ -69,11 +62,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             csrfToken = data.csrf_token;
             loadAppointments();
         } else {
-            webApp.showAlert('Ошибка: не удалось получить CSRF-токен'), UKT.getInstance().showAlert('Ошибка: не удалось получить CSRF-токен');
+            alert('Ошибка: не удалось получить CSRF-токен');
             window.location.href = 'index.html';
         }
     } catch (error) {
-        webApp.showAlert('Ошибка подключения: ' + error.message);
+        alert('Ошибка подключения: ' + error.message);
         window.location.href = 'index.html';
     }
 });
@@ -116,7 +109,7 @@ async function loadAppointments() {
             upcomingContainer.innerHTML = `<p>${data.message || "Записи отсутствуют."}</p>`;
             completedContainer.innerHTML = '';
             if (data.message === 'Требуется авторизация мастера') {
-                webApp.showAlert('Требуется авторизация. Пожалуйста, войдите снова.');
+                alert('Требуется авторизация. Пожалуйста, войдите снова.');
                 window.location.href = 'index.html';
             }
         }
@@ -146,12 +139,12 @@ function createAppointmentElement(appointment) {
     return appointmentDiv;
 }
 
-// Добавление обработчиков событий
+// Обработчики кнопок
 function addEventListeners() {
     document.querySelectorAll('.delete-button').forEach(button => {
         button.addEventListener('click', function() {
             const appointmentId = this.getAttribute('data-id');
-            if (webApp.showConfirm('Вы уверены, что хотите удалить эту запись?')) {
+            if (confirm('Вы уверены, что хотите удалить эту запись?')) {
                 deleteAppointment(appointmentId);
             }
         });
@@ -176,14 +169,14 @@ async function deleteAppointment(appointmentId) {
         });
         const data = await response.json();
         if (data.success) {
-            webApp.showAlert('Запись успешно удалена');
+            alert('Запись успешно удалена');
             loadAppointments();
         } else {
-            webApp.showAlert('Ошибка при удалении: ' + data.message);
+            alert('Ошибка при удалении: ' + data.message);
         }
     } catch (error) {
         console.error('Ошибка:', error);
-        webApp.showAlert('Произошла ошибка при удалении');
+        alert('Произошла ошибка при удалении');
     }
 }
 
@@ -198,11 +191,11 @@ async function editAppointment(appointmentId) {
             const a = data.appointment;
             window.location.href = `appointment.html?appointment_id=${appointmentId}&service_id=${a.service_id}&date_time=${encodeURIComponent(a.date_time)}&fio=${encodeURIComponent(a.client_name)}&phone=${encodeURIComponent(a.phone)}&role=master&action=update`;
         } else {
-            webApp.showAlert('Ошибка: ' + data.message);
+            alert('Ошибка: ' + data.message);
         }
     } catch (error) {
         console.error('Ошибка:', error);
-        webApp.showAlert('Произошла ошибка при получении данных');
+        alert('Произошла ошибка при получении данных');
     }
 }
 
