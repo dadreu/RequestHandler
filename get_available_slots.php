@@ -12,21 +12,26 @@ if (!$master_id || !$service_id || !$date) {
 }
 
 try {
-    $stmt = $pdo->prepare("SELECT start_time, end_time, is_day_off FROM MasterSchedule WHERE master_id = ? AND day_of_week = ?");
+    // Получение id_master_service и duration
+    $stmt = $pdo->prepare("SELECT id_master_service, duration FROM MasterServices WHERE master_id = ? AND service_id = ? AND is_available = 1");
     $stmt->execute([$master_id, $service_id]);
     $service = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$service) {
-        echo json_encode(['error' => 'Услуга не найдена']);
+        error_log("Услуга не найдена для master_id: $master_id, service_id: $service_id");
+        echo json_encode(['error' => 'Услуга не найдена или недоступна']);
         exit;
     }
+    $id_master_service = $service['id_master_service'];
     $duration = $service['duration'];
     error_log("Длительность услуги: $duration минут");
 
+    // Определение дня недели
     $dayIndex = date('w', strtotime($date));
     $daysOfWeek = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     $dayOfWeek = $daysOfWeek[$dayIndex];
     error_log("Дата: $date, Индекс дня: $dayIndex, День недели: $dayOfWeek");
 
+    // Получение расписания
     $stmt = $pdo->prepare("SELECT start_time, end_time, is_day_off FROM MasterSchedule WHERE master_id = ? AND day_of_week = ?");
     $stmt->execute([$master_id, $dayOfWeek]);
     $schedule = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -47,6 +52,7 @@ try {
     $end_time = $schedule['end_time'];
     error_log("Расписание для $dayOfWeek: start_time = $start_time, end_time = $end_time");
 
+    // Генерация временных слотов
     $start_dt = DateTime::createFromFormat('H:i:s', $start_time);
     $end_dt = DateTime::createFromFormat('H:i:s', $end_time);
     $latest_start_dt = clone $end_dt;
@@ -60,6 +66,7 @@ try {
     }
     error_log("Возможные слоты: " . implode(', ', $possible_starts));
 
+    // Получение занятых слотов
     $stmt = $pdo->prepare("
         SELECT a.date_time, ms.duration
         FROM Appointments a
@@ -76,7 +83,9 @@ try {
         $app_end->add(new DateInterval('PT' . $app['duration'] . 'M'));
         $occupied[] = [$app_start->format('H:i'), $app_end->format('H:i')];
     }
+    error_log("Занятые слоты: " . json_encode($occupied));
 
+    // Определение доступных слотов
     $available_slots = [];
     foreach ($possible_starts as $start_time) {
         $start_dt = DateTime::createFromFormat('H:i', $start_time);

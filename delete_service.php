@@ -18,23 +18,29 @@ $service_id = intval($data['id']);
 $master_id = $_SESSION['user_id'];
 
 try {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM MasterServices WHERE service_id = ? AND master_id = ?");
+    // Проверка, что услуга принадлежит мастеру
+    $stmt = $pdo->prepare("SELECT id_master_service FROM MasterServices WHERE service_id = ? AND master_id = ?");
     $stmt->execute([$service_id, $master_id]);
-    if ($stmt->fetchColumn() == 0) {
+    $master_service = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$master_service) {
         echo json_encode(['success' => false, 'message' => 'У вас нет прав для удаления этой услуги']);
         exit;
     }
+    $id_master_service = $master_service['id_master_service'];
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM Appointments WHERE service_id = ?");
-    $stmt->execute([$service_id]);
+    // Проверка, используется ли услуга в записях
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM Appointments WHERE id_master_service = ?");
+    $stmt->execute([$id_master_service]);
     if ($stmt->fetchColumn() > 0) {
         echo json_encode(['success' => false, 'message' => 'Нельзя удалить услугу, так как она используется в записях']);
         exit;
     }
 
-    $stmt = $pdo->prepare("DELETE FROM MasterServices WHERE service_id = ? AND master_id = ?");
-    $stmt->execute([$service_id, $master_id]);
+    // Удаление услуги
+    $stmt = $pdo->prepare("DELETE FROM MasterServices WHERE id_master_service = ?");
+    $stmt->execute([$id_master_service]);
 
+    // Логирование
     $stmt_log = $pdo->prepare("INSERT INTO Logs (user_id, role, action, timestamp) VALUES (?, ?, ?, NOW())");
     $stmt_log->execute([$_SESSION['user_id'], $_SESSION['role'], "Удалил услугу с ID $service_id"]);
 
