@@ -1,79 +1,72 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
+require_once 'config.php';
 
-include 'config.php';
 header('Content-Type: application/json; charset=UTF-8');
 
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-ini_set('error_log', '/var/www/html/error.log');
-
-$response = ['success' => false];
-
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'master') {
-    $response['message'] = 'Не авторизован или недостаточно прав.';
-    echo json_encode($response);
-    exit;
-}
-
-$master_id = intval($_SESSION['user_id']);
-
+/**
+ * Возвращает записи мастера.
+ */
 try {
-    $stmt = $pdo->prepare("SELECT id_masters FROM Masters WHERE id_masters = ?");
-    $stmt->execute([$master_id]);
-    if (!$stmt->fetch()) {
-        $response['message'] = 'Мастер не найден.';
-        echo json_encode($response);
-        exit;
+    // Проверка авторизации
+    if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'master') {
+        throw new Exception('Требуется авторизация мастера');
     }
 
+    // Проверка salon_id
+    if (!isset($_SESSION['salon_id'])) {
+        throw new Exception('Салон не определён. Пожалуйста, перезапустите приложение');
+    }
+
+    $master_id = (int)$_SESSION['user_id'];
+    $salon_id = (int)$_SESSION['salon_id'];
     $sort_field = $_GET['sort_field'] ?? 'date_time';
     $sort_order = $_GET['sort_order'] ?? 'ASC';
-    $allowed_fields = ['date_time', 'client_name', 'phone', 'service_name', 'price', 'duration'];
-    $allowed_orders = ['ASC', 'DESC'];
-    $sort_field = in_array($sort_field, $allowed_fields) ? $sort_field : 'date_time';
-    $sort_order = in_array($sort_order, $allowed_orders) ? $sort_order : 'ASC';
 
-    $stmt = $pdo->prepare("
-        SELECT a.id_appointment, a.date_time, ms.price, ms.duration, c.full_name AS client_name, c.phone, s.name AS service_name
-        FROM Appointments a
-        JOIN MasterServices ms ON a.id_master_service = ms.id_master_service
-        JOIN Services s ON ms.service_id = s.id_service
-        JOIN Clients c ON a.client_id = c.id_clients
-        WHERE ms.master_id = ?
-        ORDER BY $sort_field $sort_order
-        LIMIT 0, 50
-    ");
-    $stmt->execute([$master_id]);
-    $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Валидация сортировки
+    $valid_fields = ['date_time', 'client_name', 'phone', 'service_name', 'price'];
+    $sort_field = in_array($sort_field, $valid_fields) ? $sort_field : 'date_time';
+    $sort_order = strtoupper($sort_order) === 'DESC' ? 'DESC' : 'ASC';
+
+    // Получение записей
+    $stmt = $pdo->prepare(
+        "SELECT a.id_appointment, a.date_time, c.full_name AS client_name, c.phone, 
+                s.name AS service_name, ms.price
+         FROM Appointments a
+         JOIN MasterServices ms ON a.id_master_service = ms.id_master_service
+         JOIN Services s ON ms.service_id = s.id_service
+         JOIN Clients c ON a.client_id = c.id_clients
+         WHERE ms.master_id = :master_id AND s.salon_id = :salon_id
+         ORDER BY $sort_field $sort_order"
+    );
+    $stmt->execute(['master_id' => $master_id, 'salon_id' => $salon_id]);
+    $appointments = $stmt->fetchAll();
 
     $upcoming = [];
     $completed = [];
-    $permTime = new DateTime('now', new DateTimeZone('UTC'));
-    $permTime->modify('+5 hours');
-    $currentTime = $permTime->format('Y-m-d H:i:s');
+    $now = new DateTime('now', new DateTimeZone('Asia/Yekaterinburg'));
 
-    foreach ($appointments as $appointment) {
-        if ($appointment['date_time'] >= $currentTime) {
-            $upcoming[] = $appointment;
+    foreach ($appointments as $app) {
+        $app_time = new DateTime($app['date_time'], new DateTimeZone('Asia/Yekaterinburg'));
+        $app['date_time'] = $app_time->format('Y-m-d H:i');
+        if ($app_time > $now) {
+            $upcoming[] = $app;
         } else {
-            $completed[] = $appointment;
+            $completed[] = $app;
         }
     }
 
-    if ($upcoming || $completed) {
-        $response['success'] = true;
-        $response['upcoming'] = $upcoming;
-        $response['completed'] = $completed;
-    } else {
-        $response['message'] = 'Записи отсутствуют.';
-    }
+    echo json_encode([
+        'success' => true,
+        'upcoming' => $upcoming,
+        'completed' => $completed
+    ]);
 } catch (Exception $e) {
-    error_log('Ошибка в get_master_appointments.php: ' . $e->getMessage());
-    $response['message'] = 'Ошибка сервера.';
+    error_log("Ошибка в get_master_appointments.php: " . $e->getMessage());
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
-
-echo json_encode($response);
 ?>

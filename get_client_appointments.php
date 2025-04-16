@@ -5,11 +5,11 @@ require_once 'config.php';
 header('Content-Type: application/json; charset=UTF-8');
 
 /**
- * Возвращает записи клиента для салона из сессии.
+ * Возвращает записи клиента.
  */
 try {
     // Проверка авторизации
-    if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'client') {
+    if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'client') {
         throw new Exception('Требуется авторизация клиента');
     }
 
@@ -29,13 +29,18 @@ try {
          JOIN MasterServices ms ON a.id_master_service = ms.id_master_service
          JOIN Services s ON ms.service_id = s.id_service
          JOIN Masters m ON ms.master_id = m.id_masters
-         WHERE a.client_id = :client_id 
-         AND m.salon_id = :salon_id
+         WHERE a.client_id = :client_id AND m.salon_id = :salon_id
          ORDER BY a.date_time DESC
          LIMIT 50"
     );
     $stmt->execute(['client_id' => $client_id, 'salon_id' => $salon_id]);
     $appointments = $stmt->fetchAll();
+
+    // Форматирование дат
+    foreach ($appointments as &$app) {
+        $app['date_time'] = (new DateTime($app['date_time'], new DateTimeZone('Asia/Yekaterinburg')))
+            ->format('Y-m-d H:i');
+    }
 
     echo json_encode([
         'success' => true,

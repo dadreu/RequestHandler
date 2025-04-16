@@ -20,7 +20,7 @@ try {
         '7922175259:AAFthA1LcUs8Oh5wh01z3eQyr3uBh2F9w8I'
     ];
 
-    // Поиск bot_token, соответствующего initData
+    // Поиск bot_token
     $bot_token = null;
     foreach ($valid_bot_tokens as $token) {
         if (verifyTelegramInitData($init_data, $token)) {
@@ -33,7 +33,7 @@ try {
         throw new Exception('Недействительные данные инициализации');
     }
 
-    // Поиск salon_id по bot_token
+    // Поиск salon_id
     $stmt = $pdo->prepare("SELECT salon_id FROM Bots WHERE bot_token = :bot_token");
     $stmt->execute(['bot_token' => $bot_token]);
     $salon_id = $stmt->fetchColumn();
@@ -46,7 +46,6 @@ try {
     $_SESSION['bot_token'] = $bot_token;
     $_SESSION['salon_id'] = (int)$salon_id;
 
-    // Логирование
     logAction($pdo, 0, 'system', "Инициализирована сессия для бота $bot_token, salon_id: $salon_id");
 
     echo json_encode([

@@ -16,63 +16,65 @@
     <div class="content">
         <div id="my-records" class="my-records">
             <h2>Мои записи</h2>
-            <!-- Записи будут добавляться сюда -->
         </div>
         <button class="record-button" onclick="goToAppointment()">Записаться</button>
     </div>
 
     <script>
-        function loadClientRecords() {
-            fetch('https://requesthandler-dadreu.amvera.io/get_client_appointments.php', {
-                credentials: 'include'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Ответ от get_client_appointments.php:', data); // Отладка
-                const recordsContainer = document.getElementById('my-records');
-                if (data.success) {
-                    recordsContainer.innerHTML = '<h2>Мои записи</h2>';
-                    if (data.appointments && data.appointments.length > 0) {
-                        data.appointments.forEach(appointment => {
-                            const recordDiv = document.createElement('div');
-                            recordDiv.classList.add('record');
-                            recordDiv.innerHTML = `
-                                <span class="record-service">${appointment.service_name}</span>
-                                <span class="record-time">${appointment.date_time}</span>
-                                <span class="record-master-phone">${appointment.master_phone}</span>
-                                <span class="record-price">${appointment.price} ₽</span>
-                            `;
-                            recordsContainer.appendChild(recordDiv);
-                        });
-                    } else {
-                        recordsContainer.innerHTML += '<p>У вас нет записей.</p>';
-                    }
-                } else {
-                    console.error('Ошибка сервера:', data.message);
-                    recordsContainer.innerHTML = `<p>${data.message || "Ошибка загрузки записей."}</p>`;
-                    if (data.message === 'Требуется авторизация клиента') {
-                        alert('Требуется авторизация. Пожалуйста, войдите снова.');
-                        window.location.href = 'login.html';
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при загрузке записей:', error);
-                document.getElementById('my-records').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
-                alert('Ошибка подключения: ' + error.message);
-            });
-        }
+const webApp = window.Telegram?.WebApp;
 
-        function goToAppointment() {
-            window.location.href = 'appointment.html?role=client';
-        }
+document.addEventListener('DOMContentLoaded', function() {
+    if (webApp) {
+        webApp.expand();
+        webApp.ready();
+    }
+    loadClientRecords();
+});
 
-        window.onload = loadClientRecords;
+async function loadClientRecords() {
+    try {
+        const response = await fetch('https://requesthandler-dadreu.amvera.io/get_client_appointments.php', {
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const recordsContainer = document.getElementById('my-records');
+        if (data.success) {
+            recordsContainer.innerHTML = '<h2>Мои записи</h2>';
+            if (data.appointments && data.appointments.length > 0) {
+                data.appointments.forEach(appointment => {
+                    const recordDiv = document.createElement('div');
+                    recordDiv.classList.add('record');
+                    recordDiv.innerHTML = `
+                        <span class="record-service">${appointment.service_name}</span>
+                        <span class="record-time">${appointment.date_time}</span>
+                        <span class="record-master-phone">${appointment.master_phone}</span>
+                        <span class="record-price">${appointment.price} ₽</span>
+                    `;
+                    recordsContainer.appendChild(recordDiv);
+                });
+            } else {
+                recordsContainer.innerHTML += '<p>У вас нет записей.</p>';
+            }
+        } else {
+            recordsContainer.innerHTML = `<p>${data.message || "Ошибка загрузки записей."}</p>`;
+            if (data.message === 'Требуется авторизация клиента') {
+                webApp.showAlert('Требуется авторизация. Пожалуйста, войдите снова.');
+                window.location.href = 'index.html';
+            }
+        }
+    } catch (error) {
+        console.error('Ошибка при загрузке записей:', error);
+        document.getElementById('my-records').innerHTML = '<p>Ошибка подключения. Попробуйте снова.</p>';
+        webApp.showAlert('Ошибка подключения: ' + error.message);
+    }
+}
+
+function goToAppointment() {
+    window.location.href = 'appointment.html?role=client';
+}
     </script>
 </body>
 </html>

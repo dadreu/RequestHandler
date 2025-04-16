@@ -2,19 +2,33 @@
 session_start();
 require_once 'config.php';
 
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=UTF-8');
 
+/**
+ * Запрашивает код подтверждения и отправляет его в Telegram.
+ */
 try {
+    // Проверка входных данных
     if (!isset($_POST['phone']) || !isset($_POST['telegram_id']) || !isset($_POST['csrf_token'])) {
         throw new Exception('Недостаточно данных');
     }
 
+    // Проверка CSRF-токена
     if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
         throw new Exception('Неверный CSRF-токен');
     }
 
+    // Проверка bot_token и salon_id
+    if (!isset($_SESSION['bot_token']) || !isset($_SESSION['salon_id'])) {
+        throw new Exception('Салон не определён. Пожалуйста, перезапустите приложение');
+    }
+
     $phone = normalizePhone($_POST['phone']);
     $telegram_id = $_POST['telegram_id'];
+
+    if (strlen($phone) !== 11 || $phone[0] !== '7') {
+        throw new Exception('Неверный формат номера телефона');
+    }
 
     // Проверка времени последнего запроса
     $stmt = $pdo->prepare(
@@ -27,8 +41,9 @@ try {
 
     if ($last_sent) {
         $interval = (new DateTime())->diff(new DateTime($last_sent));
-        if ($interval->i < 1) {
-            throw new Exception('Новый код можно запросить через ' . (60 - $interval->s) . ' секунд');
+        $seconds_left = 60 - ($interval->i * 60 + $interval->s);
+        if ($interval->i < 1 && $seconds_left > 0) {
+            throw new Exception('Новый код можно запросить через ' . $seconds_left . ' секунд');
         }
     }
 
@@ -48,31 +63,70 @@ try {
             $client_id = $client['id_clients'];
         }
     } else {
-        $stmt = $pdo->prepare("INSERT INTO Clients (phone, telegram_id) VALUES (:phone, :telegram_id)");
-        $stmt->execute(['phone' => $phone, 'telegram_id' => $telegram_id]);
+        $stmt = $pdo->prepare(
+            "INSERT INTO Clients (phone, telegram_id, salon_id) 
+             VALUES (:phone, :telegram_id, :salon_id)"
+        );
+        $stmt->execute([
+            'phone' => $phone,
+            'telegram_id' => $telegram_id,
+            'salon_id' => $_SESSION['salon_id']
+        ]);
         $client_id = $pdo->lastInsertId();
     }
 
-    // Генерация и отправка кода
-    $code = rand(100000, 999999);
+    // Генерация кода
+    $code = sprintf("%06d", rand(100000, 999999));
+
+    // Сохранение кода
     $stmt = $pdo->prepare(
         "INSERT INTO ConfirmationCodes (phone, telegram_id, code) 
          VALUES (:phone, :telegram_id, :code)"
     );
     $stmt->execute(['phone' => $phone, 'telegram_id' => $telegram_id, 'code' => $code]);
 
-    $bot_token = '8168606272:AAFuikWYy8UKjzK3iuyMjRtWHCdS1KKECbE';
+    // Отправка кода в Telegram
+    $bot_token = $_SESSION['bot_token'];
     $text = "Ваш код подтверждения: $code";
-    file_get_contents("https://api.telegram.org/bot$bot_token/sendMessage?chat_id=$telegram_id&text=" . urlencode($text));
+    $url = "https://api.telegram.org/bot$bot_token/sendMessage?chat_id=$telegram_id&text=" . urlencode($text);
+    $response = file_get_contents($url);
+    $result = json_decode($response, true);
+
+    if (!$result['ok']) {
+        throw new Exception('Не удалось отправить код в Telegram: ' . ($result['description'] ?? 'Неизвестная ошибка'));
+    }
+
+    logAction($pdo, $client_id, 'client', "Запрошен и отправлен код для телефона $phone в салоне {$_SESSION['salon_id']}");
 
     echo json_encode(['success' => true, 'client_id' => $client_id]);
 } catch (Exception $e) {
     error_log("Ошибка в request_code.php: " . $e->getMessage());
+    http_response_code(400);
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
 
+/**
+ * Нормализует номер телефона.
+ * @param string $phone Номер телефона
+ * @return string Нормализованный номер
+ */
 function normalizePhone(string $phone): string {
     $phone = preg_replace('/[^0-9]/', '', $phone);
     return strlen($phone) === 10 ? '7' . $phone : (strlen($phone) === 11 && $phone[0] === '8' ? '7' . substr($phone, 1) : $phone);
+}
+
+/**
+ * Логирует действие.
+ * @param PDO $pdo Подключение к базе данных
+ * @param int $user_id ID пользователя
+ * @param string $role Роль
+ * @param string $action Действие
+ */
+function logAction(PDO $pdo, int $user_id, string $role, string $action): void {
+    $stmt = $pdo->prepare(
+        "INSERT INTO Logs (user_id, role, action, timestamp) 
+         VALUES (:user_id, :role, :action, NOW())"
+    );
+    $stmt->execute(['user_id' => $user_id, 'role' => $role, 'action' => $action]);
 }
 ?>
