@@ -45,8 +45,8 @@ try {
     }
 
     // Проверка клиента
-    $stmt = $pdo->prepare("SELECT id_clients, telegram_id FROM Clients WHERE phone = :phone AND salon_id = :salon_id");
-    $stmt->execute(['phone' => $phone, 'salon_id' => $_SESSION['salon_id']]);
+    $stmt = $pdo->prepare("SELECT id_clients, telegram_id FROM Clients WHERE phone = :phone");
+    $stmt->execute(['phone' => $phone]);
     $client = $stmt->fetch();
 
     if ($client) {
@@ -61,13 +61,13 @@ try {
         }
     } else {
         $stmt = $pdo->prepare(
-            "INSERT INTO Clients (phone, telegram_id, salon_id) 
-             VALUES (:phone, :telegram_id, :salon_id)"
+            "INSERT INTO Clients (phone, telegram_id, full_name) 
+             VALUES (:phone, :telegram_id, :full_name)"
         );
         $stmt->execute([
             'phone' => $phone,
             'telegram_id' => $telegram_id,
-            'salon_id' => $_SESSION['salon_id']
+            'full_name' => 'Клиент'
         ]);
         $client_id = $pdo->lastInsertId();
     }
@@ -93,7 +93,7 @@ try {
         throw new Exception('Не удалось отправить код: ' . ($result['description'] ?? 'Неизвестная ошибка'));
     }
 
-    logAction($pdo, $client_id, 'client', "Код отправлен для телефона $phone в салоне {$_SESSION['salon_id']}");
+    logAction($pdo, $client_id, 'client', "Код отправлен для телефона $phone");
 
     echo json_encode(['success' => true, 'client_id' => $client_id]);
 } catch (Exception $e) {
